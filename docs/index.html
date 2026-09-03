@@ -1,1 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web Programming — Course Repository</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1C2541;
+    --paper: #EDEAE0;
+    --paper-raised: #F5F3EC;
+    --muted: #5B5F6B;
+    --accent: #2E6E62;
+    --border: #D9D4C6;
+    --serif: 'Lora', Georgia, serif;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --mono: 'JetBrains Mono', 'Courier New', monospace;
+  }
 
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 4rem 1.75rem 6rem;
+  }
+
+  header.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 3.5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .mark {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+  }
+
+  .affiliations {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 2.6rem;
+    line-height: 1.15;
+    margin: 0 0 0.9rem;
+    max-width: 14ch;
+  }
+
+  .lede {
+    font-size: 1.08rem;
+    color: var(--ink);
+    max-width: 58ch;
+    margin: 0 0 2.75rem;
+  }
+
+  .lede a { color: var(--accent); }
+
+  .infobar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    padding: 1.35rem 0;
+    margin-bottom: 3rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .infobar dt {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-bottom: 0.35rem;
+  }
+
+  .infobar dd {
+    margin: 0;
+    font-size: 0.94rem;
+    font-weight: 500;
+  }
+
+  section.dir {
+    margin-bottom: 3rem;
+  }
+
+  section.dir h2 {
+    font-family: var(--serif);
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 0 0 1.1rem;
+  }
+
+  .tree {
+    border: 1px solid var(--border);
+    background: var(--paper-raised);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .tree a {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1.1rem;
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px solid var(--border);
+    transition: background-color 0.12s ease;
+  }
+
+  .tree a:last-child { border-bottom: none; }
+
+  .tree a:hover,
+  .tree a:focus-visible {
+    background: rgba(46, 110, 98, 0.07);
+    outline: none;
+  }
+
+  .tree a:focus-visible {
+    box-shadow: inset 2px 0 0 var(--accent);
+  }
+
+  .path {
+    font-family: var(--mono);
+    font-size: 0.92rem;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  .desc {
+    font-size: 0.88rem;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  section.about p {
+    max-width: 62ch;
+    font-size: 0.98rem;
+  }
+
+  footer {
+    margin-top: 4rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  footer a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 2.05rem; max-width: none; }
+    .infobar { grid-template-columns: 1fr; gap: 1rem; }
+    header.top { flex-direction: column; align-items: flex-start; }
+    .affiliations { text-align: left; }
+    .tree a { flex-direction: column; align-items: flex-start; gap: 0.15rem; }
+    .desc { text-align: left; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tree a { transition: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+
+    <header class="top">
+      <span class="mark">muxiddin19 / WebPro</span>
+      <span class="affiliations">Gachon University<br>Jizzakh Branch, National University of Uzbekistan</span>
+    </header>
+
+    <h1>Web Programming</h1>
+    <p class="lede">
+      A shared course repository for students learning web programming across two
+      campuses. Lecture notes, working source code, and reference material are
+      kept here as one living folder tree — clone it, follow along, and reuse
+      whatever helps.
+    </p>
+
+    <dl class="infobar">
+      <div>
+        <dt>Instructor</dt>
+        <dd>Dr. Mukhiddin Toshpulatov</dd>
+      </div>
+      <div>
+        <dt>Format</dt>
+        <dd>Lectures + hands-on labs</dd>
+      </div>
+      <div>
+        <dt>Repository</dt>
+        <dd><a href="https://github.com/muxiddin19/WebPro" style="color:inherit;">github.com/muxiddin19/WebPro</a></dd>
+      </div>
+    </dl>
+
+    <section class="dir">
+      <h2>Course materials</h2>
+      <div class="tree">
+        <a href="../LectureNotes/">
+          <span class="path">/LectureNotes</span>
+          <span class="desc">Weekly slides and written notes</span>
+        </a>
+        <a href="../SourceCodes/">
+          <span class="path">/SourceCodes</span>
+          <span class="desc">Example code built in class</span>
+        </a>
+        <a href="../UsefullResources/">
+          <span class="path">/UsefullResources</span>
+          <span class="desc">Tools, references, and cheat sheets</span>
+        </a>
+        <a href="../Videos/">
+          <span class="path">/Videos</span>
+          <span class="desc">Recorded sessions and demos</span>
+        </a>
+        <a href="../Images/">
+          <span class="path">/Images</span>
+          <span class="desc">Diagrams and screenshots used in class</span>
+        </a>
+        <a href="../MyDAta/">
+          <span class="path">/MyDAta</span>
+          <span class="desc">Sample datasets for assignments</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="about">
+      <h2 style="font-family: var(--serif); font-size: 1.3rem; font-weight: 600;">About this course</h2>
+      <p>
+        This course covers the foundations of building for the web — HTML, CSS,
+        and JavaScript through to client-server interaction, APIs, and modern
+        front-end practice. It runs jointly for students at Gachon University
+        and the Jizzakh branch of the National University of Uzbekistan, with
+        shared materials and a common repository so both cohorts work from the
+        same source.
+      </p>
+      <p>
+        Everything above is a live folder — updates land here first. If you're
+        enrolled, star or watch the repository to catch new material as it's
+        added.
+      </p>
+    </section>
+
+    <footer>
+      <span>Web Programming Course</span>
+      <a href="https://github.com/muxiddin19/WebPro">View repository on GitHub</a>
+    </footer>
+
+  </div>
+</body>
+</html>
