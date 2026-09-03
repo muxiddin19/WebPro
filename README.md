@@ -13,6 +13,7 @@ students at either campus can clone the same repo and follow along with the
 same materials.
 
 **Course page:** https://muxiddin19.github.io/WebPro/
+**Personal page:** https://muxiddin19.github.io/
 
 ---
 
