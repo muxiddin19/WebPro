@@ -2033,27 +2033,36 @@ textarea.code-editor{width:100%;min-height:180px;background:var(--cb);color:var(
 <footer id="site-footer">K0126002 Web Programming · Gachon University · Week 2 · HTML Fundamentals</footer>
 
 <script>
-// ── Syntax highlighter ────────────────────────────────────
+// ── Syntax highlighter (single-pass — never re-matches injected spans) ──
 function highlight(raw){
   const e=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   return raw.split('\n').map(line=>{
-    // comments
-    if(/^\s*&lt;!--/.test(e(line))) return '<span class="hc">'+e(line)+'</span>';
-    // colorise tags, attrs, values
-    return e(line)
-      .replace(/(&lt;\/?)([a-zA-Z][a-zA-Z0-9]*)(\s|&gt;|\/&gt;)/g,
-        (_,sl,tag,rest)=>`${sl}<span class="ht">${tag}</span>${rest}`)
-      .replace(/(\s)([a-zA-Z][a-zA-Z0-9-]*)=/g,
-        (_,sp,attr)=>`${sp}<span class="ha">${attr}</span>=`)
-      .replace(/="([^"]*?)"/g,
-        (_,v)=>`=<span class="hv">"${e(v)}"</span>`);
+    const esc=e(line);
+    // comment lines
+    if(/^\s*&lt;!--/.test(esc)) return '<span class="hc">'+esc+'</span>';
+    // single regex captures the entire tag in one shot so we never
+    // run a second regex over the <span> tags we already injected
+    return esc.replace(
+      /(&lt;\/?)([ a-zA-Z!][a-zA-Z0-9]*)((?:\s+[a-zA-Z][a-zA-Z0-9-]*(?:="[^"]*")?)*\s*)(\/?)(&gt;)/g,
+      function(_,lt,tag,attrs,sc,gt){
+        // colour attribute names and quoted values inside attrs
+        var ca=attrs.replace(/(\s+)([a-zA-Z][a-zA-Z0-9-]*)(?:="([^"]*)")?/g,
+          function(_,sp,nm,v){
+            return v!=null
+              ? sp+'<span class="ha">'+nm+'</span>=<span class="hv">"'+e(v)+'"</span>'
+              : sp+'<span class="ha">'+nm+'</span>';
+          });
+        // DOCTYPE / special: don't colour the keyword, just the angle brackets
+        if(tag[0]==='!' || tag==='DOCTYPE') return lt+tag+ca+sc+gt;
+        return lt+'<span class="ht">'+tag+'</span>'+ca+sc+gt;
+      });
   }).join('\n');
 }
-// Apply highlighting to all code blocks on load
-document.querySelectorAll('.raw-code').forEach(el=>{
-  const code=el.querySelector('code');
+// Apply highlighting and stash raw text before innerHTML is replaced
+document.querySelectorAll('.raw-code').forEach(function(el){
+  var code=el.querySelector('code');
   if(code){
-    code.dataset.raw=code.textContent; // preserve raw text for Copy/Preview
+    code.dataset.raw=code.textContent;
     code.innerHTML=highlight(code.textContent);
   }
 });
