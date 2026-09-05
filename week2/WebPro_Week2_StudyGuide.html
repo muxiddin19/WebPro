@@ -2042,35 +2042,56 @@ function highlight(raw){
     // colorise tags, attrs, values
     return e(line)
       .replace(/(&lt;\/?)([a-zA-Z][a-zA-Z0-9]*)(\s|&gt;|\/&gt;)/g,
-        (_,sl,tag,rest)=>`${e(sl)}<span class="ht">${tag}</span>${rest}`)
+        (_,sl,tag,rest)=>`${sl}<span class="ht">${tag}</span>${rest}`)
       .replace(/(\s)([a-zA-Z][a-zA-Z0-9-]*)=/g,
         (_,sp,attr)=>`${sp}<span class="ha">${attr}</span>=`)
-      .replace(/=&quot;([^&]*)&quot;/g,
-        (_,v)=>`=<span class="hv">&quot;${v}&quot;</span>`);
+      .replace(/="([^"]*?)"/g,
+        (_,v)=>`=<span class="hv">"${e(v)}"</span>`);
   }).join('\n');
 }
 // Apply highlighting to all code blocks on load
 document.querySelectorAll('.raw-code').forEach(el=>{
   const code=el.querySelector('code');
-  if(code) code.innerHTML=highlight(code.textContent);
+  if(code){
+    code.dataset.raw=code.textContent; // preserve raw text for Copy/Preview
+    code.innerHTML=highlight(code.textContent);
+  }
 });
 
 // ── Copy code ─────────────────────────────────────────────
 function copyCode(btn){
   const wrap=btn.closest('.code-wrap');
-  const text=wrap.querySelector('code').textContent;
+  const raw=wrap.querySelector('code');
+  const text=raw.dataset.raw||raw.textContent;
   navigator.clipboard.writeText(text).then(()=>{
     const orig=btn.textContent; btn.textContent='Copied!';
     setTimeout(()=>btn.textContent=orig,1500);
   });
 }
 
-// ── Preview code block in new tab ─────────────────────────
+// ── Preview code block inline ─────────────────────────────
 function previewCode(btn){
   const wrap=btn.closest('.code-wrap');
-  const text=wrap.querySelector('code').textContent;
-  const blob=new Blob([text],{type:'text/html'});
-  window.open(URL.createObjectURL(blob),'_blank');
+  const raw=wrap.querySelector('code');
+  const text=raw.dataset.raw||raw.textContent;
+  // find or create preview iframe directly after this .code-wrap
+  let frame=wrap.nextElementSibling;
+  if(!frame||!frame.classList.contains('inline-preview')){
+    frame=document.createElement('iframe');
+    frame.className='inline-preview';
+    frame.style.cssText='width:100%;height:320px;border:1px solid var(--brd);'+
+      'border-radius:0 0 8px 8px;margin-top:-4px;display:none;background:#fff';
+    wrap.parentNode.insertBefore(frame,wrap.nextSibling);
+  }
+  if(frame.style.display==='none'){
+    const blob=new Blob([text],{type:'text/html'});
+    frame.src=URL.createObjectURL(blob);
+    frame.style.display='block';
+    btn.textContent='Hide Preview';
+  }else{
+    frame.style.display='none';
+    btn.textContent='Preview';
+  }
 }
 
 // ── Exercise live preview ─────────────────────────────────
