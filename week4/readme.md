@@ -1,3 +1,6 @@
 # Weekly course data
 ## Quiz
 ### https://docs.google.com/forms/d/e/1FAIpQLSfkYC7sbvDyhAvx7QeS-r3H3ydRS8qI_Db0HH8-GSBvLnQuSA/viewform
+
+## Practical task for improvement lecture notes
+### https://claude.ai/artifact/1KZrHGXbphTE6iBHxkNHGa?sk=aj4cDPTiu2F5513nCitAbA
