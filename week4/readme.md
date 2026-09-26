@@ -4,3 +4,6 @@
 
 ## Practical task for improvement lecture notes
 ### https://claude.ai/artifact/1KZrHGXbphTE6iBHxkNHGa?sk=aj4cDPTiu2F5513nCitAbA
+
+## Video lecture
+### https://youtu.be/MOHPd4OgI5U
