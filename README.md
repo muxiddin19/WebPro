@@ -56,8 +56,11 @@ latest changes regularly:
 git pull origin main
 ```
 
-## How to use git within your project
-### https://claude.ai/artifact/FYrS94XB1Mn4xJ5ziKeLtf?sk=nGsWHVAunsyEjZMvmsKsLA#ff88ab45-9829.m5903cx5xc5.1485~step-3-tell-git-who-you-are-do-this-once
+### How to use git within your project
+
+#### https://claude.ai/artifact/FYrS94XB1Mn4xJ5ziKeLtf?sk=nGsWHVAunsyEjZMvmsKsLA#ff88ab45-9829.m5903cx5xc5.1485~step-3-tell-git-who-you-are-do-this-once
+
+#### https://github.com/muxiddin19/WebPro/blob/main/Git%20Tutorial%20for%20Web%20Programming%20Students.pdf
 
 ## Contributing
 
