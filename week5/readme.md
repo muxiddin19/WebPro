@@ -1,4 +1,4 @@
-## Improving learned skills within their implementation
+## Improving learned skills by implementing them in a single live web page
 
 ### Web Programming: HTML · CSS · JS Class Notes
 
