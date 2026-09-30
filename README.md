@@ -56,6 +56,9 @@ latest changes regularly:
 git pull origin main
 ```
 
+## How to use git within your project
+### https://claude.ai/artifact/FYrS94XB1Mn4xJ5ziKeLtf?sk=nGsWHVAunsyEjZMvmsKsLA#ff88ab45-9829.m5903cx5xc5.1485~step-3-tell-git-who-you-are-do-this-once
+
 ## Contributing
 
 This repository is primarily for course delivery, but students are welcome to
