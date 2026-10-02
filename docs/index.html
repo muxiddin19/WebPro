@@ -396,6 +396,84 @@ kbd { font-family:var(--mono); font-size:.68rem; background:var(--paper-raised);
 @media (prefers-reduced-motion:reduce) {
   *, *::before, *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; }
 }
+
+/* ── 30. Task Viewer Panel ── */
+.tp-backdrop {
+  position:fixed; inset:0; background:rgba(0,0,0,.42);
+  backdrop-filter:blur(3px); z-index:500;
+  opacity:0; pointer-events:none; transition:opacity .28s ease;
+}
+.tp-backdrop.on { opacity:1; pointer-events:auto; }
+
+.task-panel {
+  position:fixed; top:0; right:0; bottom:0;
+  width:min(54vw, 740px);
+  background:var(--paper-raised); border-left:1px solid var(--border);
+  box-shadow:-6px 0 36px var(--shadow);
+  z-index:600; display:flex; flex-direction:column;
+  transform:translateX(105%);
+  transition:transform .32s cubic-bezier(.4,0,.2,1);
+}
+.task-panel.open { transform:translateX(0); }
+
+.tp-header {
+  padding:.8rem 1rem; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:.5rem; flex-shrink:0;
+  background:var(--paper-raised);
+}
+.tp-title { font-family:var(--serif); font-size:.95rem; font-weight:600; line-height:1.2; }
+.tp-sub   { font-family:var(--mono); font-size:.7rem; color:var(--muted); display:block; margin-top:.1rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tp-titles { flex:1; min-width:0; }
+
+.tp-btn {
+  flex-shrink:0; font-size:.75rem; font-family:var(--mono); font-weight:500;
+  padding:.28rem .65rem; border-radius:var(--r);
+  border:1px solid var(--border); background:none; color:var(--muted);
+  cursor:pointer; transition:all var(--ease); white-space:nowrap;
+  text-decoration:none; display:inline-flex; align-items:center;
+}
+.tp-btn:hover          { border-color:var(--accent); color:var(--accent); background:var(--accent-lt); }
+.tp-btn.tp-close       { font-size:1.1rem; border:none; color:var(--muted); padding:.2rem .5rem; }
+.tp-btn.tp-close:hover { background:var(--paper-sunken); color:var(--ink); }
+.tp-btn.tp-danger:hover{ border-color:var(--danger); color:var(--danger); background:rgba(192,57,43,.08); }
+
+.tp-frame-wrap { flex:1; position:relative; overflow:hidden; background:var(--paper-sunken); }
+.tp-frame      { position:absolute; inset:0; width:100%; height:100%; border:none; }
+.tp-empty {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:1rem; padding:2rem; text-align:center;
+}
+.tp-empty-icon { font-size:2.2rem; opacity:.45; }
+.tp-empty p    { font-size:.88rem; color:var(--muted); max-width:24ch; }
+
+@media (max-width:700px) {
+  .task-panel {
+    width:100%; top:auto; height:74vh;
+    border-left:none; border-top:1px solid var(--border);
+    border-radius:14px 14px 0 0;
+    transform:translateY(105%);
+  }
+  .task-panel.open { transform:translateY(0); }
+}
+
+/* ── 31. Week item — split layout ── */
+.week-item { cursor:default; padding:.45rem .75rem; align-items:stretch; }
+.week-left {
+  display:flex; align-items:center; gap:.5rem; flex:1; cursor:pointer;
+  padding:.1rem 0; min-width:0;
+}
+.week-left:hover { opacity:.82; }
+.wview {
+  flex-shrink:0; padding:.2rem .62rem; border-radius:99px;
+  border:1.5px solid var(--border); background:none;
+  font-size:.7rem; font-family:var(--mono); font-weight:600;
+  color:var(--muted); cursor:pointer; transition:all var(--ease); line-height:1.6;
+  align-self:center;
+}
+.wview:hover        { border-color:var(--accent); color:var(--accent); background:var(--accent-lt); }
+.wview.has-url      { border-color:var(--accent); color:var(--accent); }
+.week-item.done .wview.has-url { border-color:#14a068; color:#14a068; }
 </style>
 </head>
 <body>
@@ -592,7 +670,8 @@ kbd { font-family:var(--mono); font-size:.68rem; background:var(--paper-raised);
   <section id="tracker" class="reveal" style="margin-bottom:3rem;" aria-labelledby="trk-title">
     <h2 class="sec-h" id="trk-title">My progress</h2>
     <p style="font-size:.88rem;color:var(--muted);margin-bottom:1rem;">
-      Mark weeks you've completed — stored locally in <code>localStorage</code>.
+      Mark weeks you've completed — stored in <code>localStorage</code>.
+      Click <strong>▶</strong> to open your submitted task for that week, or <strong>＋</strong> to add a task URL.
     </p>
     <div class="week-grid" id="week-grid"></div>
     <div class="prog-row">
@@ -643,6 +722,7 @@ kbd { font-family:var(--mono); font-size:.68rem; background:var(--paper-raised);
             <th scope="col">Topic</th>
             <th scope="col">Key concepts</th>
             <th scope="col">Type</th>
+            <th scope="col" style="text-align:right;padding-right:.75rem;">Task</th>
           </tr>
         </thead>
         <tbody id="cur-body"></tbody>
@@ -698,7 +778,47 @@ kbd { font-family:var(--mono); font-size:.68rem; background:var(--paper-raised);
 </div>
 </main>
 
-<!-- ── DIALOG (HTML5 dialog element) ── -->
+<!-- ── TASK VIEWER PANEL (slide-in from right) ── -->
+<div class="tp-backdrop" id="tp-back" onclick="closeTaskPanel()" aria-hidden="true"></div>
+<aside class="task-panel" id="task-panel" aria-label="Task viewer">
+  <div class="tp-header">
+    <div class="tp-titles">
+      <div class="tp-title" id="tp-title">Task</div>
+      <span class="tp-sub"  id="tp-sub"></span>
+    </div>
+    <a  class="tp-btn" id="tp-open-link" href="#" target="_blank" rel="noopener">↗ Open</a>
+    <button class="tp-btn" id="tp-edit-btn" title="Change task URL">✎ URL</button>
+    <button class="tp-btn tp-danger" id="tp-del-btn" title="Remove task URL">✕ Remove</button>
+    <button class="tp-btn tp-close" onclick="closeTaskPanel()" title="Close panel" aria-label="Close">×</button>
+  </div>
+  <div class="tp-frame-wrap">
+    <iframe class="tp-frame" id="tp-frame"
+      sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+      title="Task preview" src="about:blank"></iframe>
+    <div class="tp-empty" id="tp-empty">
+      <div class="tp-empty-icon">📂</div>
+      <p>No task URL set for this week yet.<br>Paste your submitted page link below.</p>
+      <button class="btn btn-outline" id="tp-add-btn">＋ Add task URL</button>
+    </div>
+  </div>
+</aside>
+
+<!-- ── URL-SETTING DIALOG ── -->
+<dialog id="url-dlg" aria-labelledby="url-dlg-t">
+  <h3 id="url-dlg-t">Set task URL</h3>
+  <p id="url-dlg-sub"></p>
+  <div class="form-group" style="margin-bottom:1.1rem;">
+    <label for="url-inp">Your submitted GitHub Pages URL</label>
+    <input type="url" id="url-inp"
+      placeholder="https://muxiddin19.github.io/Web-Programming/Week4/…">
+  </div>
+  <div style="display:flex;gap:.5rem;justify-content:flex-end;">
+    <button class="btn btn-ghost" id="url-cancel">Cancel</button>
+    <button class="btn btn-primary" id="url-save">Save</button>
+  </div>
+</dialog>
+
+<!-- ── ABOUT DIALOG (HTML5 dialog element) ── -->
 <dialog id="about-dlg" aria-labelledby="dlg-title">
   <h3 id="dlg-title">About the Instructor</h3>
   <p>
@@ -728,6 +848,12 @@ const REPO      = 'muxiddin19/WebPro';
 const SK_PROG   = 'wpro_prog_2026';
 const SK_NOTE   = 'wpro_note_2026';
 const SK_THEME  = 'wpro_theme_2026';
+const SK_TASKS  = 'wpro_tasks_2026';
+
+// Task URLs: weekId → submitted page URL (stored in localStorage)
+let taskUrls = {};
+try { taskUrls = JSON.parse(localStorage.getItem(SK_TASKS) || '{}'); } catch {}
+function saveTaskUrls() { try { localStorage.setItem(SK_TASKS, JSON.stringify(taskUrls)); } catch {} }
 
 const WEEKS = [
   {id:'w1',  label:'Week 1',  topic:'HTML Basics'},
@@ -941,13 +1067,27 @@ document.getElementById('joke-btn').addEventListener('click', async () => {
 // ── Curriculum table (Array.forEach, innerHTML, table elements) ──
 const tbody = document.getElementById('cur-body');
 CURRICULUM.forEach(row => {
+  const wid = 'w' + row.wk;
+  const hasUrl = !!taskUrls[wid];
   const tr = document.createElement('tr');
+  tr.style.cursor = 'pointer';
+  tr.title = hasUrl ? `Open Week ${row.wk} task` : `Add task URL for Week ${row.wk}`;
   tr.innerHTML = `
     <td style="font-family:var(--mono);font-size:.82rem;color:var(--muted);">${row.wk}</td>
     <td style="font-weight:500;">${row.topic}</td>
     <td style="color:var(--muted);font-size:.85rem;">${row.concepts}</td>
     <td><span class="badge">${row.type}</span></td>
-  `;
+    <td style="text-align:right;padding-right:.75rem;">
+      <button style="
+        font-family:var(--mono);font-size:.72rem;font-weight:600;padding:.15rem .55rem;
+        border-radius:99px;border:1.5px solid ${hasUrl?'var(--accent)':'var(--border)'};
+        background:none;color:${hasUrl?'var(--accent)':'var(--muted)'};
+        cursor:pointer;transition:all .15s;"
+        title="${hasUrl?'View task':'Add task URL'}"
+        onclick="event.stopPropagation();openTaskPanel('${wid}')"
+      >${hasUrl ? '▶' : '＋'}</button>
+    </td>`;
+  tr.addEventListener('click', () => openTaskPanel(wid));
   tbody.appendChild(tr);
 });
 
@@ -975,27 +1115,42 @@ function buildTracker() {
   const grid = document.getElementById('week-grid');
   grid.innerHTML = '';
   WEEKS.forEach(w => {
+    const hasUrl = !!taskUrls[w.id];
     const el = document.createElement('div');
     el.className = `week-item${prog[w.id] ? ' done' : ''}`;
     el.dataset.id = w.id;
-    el.setAttribute('role', 'checkbox');
-    el.setAttribute('aria-checked', prog[w.id] ? 'true' : 'false');
-    el.setAttribute('tabindex', '0');
-    el.innerHTML = `
+
+    // Left side: checkbox toggle
+    const left = document.createElement('div');
+    left.className = 'week-left';
+    left.setAttribute('role', 'checkbox');
+    left.setAttribute('aria-checked', prog[w.id] ? 'true' : 'false');
+    left.setAttribute('tabindex', '0');
+    left.innerHTML = `
       <div class="wchk">${prog[w.id] ? '✓' : ''}</div>
-      <div><div class="wlabel">${w.label}</div><div class="wtopic">${w.topic}</div></div>
-    `;
+      <div><div class="wlabel">${w.label}</div><div class="wtopic">${w.topic}</div></div>`;
+
     const toggle = () => {
       prog[w.id] = !prog[w.id];
       saveProg();
       el.classList.toggle('done', !!prog[w.id]);
-      el.setAttribute('aria-checked', prog[w.id] ? 'true' : 'false');
-      el.querySelector('.wchk').textContent = prog[w.id] ? '✓' : '';
+      left.setAttribute('aria-checked', prog[w.id] ? 'true' : 'false');
+      left.querySelector('.wchk').textContent = prog[w.id] ? '✓' : '';
       updateProgBar();
       if (prog[w.id]) toast(`${w.label} complete!`);
     };
-    el.addEventListener('click', toggle);
-    el.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle(); } });
+    left.addEventListener('click', toggle);
+    left.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggle(); } });
+
+    // Right side: view/add task button
+    const vbtn = document.createElement('button');
+    vbtn.className = `wview${hasUrl ? ' has-url' : ''}`;
+    vbtn.title     = hasUrl ? `Open ${w.label} task` : `Add task URL for ${w.label}`;
+    vbtn.textContent = hasUrl ? '▶' : '＋';
+    vbtn.addEventListener('click', e => { e.stopPropagation(); openTaskPanel(w.id); });
+
+    el.appendChild(left);
+    el.appendChild(vbtn);
     grid.appendChild(el);
   });
   updateProgBar();
@@ -1049,6 +1204,134 @@ const dlg = document.getElementById('about-dlg');
 document.getElementById('open-dlg').addEventListener('click', () => dlg.showModal());
 document.getElementById('close-dlg').addEventListener('click', () => dlg.close());
 dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+// ── Task viewer panel ─────────────────────────────────────────
+let tpWid = null;
+
+function openTaskPanel(wid) {
+  const w   = WEEKS.find(x => x.id === wid);
+  if (!w) return;
+  tpWid = wid;
+  const url     = taskUrls[wid] || '';
+  const frame   = document.getElementById('tp-frame');
+  const empty   = document.getElementById('tp-empty');
+  const openLnk = document.getElementById('tp-open-link');
+  const editBtn = document.getElementById('tp-edit-btn');
+  const delBtn  = document.getElementById('tp-del-btn');
+
+  document.getElementById('tp-title').textContent = `${w.label} — ${w.topic}`;
+  document.getElementById('tp-sub').textContent   = url || 'No task URL set yet';
+
+  if (url) {
+    frame.src = url;
+    frame.style.display  = 'block';
+    empty.style.display  = 'none';
+    openLnk.href         = url;
+    openLnk.style.display = '';
+    editBtn.style.display = '';
+    delBtn.style.display  = '';
+  } else {
+    frame.src = 'about:blank';
+    frame.style.display  = 'none';
+    empty.style.display  = 'flex';
+    openLnk.style.display = 'none';
+    editBtn.style.display  = 'none';
+    delBtn.style.display   = 'none';
+  }
+
+  document.getElementById('task-panel').classList.add('open');
+  document.getElementById('tp-back').classList.add('on');
+}
+
+function closeTaskPanel() {
+  document.getElementById('task-panel').classList.remove('open');
+  document.getElementById('tp-back').classList.remove('on');
+  setTimeout(() => {
+    if (!document.getElementById('task-panel').classList.contains('open'))
+      document.getElementById('tp-frame').src = 'about:blank';
+  }, 380);
+}
+
+function openUrlDlg(wid) {
+  const w = WEEKS.find(x => x.id === wid) || {label:'', topic:''};
+  document.getElementById('url-dlg-sub').textContent = `${w.label} — ${w.topic}`;
+  document.getElementById('url-inp').value = taskUrls[wid] || '';
+  const d = document.getElementById('url-dlg');
+  d._wid = wid;
+  d.showModal();
+  setTimeout(() => document.getElementById('url-inp').select(), 60);
+}
+
+// URL dialog save / cancel
+document.getElementById('url-cancel').addEventListener('click', () =>
+  document.getElementById('url-dlg').close());
+document.getElementById('url-save').addEventListener('click', () => {
+  const d   = document.getElementById('url-dlg');
+  const url = document.getElementById('url-inp').value.trim();
+  const wid = d._wid;
+  if (url && !/^https?:\/\//.test(url)) { toast('URL must start with https://'); return; }
+  if (url) { taskUrls[wid] = url; } else { delete taskUrls[wid]; }
+  saveTaskUrls();
+  d.close();
+  buildTracker();
+  rebuildCurTable();
+  if (url) openTaskPanel(wid);
+  else     toast('Task URL cleared.');
+});
+
+// Header buttons inside panel
+document.getElementById('tp-edit-btn').addEventListener('click', () => {
+  if (tpWid) openUrlDlg(tpWid);
+});
+document.getElementById('tp-del-btn').addEventListener('click', () => {
+  if (!tpWid) return;
+  if (!confirm(`Remove task URL for ${WEEKS.find(x=>x.id===tpWid)?.label}?`)) return;
+  delete taskUrls[tpWid];
+  saveTaskUrls();
+  buildTracker();
+  rebuildCurTable();
+  closeTaskPanel();
+  toast('Task URL removed.');
+});
+document.getElementById('tp-add-btn').addEventListener('click', () => {
+  if (tpWid) openUrlDlg(tpWid);
+});
+
+// Rebuild the curriculum table after URL changes
+function rebuildCurTable() {
+  const tb = document.getElementById('cur-body');
+  tb.innerHTML = '';
+  CURRICULUM.forEach(row => {
+    const wid = 'w' + row.wk;
+    const hasUrl = !!taskUrls[wid];
+    const tr = document.createElement('tr');
+    tr.style.cursor = 'pointer';
+    tr.title = hasUrl ? `Open Week ${row.wk} task` : `Add task URL for Week ${row.wk}`;
+    tr.innerHTML = `
+      <td style="font-family:var(--mono);font-size:.82rem;color:var(--muted);">${row.wk}</td>
+      <td style="font-weight:500;">${row.topic}</td>
+      <td style="color:var(--muted);font-size:.85rem;">${row.concepts}</td>
+      <td><span class="badge">${row.type}</span></td>
+      <td style="text-align:right;padding-right:.75rem;">
+        <button style="
+          font-family:var(--mono);font-size:.72rem;font-weight:600;padding:.15rem .55rem;
+          border-radius:99px;border:1.5px solid ${hasUrl?'var(--accent)':'var(--border)'};
+          background:none;color:${hasUrl?'var(--accent)':'var(--muted)'};
+          cursor:pointer;transition:all .15s;"
+          title="${hasUrl?'View task':'Add task URL'}"
+          onclick="event.stopPropagation();openTaskPanel('${wid}')"
+        >${hasUrl ? '▶' : '＋'}</button>
+      </td>`;
+    tr.addEventListener('click', () => openTaskPanel(wid));
+    tb.appendChild(tr);
+  });
+}
+
+// Escape key closes panel
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('task-panel').classList.contains('open'))
+    closeTaskPanel();
+});
 
 // ── Keyboard shortcuts (keydown, switch, focus) ──
 document.addEventListener('keydown', e => {
