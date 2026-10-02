@@ -457,6 +457,32 @@ kbd { font-family:var(--mono); font-size:.68rem; background:var(--paper-raised);
   .task-panel.open { transform:translateY(0); }
 }
 
+/* ── 30b. File browser (GitHub API) ── */
+.tp-breadcrumb {
+  padding:.38rem 1rem; border-bottom:1px solid var(--border); flex-shrink:0;
+  font-family:var(--mono); font-size:.72rem; color:var(--muted);
+  display:flex; align-items:center; gap:.18rem; flex-wrap:wrap;
+  background:var(--paper-raised); overflow-x:auto;
+}
+.tp-bc-sep { color:var(--border); user-select:none; padding:0 .1rem; }
+.tp-bc-btn { cursor:pointer; color:var(--accent); background:none; border:none; font:inherit; padding:.1rem .25rem; border-radius:2px; }
+.tp-bc-btn:hover { text-decoration:underline; }
+.tp-bc-cur { color:var(--ink); font-weight:600; padding:.1rem .25rem; }
+.tp-browser { position:absolute; inset:0; overflow-y:auto; background:var(--paper-raised); }
+.tp-file-item {
+  display:flex; align-items:center; gap:.65rem; padding:.52rem 1rem;
+  border-bottom:1px solid var(--border); cursor:pointer;
+  transition:background var(--ease); user-select:none;
+}
+.tp-file-item:hover { background:var(--accent-lt); }
+.tp-file-item:last-child { border-bottom:none; }
+.tp-file-icon { font-size:.9rem; flex-shrink:0; width:1.1rem; text-align:center; line-height:1; }
+.tp-file-name { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:var(--mono); font-size:.8rem; }
+.tp-file-size { font-family:var(--mono); font-size:.68rem; color:var(--muted); flex-shrink:0; }
+.tp-file-chevron { color:var(--muted); font-size:.85rem; flex-shrink:0; }
+.tp-msg { padding:2rem; text-align:center; color:var(--muted); font-family:var(--mono); font-size:.82rem; line-height:1.7; }
+.tp-msg.err { color:var(--danger); }
+
 /* ── 31. Week item — task indicator ── */
 .wtask-ind {
   flex-shrink:0; font-size:.78rem; font-family:var(--mono); font-weight:700;
@@ -539,6 +565,9 @@ kbd { font-family:var(--mono); font-size:.68rem; background:var(--paper-raised);
   <!-- ── COURSE MATERIALS (Flexbox, anchor list) ── -->
   <section id="materials" class="reveal" style="margin-bottom:3rem;" aria-labelledby="mat-title">
     <h2 class="sec-h" id="mat-title">Course materials</h2>
+    <p style="font-size:.85rem;color:var(--muted);margin-bottom:.75rem;">
+      Click any folder to browse its contents in the panel. All files and subfolders are accessible.
+    </p>
     <div class="tree" role="list">
       <a href="../CoursePlan/" role="listitem"><span class="path">/CoursePlan</span><span class="fdesc">Course syllabus, plan, and relevant data</span></a>
       <a href="../LectureNotes/" role="listitem"><span class="path">/LectureNotes</span><span class="fdesc">Weekly slides and written notes</span></a>
@@ -548,6 +577,7 @@ kbd { font-family:var(--mono); font-size:.68rem; background:var(--paper-raised);
       <a href="../Images/" role="listitem"><span class="path">/Images</span><span class="fdesc">Diagrams and screenshots</span></a>
       <a href="../MyDAta/" role="listitem"><span class="path">/MyDAta</span><span class="fdesc">Sample datasets for assignments</span></a>
     </div>
+    <button class="btn btn-ghost" id="browse-root-btn" style="margin-top:.75rem;font-family:var(--mono);font-size:.8rem;">📁 Browse all repository files</button>
   </section>
 
   <!-- ── INTERACTIVE DEMOS (details/summary) ── -->
@@ -765,23 +795,26 @@ kbd { font-family:var(--mono); font-size:.68rem; background:var(--paper-raised);
 </div>
 </main>
 
-<!-- ── TASK VIEWER PANEL (slide-in from right) ── -->
+<!-- ── TASK / FILE-BROWSER PANEL (slide-in from right) ── -->
 <div class="tp-backdrop" id="tp-back" onclick="closeTaskPanel()" aria-hidden="true"></div>
-<aside class="task-panel" id="task-panel" aria-label="Task viewer">
+<aside class="task-panel" id="task-panel" aria-label="Content viewer">
   <div class="tp-header">
     <div class="tp-titles">
-      <div class="tp-title" id="tp-title">Task</div>
+      <div class="tp-title" id="tp-title">Browse</div>
       <span class="tp-sub"  id="tp-sub"></span>
     </div>
-    <a  class="tp-btn" id="tp-open-link" href="#" target="_blank" rel="noopener">↗ Open</a>
-    <button class="tp-btn" id="tp-edit-btn" title="Change task URL">✎ URL</button>
-    <button class="tp-btn tp-danger" id="tp-del-btn" title="Remove task URL">✕ Remove</button>
+    <button class="tp-btn" id="tp-back-btn" style="display:none" title="Go back">← Back</button>
+    <a  class="tp-btn" id="tp-open-link" href="#" target="_blank" rel="noopener" style="display:none">↗ Open</a>
+    <button class="tp-btn" id="tp-edit-btn" title="Change task URL" style="display:none">✎ URL</button>
+    <button class="tp-btn tp-danger" id="tp-del-btn" title="Remove task URL" style="display:none">✕ Remove</button>
     <button class="tp-btn tp-close" onclick="closeTaskPanel()" title="Close panel" aria-label="Close">×</button>
   </div>
+  <nav class="tp-breadcrumb" id="tp-breadcrumb" aria-label="File path" style="display:none"></nav>
   <div class="tp-frame-wrap">
+    <div class="tp-browser" id="tp-browser" style="display:none"></div>
     <iframe class="tp-frame" id="tp-frame"
       sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-      title="Task preview" src="about:blank"></iframe>
+      title="Content preview" src="about:blank" style="display:none"></iframe>
     <div class="tp-empty" id="tp-empty">
       <div class="tp-empty-icon">📂</div>
       <p>No task URL set for this week yet.<br>Paste your submitted page link below.</p>
@@ -831,7 +864,9 @@ kbd { font-family:var(--mono); font-size:.68rem; background:var(--paper-raised);
 'use strict';
 
 // ── Data constants ─────────────────────────────────────────────
-const REPO      = 'muxiddin19/WebPro';
+const REPO        = 'muxiddin19/WebPro';
+const PAGES_BASE  = 'https://muxiddin19.github.io/WebPro/';
+const API_CONTENTS= `https://api.github.com/repos/${REPO}/contents/`;
 const SK_PROG   = 'wpro_prog_2026';
 const SK_NOTE   = 'wpro_note_2026';
 const SK_THEME  = 'wpro_theme_2026';
@@ -1199,48 +1234,195 @@ document.getElementById('open-dlg').addEventListener('click', () => dlg.showModa
 document.getElementById('close-dlg').addEventListener('click', () => dlg.close());
 dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
 
-// ── Task viewer panel ─────────────────────────────────────────
-let tpWid = null;
+// ── Panel helpers ──────────────────────────────────────────────
+let tpWid        = null;
+let tpMode       = 'task';   // 'task' | 'browser' | 'viewer'
+let browseStack  = [];       // [{path, label}] navigation history
+let browseParent = null;     // path to return to from viewer
 
-// Generic panel opener — works for any URL (folders, tasks, etc.)
-function openPanel(title, subtitle, url, wid) {
-  tpWid = wid;
-  const frame   = document.getElementById('tp-frame');
-  const empty   = document.getElementById('tp-empty');
-  const openLnk = document.getElementById('tp-open-link');
-  const editBtn = document.getElementById('tp-edit-btn');
-  const delBtn  = document.getElementById('tp-del-btn');
-
-  document.getElementById('tp-title').textContent = title;
-  document.getElementById('tp-sub').textContent   = subtitle || url || '';
-
-  if (url) {
-    frame.src = url;
-    frame.style.display  = 'block';
-    empty.style.display  = 'none';
-    openLnk.href         = url;
-    openLnk.style.display = '';
-    editBtn.style.display = wid ? '' : 'none';
-    delBtn.style.display  = wid ? '' : 'none';
-  } else {
-    frame.src = 'about:blank';
-    frame.style.display  = 'none';
-    empty.style.display  = 'flex';
-    openLnk.style.display = 'none';
-    editBtn.style.display = wid ? '' : 'none';
-    delBtn.style.display  = 'none';
-  }
-
+function _showPanel() {
   document.getElementById('task-panel').classList.add('open');
   document.getElementById('tp-back').classList.add('on');
 }
+function _setHeader({title, sub, backBtn, openLnk, editBtn, delBtn}) {
+  document.getElementById('tp-title').textContent    = title  || '';
+  document.getElementById('tp-sub').textContent      = sub    || '';
+  document.getElementById('tp-back-btn').style.display  = backBtn  ? '' : 'none';
+  document.getElementById('tp-open-link').style.display = openLnk  ? '' : 'none';
+  if (openLnk) document.getElementById('tp-open-link').href = openLnk;
+  document.getElementById('tp-edit-btn').style.display   = editBtn  ? '' : 'none';
+  document.getElementById('tp-del-btn').style.display    = delBtn   ? '' : 'none';
+}
+function _showLayer(layer) {
+  // layer: 'browser' | 'frame' | 'empty'
+  document.getElementById('tp-browser').style.display     = layer==='browser' ? 'block' : 'none';
+  document.getElementById('tp-frame').style.display       = layer==='frame'   ? 'block' : 'none';
+  document.getElementById('tp-empty').style.display       = layer==='empty'   ? 'flex'  : 'none';
+  document.getElementById('tp-breadcrumb').style.display  = layer==='browser' ? ''      : 'none';
+}
 
-// Week-task panel opener
+// ── File icon by extension ──────────────────────────────────────
+function fileIcon(name) {
+  const ext = (name.split('.').pop() || '').toLowerCase();
+  return {
+    html:'🌐', htm:'🌐', css:'🎨', js:'⚡', ts:'⚡',
+    pdf:'📄', md:'📝', txt:'📝', json:'📋', csv:'📋',
+    png:'🖼', jpg:'🖼', jpeg:'🖼', gif:'🖼', svg:'🖼', webp:'🖼',
+    mp4:'🎬', mov:'🎬', mp3:'🎵',
+    zip:'📦', rar:'📦',
+    pptx:'📊', ppt:'📊', xlsx:'📊', xls:'📊', docx:'📄', doc:'📄',
+  }[ext] || '📄';
+}
+function fmtBytes(n) {
+  if (!n || n < 1) return '';
+  if (n < 1024)    return n + ' B';
+  if (n < 1048576) return (n/1024).toFixed(0) + ' KB';
+  return (n/1048576).toFixed(1) + ' MB';
+}
+
+// ── Breadcrumb ─────────────────────────────────────────────────
+function renderBreadcrumb() {
+  const bc = document.getElementById('tp-breadcrumb');
+  bc.innerHTML = browseStack.map((s, i) => {
+    if (i === browseStack.length - 1)
+      return `<span class="tp-bc-cur">${s.label}</span>`;
+    return `<button class="tp-bc-btn" onclick="browseDir(${JSON.stringify(s.path)},${JSON.stringify(s.label)},${i})">${s.label}</button><span class="tp-bc-sep">›</span>`;
+  }).join('');
+}
+
+// ── Directory browser ──────────────────────────────────────────
+async function browseDir(apiPath, label, stackIdx) {
+  tpMode = 'browser';
+  tpWid  = null;
+
+  if (typeof stackIdx === 'number') {
+    browseStack = browseStack.slice(0, stackIdx + 1);
+  } else {
+    if (!browseStack.length) browseStack = [{path:'', label:'/'}];
+    if (apiPath === '') {
+      browseStack = [{path:'', label:'/'}];
+    } else {
+      const last = browseStack[browseStack.length - 1];
+      if (last.path !== apiPath) browseStack.push({path: apiPath, label});
+    }
+  }
+
+  const displayLabel = label || (apiPath ? apiPath.split('/').pop() : '/');
+  _setHeader({title: displayLabel, sub: apiPath || 'Repository root', backBtn: browseStack.length > 1});
+  _showLayer('browser');
+  _showPanel();
+  renderBreadcrumb();
+
+  const browser = document.getElementById('tp-browser');
+  browser.innerHTML = '<div class="tp-msg">⟳ Loading…</div>';
+
+  try {
+    const res = await fetch(API_CONTENTS + (apiPath || ''));
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const items = await res.json();
+
+    items.sort((a, b) => {
+      if (a.type !== b.type) return a.type === 'dir' ? -1 : 1;
+      return a.name.localeCompare(b.name, undefined, {numeric: true});
+    });
+
+    if (!items.length) {
+      browser.innerHTML = '<div class="tp-msg">Folder is empty.</div>';
+      return;
+    }
+
+    browser.innerHTML = items.map(item => {
+      const icon = item.type === 'dir' ? '📁' : fileIcon(item.name);
+      const size = item.type === 'file' ? fmtBytes(item.size) : '';
+      const chev = item.type === 'dir'  ? '<span class="tp-file-chevron">›</span>' : '';
+      const dataAttr = `data-item='${JSON.stringify(item).replace(/'/g,"&#39;")}'`;
+      return `<div class="tp-file-item" role="button" tabindex="0" ${dataAttr}>
+        <span class="tp-file-icon">${icon}</span>
+        <span class="tp-file-name">${item.name}</span>
+        ${size ? `<span class="tp-file-size">${size}</span>` : ''}
+        ${chev}
+      </div>`;
+    }).join('');
+
+    browser.querySelectorAll('.tp-file-item').forEach(el => {
+      const item = JSON.parse(el.dataset.item);
+      el.addEventListener('click',   () => handleItem(item));
+      el.addEventListener('keydown', e => { if (e.key === 'Enter') handleItem(item); });
+    });
+  } catch (err) {
+    browser.innerHTML = `<div class="tp-msg err">⚠ Could not load folder.<br><small>${err.message}</small><br><br><a href="https://github.com/${REPO}/tree/main/${apiPath || ''}" target="_blank" rel="noopener" style="color:var(--accent)">View on GitHub ↗</a></div>`;
+  }
+}
+
+// ── File item click handler ────────────────────────────────────
+function handleItem(item) {
+  if (item.type === 'dir') {
+    browseDir(item.path, item.name);
+    return;
+  }
+  const ext = (item.name.split('.').pop() || '').toLowerCase();
+  const htmlTypes  = ['html', 'htm'];
+  const imageTypes = ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp', 'ico'];
+  const frameTypes = [...htmlTypes, ...imageTypes, 'pdf'];
+
+  let viewUrl;
+  if (htmlTypes.includes(ext)) {
+    viewUrl = PAGES_BASE + item.path;
+  } else if (frameTypes.includes(ext)) {
+    viewUrl = item.download_url;
+  } else {
+    window.open(item.download_url || item.html_url, '_blank', 'noopener');
+    return;
+  }
+
+  browseParent = browseStack.slice(); // save so back button can restore
+  tpMode = 'viewer';
+  _setHeader({title: item.name, sub: item.path, backBtn: true, openLnk: viewUrl});
+  _showLayer('frame');
+  document.getElementById('tp-breadcrumb').style.display = 'none';
+  const frame = document.getElementById('tp-frame');
+  frame.src = viewUrl;
+}
+
+// ── Back button ────────────────────────────────────────────────
+document.getElementById('tp-back-btn').addEventListener('click', () => {
+  if (tpMode === 'viewer' && browseParent) {
+    // restore browser at the last directory we were in
+    const last = browseParent[browseParent.length - 1];
+    browseStack = browseParent;
+    browseDir(last.path, last.label, browseStack.length - 1);
+  } else if (tpMode === 'browser' && browseStack.length > 1) {
+    browseStack.pop();
+    const prev = browseStack[browseStack.length - 1];
+    browseDir(prev.path, prev.label, browseStack.length - 1);
+  }
+});
+
+// ── Week-task panel opener ─────────────────────────────────────
 function openTaskPanel(wid) {
   const w = WEEKS.find(x => x.id === wid);
   if (!w) return;
+  tpWid  = wid;
+  tpMode = 'task';
   const url = taskUrls[wid] || '';
-  openPanel(`${w.label} — ${w.topic}`, url || 'No task URL set yet', url, wid);
+
+  document.getElementById('tp-breadcrumb').style.display = 'none';
+  _setHeader({
+    title:   `${w.label} — ${w.topic}`,
+    sub:     url || 'No task URL set yet',
+    backBtn: false,
+    openLnk: url || null,
+    editBtn: true,
+    delBtn:  url ? true : false,
+  });
+
+  if (url) {
+    _showLayer('frame');
+    document.getElementById('tp-frame').src = url;
+  } else {
+    _showLayer('empty');
+  }
+  _showPanel();
 }
 
 function closeTaskPanel() {
@@ -1344,14 +1526,21 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// ── Course Materials tree — open links in the task panel ──
+// ── Course Materials tree — browse via GitHub API ──
 document.querySelectorAll('.tree a').forEach(link => {
   link.addEventListener('click', e => {
     e.preventDefault();
-    const title = (link.querySelector('.path')?.textContent || link.textContent).trim();
-    const sub   = (link.querySelector('.fdesc')?.textContent || '').trim();
-    openPanel(title, sub, link.href, null);
+    const pathText = (link.querySelector('.path')?.textContent || '').trim(); // e.g. '/SourceCodes'
+    const apiPath  = pathText.replace(/^\//, '');  // strip leading slash → 'SourceCodes'
+    const label    = pathText || link.textContent.trim();
+    browseStack = [{path:'', label:'/'}];           // reset to root, then push this folder
+    browseDir(apiPath, label);
   });
+});
+
+document.getElementById('browse-root-btn').addEventListener('click', () => {
+  browseStack = [];
+  browseDir('', '/');
 });
 
 // ── IntersectionObserver — fade-in on scroll ──
