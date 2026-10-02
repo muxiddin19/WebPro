@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web Programming — Course Repository</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── 1. CSS Custom Properties (Variables) ── */
+:root {
+  --ink: #1C2541;
+  --paper: #EDEAE0;
+  --paper-raised: #F5F3EC;
+  --paper-sunken: #E4E1D7;
+  --muted: #5B5F6B;
+  --accent: #2E6E62;
+  --accent-lt: rgba(46,110,98,.12);
+  --danger: #C0392B;
+  --border: #D9D4C6;
+  --shadow: rgba(28,37,65,.08);
+  --serif: 'Lora', Georgia, serif;
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono: 'JetBrains Mono', 'Courier New', monospace;
+  --r: 4px;
+  --ease: 0.18s ease;
+}
+
+/* Dark mode — system preference */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink: #E2DDD4;
+    --paper: #181B22;
+    --paper-raised: #1E2230;
+    --paper-sunken: #13161D;
+    --muted: #8A92A8;
+    --accent: #4BADA0;
+    --accent-lt: rgba(75,173,160,.15);
+    --border: #28303F;
+    --shadow: rgba(0,0,0,.3);
+  }
+}
+/* Dark mode — explicit toggle */
+:root[data-theme="dark"] {
+  --ink: #E2DDD4;
+  --paper: #181B22;
+  --paper-raised: #1E2230;
+  --paper-sunken: #13161D;
+  --muted: #8A92A8;
+  --accent: #4BADA0;
+  --accent-lt: rgba(75,173,160,.15);
+  --border: #28303F;
+  --shadow: rgba(0,0,0,.3);
+}
+
+/* ── 2. Reset ── */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body  { margin:0; padding:0; }
+h1,h2,h3,h4 { margin:0; }
+p    { margin:0; }
+ul,ol { margin:0; padding:0; list-style:none; }
+a    { text-decoration:none; }
+
+/* ── 3. Base ── */
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  transition: background var(--ease), color var(--ease);
+}
+
+/* ── 4. Scroll progress bar (fixed, JS-driven width) ── */
+#scroll-bar {
+  position:fixed; top:0; left:0;
+  height:3px; width:0%;
+  background:var(--accent);
+  z-index:200;
+  transition: width .1s linear;
+}
+
+/* ── 5. Sticky Nav (Flexbox) ── */
+nav.site-nav {
+  position:sticky; top:0; z-index:100;
+  background:var(--paper);
+  border-bottom:1px solid var(--border);
+  padding:.7rem 1.75rem;
+  display:flex; align-items:center; justify-content:space-between; gap:1rem;
+  backdrop-filter:blur(8px);
+  transition:box-shadow var(--ease);
+}
+nav.site-nav.scrolled { box-shadow:0 2px 14px var(--shadow); }
+.nav-brand { font-family:var(--mono); font-size:.82rem; color:var(--accent); font-weight:500; }
+.nav-links  { display:flex; gap:1.4rem; align-items:center; }
+.nav-links a { font-size:.85rem; color:var(--muted); font-weight:500; transition:color var(--ease); }
+.nav-links a:hover { color:var(--ink); }
+
+/* ── 6. Buttons ── */
+button { font-family:var(--sans); cursor:pointer; }
+.btn {
+  font-size:.85rem; font-weight:500;
+  padding:.42rem 1rem; border-radius:var(--r);
+  border:1px solid transparent;
+  transition:all var(--ease);
+}
+.btn-primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+.btn-primary:hover { filter:brightness(1.1); }
+.btn-outline { background:transparent; color:var(--ink); border-color:var(--border); }
+.btn-outline:hover { background:var(--accent-lt); border-color:var(--accent); color:var(--accent); }
+.btn-ghost { background:transparent; color:var(--muted); border:1px solid transparent; }
+.btn-ghost:hover { background:var(--accent-lt); color:var(--accent); }
+#theme-btn {
+  background:none; border:1px solid var(--border); border-radius:var(--r);
+  padding:.28rem .6rem; font-family:var(--mono); font-size:.78rem; color:var(--muted);
+  transition:background var(--ease), color var(--ease);
+}
+#theme-btn:hover { background:var(--accent-lt); color:var(--ink); }
+
+/* ── 7. Wrap / Main ── */
+.wrap { max-width:800px; margin:0 auto; padding:3.5rem 1.75rem 6rem; }
+
+/* ── 8. Section headings with rule ── */
+.sec-h {
+  font-family:var(--serif); font-size:1.3rem; font-weight:600;
+  display:flex; align-items:baseline; gap:.7rem; margin-bottom:1.1rem;
+}
+.sec-h::after { content:''; flex:1; height:1px; background:var(--border); margin-left:.4rem; }
+
+/* ── 9. Hero ── */
+.hero { margin-bottom:3rem; padding-bottom:2.75rem; border-bottom:1px solid var(--border); }
+.hero-tag {
+  font-family:var(--mono); font-size:.72rem; color:var(--accent);
+  letter-spacing:.08em; text-transform:uppercase;
+  display:flex; align-items:center; gap:.5rem; margin-bottom:1rem;
+}
+.hero-tag::before { content:''; display:inline-block; width:1.5rem; height:1px; background:var(--accent); }
+
+h1.hero-title {
+  font-family:var(--serif); font-weight:700;
+  font-size:clamp(1.9rem,5vw,2.75rem); line-height:1.15;
+  text-wrap:balance; margin-bottom:1rem;
+}
+.typewriter-cursor {
+  display:inline-block;
+  border-right:2px solid var(--accent); padding-right:2px;
+  animation:blink 1s step-end infinite;
+}
+@keyframes blink { 0%,100%{border-color:var(--accent)} 50%{border-color:transparent} }
+
+.hero-lede {
+  font-size:1.05rem; max-width:60ch; margin-bottom:2rem;
+  opacity:0; animation:fadeUp .6s ease .7s forwards;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── 10. Countdown bar ── */
+.countdown {
+  background:var(--paper-raised); border:1px solid var(--border); border-radius:var(--r);
+  padding:.9rem 1.2rem; display:flex; align-items:center; gap:1.5rem; flex-wrap:wrap;
+  opacity:0; animation:fadeUp .5s ease .4s forwards;
+}
+.cd-label { font-family:var(--mono); font-size:.72rem; color:var(--muted); }
+.cd-digits { display:flex; gap:.75rem; font-family:var(--mono); font-variant-numeric:tabular-nums; }
+.cd-unit   { display:flex; flex-direction:column; align-items:center; gap:.05rem; }
+.cd-val    { font-size:1.3rem; font-weight:500; color:var(--accent); line-height:1; }
+.cd-lbl    { font-size:.6rem; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+
+/* ── 11. Infobar (CSS Grid, dl/dt/dd) ── */
+.infobar {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:1.25rem; padding:1.35rem 0; margin-bottom:3rem;
+  border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+}
+.infobar dt { font-family:var(--mono); font-size:.72rem; color:var(--muted); margin-bottom:.35rem; letter-spacing:.03em; }
+.infobar dd { margin:0; font-size:.94rem; font-weight:500; }
+.infobar dd a { color:inherit; }
+.infobar dd a:hover { color:var(--accent); }
+
+/* ── 12. File tree (Flexbox + pseudo-elements) ── */
+.tree {
+  border:1px solid var(--border); background:var(--paper-raised);
+  border-radius:var(--r); overflow:hidden;
+}
+.tree a {
+  display:flex; align-items:baseline; justify-content:space-between; gap:1rem;
+  padding:.85rem 1.1rem; color:inherit; border-bottom:1px solid var(--border);
+  position:relative; transition:background var(--ease);
+}
+.tree a:last-child { border-bottom:none; }
+.tree a:hover,.tree a:focus-visible { background:var(--accent-lt); outline:none; }
+.tree a:focus-visible { box-shadow:inset 2px 0 0 var(--accent); }
+.tree a::after {
+  content:'→'; position:absolute; right:1.1rem;
+  opacity:0; transform:translateX(-4px);
+  transition:opacity var(--ease), transform var(--ease);
+  color:var(--accent); font-size:.9rem;
+}
+.tree a:hover::after { opacity:1; transform:translateX(0); }
+.path { font-family:var(--mono); font-size:.92rem; color:var(--accent); white-space:nowrap; }
+.fdesc { font-size:.88rem; color:var(--muted); text-align:right; padding-right:1.25rem; }
+
+/* ── 13. details / summary (interactive disclosure) ── */
+details.demo { border:1px solid var(--border); border-radius:var(--r); margin-bottom:.5rem; overflow:hidden; }
+summary.demo-head {
+  padding:.8rem 1.1rem; cursor:pointer; list-style:none;
+  font-family:var(--mono); font-size:.87rem; font-weight:500;
+  background:var(--paper-raised);
+  display:flex; align-items:center; gap:.6rem;
+  user-select:none; transition:background var(--ease);
+}
+summary.demo-head::-webkit-details-marker { display:none; }
+summary.demo-head::before { content:'▶'; font-size:.6rem; color:var(--muted); transition:transform var(--ease); }
+details[open] summary.demo-head::before { transform:rotate(90deg); }
+summary.demo-head:hover { background:var(--accent-lt); }
+.demo-tag {
+  margin-left:auto; font-size:.68rem;
+  background:var(--accent-lt); color:var(--accent);
+  padding:.1rem .45rem; border-radius:99px; font-weight:400;
+}
+.demo-body {
+  padding:1.25rem; border-top:1px solid var(--border); background:var(--paper);
+  display:flex; flex-direction:column; gap:.8rem;
+}
+.demo-note { font-size:.82rem; color:var(--muted); }
+
+/* ── 14. Counter ── */
+.counter-num {
+  font-family:var(--mono); font-size:2.8rem; font-weight:500; text-align:center;
+  color:var(--accent); font-variant-numeric:tabular-nums;
+  transition:transform .12s ease;
+}
+.counter-num.bump { transform:scale(1.18); }
+.btn-row { display:flex; gap:.5rem; justify-content:center; flex-wrap:wrap; }
+
+/* ── 15. Form elements ── */
+input[type="text"], input[type="number"], input[type="email"],
+select, textarea {
+  font-family:var(--sans); font-size:.88rem;
+  padding:.42rem .75rem; border:1px solid var(--border); border-radius:var(--r);
+  background:var(--paper-raised); color:var(--ink); outline:none; width:100%;
+  transition:border-color var(--ease), box-shadow var(--ease);
+}
+input:focus, select:focus, textarea:focus {
+  border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-lt);
+}
+label { font-size:.85rem; font-weight:500; display:block; margin-bottom:.3rem; }
+.form-group { display:flex; flex-direction:column; gap:.3rem; }
+.field-err { font-size:.78rem; color:var(--danger); font-family:var(--mono); min-height:1em; }
+
+/* ── 16. Loop output list ── */
+#loop-out {
+  max-height:130px; overflow-y:auto;
+  background:var(--paper-sunken); border-radius:var(--r);
+  padding:.7rem; font-family:var(--mono); font-size:.82rem;
+}
+#loop-out li { padding:.12rem 0; border-bottom:1px solid var(--border); animation:slideIn .18s ease; }
+#loop-out li:last-child { border-bottom:none; }
+@keyframes slideIn { from{opacity:0;transform:translateX(-6px)} to{opacity:1;transform:translateX(0)} }
+
+/* ── 17. Week tracker (CSS Grid + localStorage) ── */
+.week-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(195px,1fr)); gap:.5rem; }
+.week-item {
+  display:flex; align-items:center; gap:.6rem;
+  padding:.65rem .9rem; border:1px solid var(--border); border-radius:var(--r);
+  background:var(--paper-raised); cursor:pointer; user-select:none;
+  transition:all var(--ease);
+}
+.week-item:hover { background:var(--accent-lt); border-color:var(--accent); }
+.week-item.done  { background:var(--accent-lt); border-color:var(--accent); }
+.wchk {
+  width:16px; height:16px; border:1.5px solid var(--border); border-radius:3px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:.7rem; color:transparent; flex-shrink:0;
+  transition:all var(--ease);
+}
+.week-item.done .wchk { background:var(--accent); border-color:var(--accent); color:#fff; }
+.wlabel { font-size:.85rem; font-weight:500; line-height:1.2; }
+.wtopic { font-size:.74rem; color:var(--muted); font-family:var(--mono); }
+.prog-row { display:flex; align-items:center; gap:1rem; margin-top:1rem; }
+.prog-track { flex:1; height:6px; background:var(--paper-sunken); border-radius:99px; overflow:hidden; }
+.prog-fill  { height:100%; background:var(--accent); border-radius:99px; transition:width .4s ease; width:0%; }
+.prog-pct   { font-family:var(--mono); font-size:.78rem; color:var(--muted); min-width:3ch; font-variant-numeric:tabular-nums; }
+
+/* ── 18. GitHub stats cards (CSS Grid, fetch) ── */
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:.75rem; }
+.stat-card {
+  background:var(--paper-raised); border:1px solid var(--border); border-radius:var(--r);
+  padding:1rem; text-align:center;
+  opacity:0; transform:translateY(8px);
+  transition:opacity .4s ease, transform .4s ease;
+}
+.stat-card.vis { opacity:1; transform:translateY(0); }
+.stat-val  { font-family:var(--mono); font-size:1.6rem; font-weight:500; color:var(--accent); font-variant-numeric:tabular-nums; line-height:1; margin-bottom:.3rem; }
+.stat-lbl  { font-size:.75rem; color:var(--muted); font-family:var(--mono); }
+
+/* ── 19. Table (thead/tbody/tr/th/td) ── */
+.tbl-wrap { overflow-x:auto; }
+table.cur {
+  width:100%; border-collapse:collapse; font-size:.87rem;
+}
+table.cur th, table.cur td { padding:.6rem .9rem; text-align:left; border-bottom:1px solid var(--border); }
+table.cur thead th {
+  font-family:var(--mono); font-size:.7rem; text-transform:uppercase;
+  letter-spacing:.05em; color:var(--muted); background:var(--paper-raised);
+}
+table.cur tbody tr:hover { background:var(--accent-lt); }
+.badge {
+  display:inline-block; font-family:var(--mono); font-size:.68rem;
+  padding:.1rem .45rem; border-radius:99px;
+  background:var(--accent-lt); color:var(--accent);
+}
+
+/* ── 20. Canvas (figure/figcaption) ── */
+figure.cv { margin:0; border:1px solid var(--border); border-radius:var(--r); overflow:hidden; background:var(--paper-raised); }
+figure.cv canvas { display:block; width:100%; }
+figcaption { padding:.5rem .85rem; font-size:.78rem; font-family:var(--mono); color:var(--muted); border-top:1px solid var(--border); }
+
+/* ── 21. Aside info box ── */
+aside.tip {
+  background:var(--accent-lt); border-left:3px solid var(--accent); border-radius:0 var(--r) var(--r) 0;
+  padding:.85rem 1.1rem; font-size:.88rem; margin-top:1.25rem;
+}
+aside.tip strong { color:var(--accent); }
+
+/* ── 22. Reveal animation (IntersectionObserver) ── */
+.reveal { opacity:0; transform:translateY(16px); transition:opacity .5s ease, transform .5s ease; }
+.reveal.vis { opacity:1; transform:translateY(0); }
+
+/* ── 23. Contact / form section ── */
+.contact-form { display:grid; gap:1rem; max-width:500px; }
+.grade-row { display:grid; grid-template-columns:1fr auto auto; gap:.5rem; align-items:flex-end; }
+.grade-big { font-family:var(--mono); font-size:2rem; font-weight:600; color:var(--accent); text-align:center; line-height:1; }
+.form-ok { display:none; background:var(--accent-lt); border:1px solid var(--accent); border-radius:var(--r); padding:.75rem 1rem; font-size:.88rem; color:var(--accent); }
+
+/* ── 24. Toast notifications ── */
+#toasts {
+  position:fixed; bottom:1.5rem; right:1.5rem;
+  display:flex; flex-direction:column; gap:.5rem;
+  z-index:999; pointer-events:none;
+}
+.toast {
+  background:var(--ink); color:var(--paper);
+  font-family:var(--mono); font-size:.82rem;
+  padding:.55rem 1rem; border-radius:var(--r);
+  opacity:0; transform:translateX(20px);
+  transition:opacity .22s ease, transform .22s ease;
+  pointer-events:auto; max-width:240px;
+}
+.toast.on { opacity:1; transform:translateX(0); }
+
+/* ── 25. Dialog ── */
+dialog {
+  border:1px solid var(--border); border-radius:var(--r);
+  background:var(--paper-raised); color:var(--ink);
+  padding:2rem; max-width:420px; width:90%;
+  box-shadow:0 8px 32px var(--shadow);
+}
+dialog::backdrop { background:rgba(0,0,0,.4); backdrop-filter:blur(4px); }
+dialog h3 { font-family:var(--serif); margin-bottom:1rem; }
+dialog p  { font-size:.92rem; color:var(--muted); margin-bottom:1rem; }
+
+/* ── 26. Footer ── */
+footer.site-footer {
+  margin-top:4rem; padding-top:1.5rem; border-top:1px solid var(--border);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:.75rem;
+  font-family:var(--mono); font-size:.78rem; color:var(--muted);
+}
+footer.site-footer a { color:var(--accent); }
+footer.site-footer a:hover { text-decoration:underline; }
+kbd { font-family:var(--mono); font-size:.68rem; background:var(--paper-raised); border:1px solid var(--border); border-radius:3px; padding:.04rem .32rem; color:var(--muted); }
+
+/* ── 27. Misc link-button ── */
+.link-btn {
+  display:inline-flex; align-items:center; gap:.4rem;
+  font-family:var(--mono); font-size:.82rem; color:var(--accent);
+  border:1px solid var(--accent); border-radius:var(--r);
+  padding:.38rem .85rem; transition:background var(--ease); background:none; cursor:pointer;
+}
+.link-btn:hover { background:var(--accent-lt); }
+
+/* ── 28. Responsive ── */
+@media (max-width:600px) {
+  h1.hero-title { font-size:1.85rem; }
+  .infobar { grid-template-columns:1fr; gap:.9rem; }
+  nav.site-nav { padding:.6rem 1rem; }
+  .nav-links a:not(:last-child) { display:none; }
+  .tree a { flex-direction:column; align-items:flex-start; gap:.15rem; }
+  .fdesc { text-align:left; }
+  .grade-row { grid-template-columns:1fr; }
+  .countdown { flex-direction:column; gap:.75rem; }
+}
+
+/* ── 29. prefers-reduced-motion ── */
+@media (prefers-reduced-motion:reduce) {
+  *, *::before, *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; }
+}
+
+/* ── 30. Task Viewer Panel ── */
+.tp-backdrop {
+  position:fixed; inset:0; background:rgba(0,0,0,.42);
+  backdrop-filter:blur(3px); z-index:500;
+  opacity:0; pointer-events:none; transition:opacity .28s ease;
+}
+.tp-backdrop.on { opacity:1; pointer-events:auto; }
+
+.task-panel {
+  position:fixed; top:0; right:0; bottom:0;
+  width:min(54vw, 740px);
+  background:var(--paper-raised); border-left:1px solid var(--border);
+  box-shadow:-6px 0 36px var(--shadow);
+  z-index:600; display:flex; flex-direction:column;
+  transform:translateX(105%);
+  transition:transform .32s cubic-bezier(.4,0,.2,1);
+}
+.task-panel.open { transform:translateX(0); }
+
+.tp-header {
+  padding:.8rem 1rem; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:.5rem; flex-shrink:0;
+  background:var(--paper-raised);
+}
+.tp-title { font-family:var(--serif); font-size:.95rem; font-weight:600; line-height:1.2; }
+.tp-sub   { font-family:var(--mono); font-size:.7rem; color:var(--muted); display:block; margin-top:.1rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tp-titles { flex:1; min-width:0; }
+
+.tp-btn {
+  flex-shrink:0; font-size:.75rem; font-family:var(--mono); font-weight:500;
+  padding:.28rem .65rem; border-radius:var(--r);
+  border:1px solid var(--border); background:none; color:var(--muted);
+  cursor:pointer; transition:all var(--ease); white-space:nowrap;
+  text-decoration:none; display:inline-flex; align-items:center;
+}
+.tp-btn:hover          { border-color:var(--accent); color:var(--accent); background:var(--accent-lt); }
+.tp-btn.tp-close       { font-size:1.1rem; border:none; color:var(--muted); padding:.2rem .5rem; }
+.tp-btn.tp-close:hover { background:var(--paper-sunken); color:var(--ink); }
+.tp-btn.tp-danger:hover{ border-color:var(--danger); color:var(--danger); background:rgba(192,57,43,.08); }
+
+.tp-frame-wrap { flex:1; position:relative; overflow:hidden; background:var(--paper-sunken); }
+.tp-frame      { position:absolute; inset:0; width:100%; height:100%; border:none; }
+.tp-empty {
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:1rem; padding:2rem; text-align:center;
+}
+.tp-empty-icon { font-size:2.2rem; opacity:.45; }
+.tp-empty p    { font-size:.88rem; color:var(--muted); max-width:24ch; }
+
+@media (max-width:700px) {
+  .task-panel {
+    width:100%; top:auto; height:74vh;
+    border-left:none; border-top:1px solid var(--border);
+    border-radius:14px 14px 0 0;
+    transform:translateY(105%);
+  }
+  .task-panel.open { transform:translateY(0); }
+}
+
+/* ── 31. Week item — task indicator ── */
+.wtask-ind {
+  flex-shrink:0; font-size:.78rem; font-family:var(--mono); font-weight:700;
+  color:var(--border); transition:color var(--ease);
+}
+.wtask-ind.has-url { color:var(--accent); }
+.week-item.done .wtask-ind.has-url { color:#14a068; }
+</style>
+</head>
+<body>
+
+<!-- Scroll progress indicator -->
+<div id="scroll-bar" aria-hidden="true"></div>
+
+<!-- Canvas background (subtle animated dots) -->
+<canvas id="bg-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:-1;opacity:.35;" aria-hidden="true"></canvas>
+
+<!-- Toast notification container -->
+<div id="toasts" aria-live="polite" aria-atomic="true"></div>
+
+<!-- ── NAVIGATION ────────────────────────────────────── -->
+<nav class="site-nav" role="navigation" aria-label="Site navigation">
+  <span class="nav-brand">muxiddin19 / WebPro</span>
+  <div class="nav-links">
+    <a href="#materials">Materials</a>
+    <a href="#demos">Demos</a>
+    <a href="#tracker">Progress</a>
+    <a href="#about">About</a>
+    <button id="theme-btn" title="Press T to toggle">☽ Theme</button>
+  </div>
+</nav>
+
+<!-- ── MAIN CONTENT ──────────────────────────────────── -->
+<main>
+<div class="wrap">
+
+  <!-- ── HERO ── -->
+  <section class="hero" aria-labelledby="hero-title">
+    <p class="hero-tag">Fall 2026 · Web Programming K0126002</p>
+    <h1 class="hero-title" id="hero-title">
+      <span id="type-out"></span><span class="typewriter-cursor" aria-hidden="true"></span>
+    </h1>
+    <p class="hero-lede">
+      A course repository for students learning web programming at
+      <strong>Gachon University</strong>. Lecture notes, working source code, and
+      reference material are kept here as one <em>living folder tree</em>.
+    </p>
+
+    <!-- Countdown to next lecture (JS Date + setInterval) -->
+    <div class="countdown" id="countdown" aria-label="Time until next lecture">
+      <span class="cd-label">Next lecture in</span>
+      <div class="cd-digits">
+        <div class="cd-unit"><span class="cd-val" id="cd-d">--</span><span class="cd-lbl">days</span></div>
+        <div class="cd-unit"><span class="cd-val" id="cd-h">--</span><span class="cd-lbl">hrs</span></div>
+        <div class="cd-unit"><span class="cd-val" id="cd-m">--</span><span class="cd-lbl">min</span></div>
+        <div class="cd-unit"><span class="cd-val" id="cd-s">--</span><span class="cd-lbl">sec</span></div>
+      </div>
+      <button class="btn btn-ghost" id="copy-btn" style="margin-left:auto;" title="Copy repo URL">
+        ⎘ Copy repo URL
+      </button>
+    </div>
+  </section>
+
+  <!-- ── INFO BAR (CSS Grid, dl/dt/dd) ── -->
+  <dl class="infobar reveal">
+    <div>
+      <dt>Instructor</dt>
+      <dd>Dr. Mukhiddin Toshpulatov</dd>
+    </div>
+    <div>
+      <dt>Format</dt>
+      <dd>Lectures + hands-on labs</dd>
+    </div>
+    <div>
+      <dt>Repository</dt>
+      <dd><a href="https://github.com/muxiddin19/WebPro">github.com/muxiddin19/WebPro</a></dd>
+    </div>
+  </dl>
+
+  <!-- ── COURSE MATERIALS (Flexbox, anchor list) ── -->
+  <section id="materials" class="reveal" style="margin-bottom:3rem;" aria-labelledby="mat-title">
+    <h2 class="sec-h" id="mat-title">Course materials</h2>
+    <div class="tree" role="list">
+      <a href="../CoursePlan/" role="listitem"><span class="path">/CoursePlan</span><span class="fdesc">Course syllabus, plan, and relevant data</span></a>
+      <a href="../LectureNotes/" role="listitem"><span class="path">/LectureNotes</span><span class="fdesc">Weekly slides and written notes</span></a>
+      <a href="../SourceCodes/" role="listitem"><span class="path">/SourceCodes</span><span class="fdesc">Example code built in class</span></a>
+      <a href="../UsefullResources/" role="listitem"><span class="path">/UsefullResources</span><span class="fdesc">Tools, references, and cheat sheets</span></a>
+      <a href="../Videos/" role="listitem"><span class="path">/Videos</span><span class="fdesc">Recorded sessions and demos</span></a>
+      <a href="../Images/" role="listitem"><span class="path">/Images</span><span class="fdesc">Diagrams and screenshots</span></a>
+      <a href="../MyDAta/" role="listitem"><span class="path">/MyDAta</span><span class="fdesc">Sample datasets for assignments</span></a>
+    </div>
+  </section>
+
+  <!-- ── INTERACTIVE DEMOS (details/summary) ── -->
+  <section id="demos" class="reveal" style="margin-bottom:3rem;" aria-labelledby="demo-title">
+    <h2 class="sec-h" id="demo-title">In-class demos</h2>
+    <p style="font-size:.88rem;color:var(--muted);margin-bottom:1rem;">
+      Live demos of concepts covered each week — click to expand and interact.
+    </p>
+
+    <!-- Week 3: Counter — DOM, events, CSS class animation -->
+    <details class="demo">
+      <summary class="demo-head">Week 3 — Counter<span class="demo-tag">DOM · Events · CSS</span></summary>
+      <div class="demo-body">
+        <p class="demo-note">DOM manipulation with <code>getElementById</code>, <code>addEventListener</code>, and CSS class animation.</p>
+        <div class="counter-num" id="cnt-val" aria-live="polite">0</div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="cnt-up">+ Add</button>
+          <button class="btn btn-outline" id="cnt-dn">− Subtract</button>
+          <button class="btn btn-ghost" id="cnt-rs">Reset</button>
+        </div>
+      </div>
+    </details>
+
+    <!-- Week 4: Grade checker — if/else, form input -->
+    <details class="demo">
+      <summary class="demo-head">Week 4 — Grade Checker<span class="demo-tag">if/else · Forms</span></summary>
+      <div class="demo-body">
+        <p class="demo-note">Conditional logic (<code>if / else if / else</code>) applied to a numeric input.</p>
+        <div class="grade-row">
+          <div class="form-group">
+            <label for="score-in">Score (0 – 100)</label>
+            <input type="number" id="score-in" min="0" max="100" value="75">
+          </div>
+          <button class="btn btn-primary" id="grade-btn">Check</button>
+          <div style="text-align:center;">
+            <div class="grade-big" id="grade-out">—</div>
+            <div style="font-size:.7rem;color:var(--muted);">Grade</div>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- Week 5: Loops — for, for-of, createElement -->
+    <details class="demo">
+      <summary class="demo-head">Week 5 — Loops<span class="demo-tag">for · for-of · Array</span></summary>
+      <div class="demo-body">
+        <p class="demo-note"><code>for</code> loop, <code>for-of</code> on arrays, dynamic <code>createElement</code> + <code>appendChild</code>.</p>
+        <div class="btn-row" style="justify-content:flex-start;">
+          <button class="btn btn-outline" id="loop-n">Count 1–10</button>
+          <button class="btn btn-outline" id="loop-t">List topics</button>
+          <button class="btn btn-ghost"   id="loop-c">Clear</button>
+        </div>
+        <ul id="loop-out" aria-live="polite"></ul>
+      </div>
+    </details>
+
+    <!-- Week 6: Functions & scope -->
+    <details class="demo">
+      <summary class="demo-head">Week 6 — Functions<span class="demo-tag">Arrow fn · Scope · Closure</span></summary>
+      <div class="demo-body">
+        <p class="demo-note">Arrow functions, default parameters, closures, and template literals.</p>
+        <div class="form-group" style="max-width:320px;">
+          <label for="fn-name">Your name</label>
+          <input type="text" id="fn-name" placeholder="e.g. Dilnoza" value="">
+        </div>
+        <button class="btn btn-outline" id="fn-greet" style="max-width:160px;margin-top:.25rem;">Greet</button>
+        <div id="fn-out" style="font-family:var(--mono);font-size:.9rem;margin-top:.5rem;color:var(--accent);"></div>
+      </div>
+    </details>
+
+    <!-- Week 7: localStorage -->
+    <details class="demo">
+      <summary class="demo-head">Week 7 — localStorage<span class="demo-tag">Storage · JSON</span></summary>
+      <div class="demo-body">
+        <p class="demo-note">Persist data between page loads with <code>localStorage.setItem</code>, <code>getItem</code>, and <code>JSON.stringify / parse</code>.</p>
+        <div class="form-group">
+          <label for="note-in">Personal note (survives reload)</label>
+          <textarea id="note-in" rows="3" placeholder="Type something to save…"></textarea>
+        </div>
+        <div class="btn-row" style="justify-content:flex-start;">
+          <button class="btn btn-primary" id="note-save">Save</button>
+          <button class="btn btn-ghost"   id="note-clr">Clear</button>
+        </div>
+        <p id="note-st" style="font-family:var(--mono);font-size:.8rem;color:var(--muted);"></p>
+      </div>
+    </details>
+
+    <!-- Week 8: fetch API -->
+    <details class="demo">
+      <summary class="demo-head">Week 8 — Fetch API<span class="demo-tag">async/await · REST · try/catch</span></summary>
+      <div class="demo-body">
+        <p class="demo-note"><code>fetch()</code> with <code>async/await</code> and <code>try/catch</code> to load data from a public REST endpoint.</p>
+        <button class="btn btn-outline" id="joke-btn">Load a joke</button>
+        <div id="joke-out" style="margin-top:.75rem;font-size:.9rem;color:var(--muted);font-style:italic;min-height:2em;"></div>
+      </div>
+    </details>
+  </section>
+
+  <!-- ── CANVAS (Canvas API, requestAnimationFrame) ── -->
+  <section class="reveal" style="margin-bottom:3rem;" aria-labelledby="cv-title">
+    <h2 class="sec-h" id="cv-title">Canvas visualizer</h2>
+    <figure class="cv">
+      <canvas id="wave-cv" height="90" aria-label="Animated sine wave demo"></canvas>
+      <figcaption>Canvas API — two overlapping sine waves, animated with <code>requestAnimationFrame</code></figcaption>
+    </figure>
+  </section>
+
+  <!-- ── WEEK PROGRESS TRACKER (localStorage + CSS Grid) ── -->
+  <section id="tracker" class="reveal" style="margin-bottom:3rem;" aria-labelledby="trk-title">
+    <h2 class="sec-h" id="trk-title">My progress</h2>
+    <p style="font-size:.88rem;color:var(--muted);margin-bottom:1rem;">
+      Click the <strong>checkbox</strong> to mark a week done. Click <strong>anywhere else</strong> on a card to open your submitted task in the viewer — or add a URL with <strong>＋</strong>.
+    </p>
+    <div class="week-grid" id="week-grid"></div>
+    <div class="prog-row">
+      <div class="prog-track" role="progressbar" aria-label="Course completion" id="prog-track">
+        <div class="prog-fill" id="prog-fill"></div>
+      </div>
+      <span class="prog-pct" id="prog-pct">0%</span>
+    </div>
+  </section>
+
+  <!-- ── GITHUB STATS (fetch, IntersectionObserver) ── -->
+  <section class="reveal" style="margin-bottom:3rem;" aria-labelledby="stat-title">
+    <h2 class="sec-h" id="stat-title">Repository stats</h2>
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card"><div class="stat-val" id="s-stars">…</div><div class="stat-lbl">Stars</div></div>
+      <div class="stat-card"><div class="stat-val" id="s-forks">…</div><div class="stat-lbl">Forks</div></div>
+      <div class="stat-card"><div class="stat-val" id="s-watch">…</div><div class="stat-lbl">Watchers</div></div>
+      <div class="stat-card"><div class="stat-val" id="s-issues">…</div><div class="stat-lbl">Open issues</div></div>
+    </div>
+  </section>
+
+  <!-- ── ABOUT + CURRICULUM TABLE ── -->
+  <section id="about" class="reveal" style="margin-bottom:3rem;" aria-labelledby="about-title">
+    <h2 class="sec-h" id="about-title">About this course</h2>
+    <p style="max-width:62ch;font-size:.98rem;margin-bottom:1rem;">
+      This course covers the <strong>foundations of building for the web</strong> — HTML, CSS, and
+      JavaScript through to client-server interaction, APIs, and modern front-end practice.
+      It is offered at <em>Gachon University</em> as part of the Web Programming curriculum (K0126002).
+    </p>
+    <p style="max-width:62ch;font-size:.98rem;margin-bottom:1rem;">
+      Everything in this repository is a live folder — updates land here first. If you're
+      enrolled, star or watch the repository to catch new material as it's added.
+    </p>
+
+    <!-- aside — HTML5 semantic element -->
+    <aside class="tip">
+      <strong>Tip:</strong> Press <kbd>T</kbd> to toggle dark/light mode, <kbd>G</kbd> to open GitHub,
+      or <kbd>/</kbd> to jump to the question form. Press <kbd>K</kbd> for all shortcuts.
+    </aside>
+
+    <!-- Curriculum table (table/thead/tbody/tr/th/td) -->
+    <div class="tbl-wrap" style="margin-top:1.75rem;">
+      <table class="cur" aria-label="Course curriculum overview">
+        <thead>
+          <tr>
+            <th scope="col">Wk</th>
+            <th scope="col">Topic</th>
+            <th scope="col">Key concepts</th>
+            <th scope="col">Type</th>
+            <th scope="col" style="text-align:right;padding-right:.75rem;">Task</th>
+          </tr>
+        </thead>
+        <tbody id="cur-body"></tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:1.5rem;display:flex;gap:.75rem;flex-wrap:wrap;">
+      <a class="link-btn" href="webpro_showcase_shared.html">⟳ Live submission tracker</a>
+      <button class="link-btn" id="open-dlg">? About the instructor</button>
+    </div>
+  </section>
+
+  <!-- ── CONTACT FORM (form, input, select, textarea, validation) ── -->
+  <section id="contact" class="reveal" style="margin-bottom:3rem;" aria-labelledby="cf-title">
+    <h2 class="sec-h" id="cf-title">Ask a question</h2>
+    <p style="font-size:.88rem;color:var(--muted);margin-bottom:1.25rem;">
+      Demo form with client-side JavaScript validation — messages aren't sent anywhere.
+    </p>
+    <form class="contact-form" id="cf" novalidate>
+      <div class="form-group">
+        <label for="cf-name">Full name</label>
+        <input type="text" id="cf-name" placeholder="Your name" autocomplete="name">
+        <span class="field-err" id="err-name"></span>
+      </div>
+      <div class="form-group">
+        <label for="cf-email">Email address</label>
+        <input type="email" id="cf-email" placeholder="you@example.com" autocomplete="email">
+        <span class="field-err" id="err-email"></span>
+      </div>
+      <div class="form-group">
+        <label for="cf-week">Related week</label>
+        <select id="cf-week">
+          <option value="">— choose a week —</option>
+        </select>
+        <span class="field-err" id="err-week"></span>
+      </div>
+      <div class="form-group">
+        <label for="cf-msg">Your question</label>
+        <textarea id="cf-msg" rows="4" placeholder="What would you like to know?"></textarea>
+        <span class="field-err" id="err-msg"></span>
+      </div>
+      <button type="submit" class="btn btn-primary" style="max-width:150px;">Submit</button>
+      <div class="form-ok" id="form-ok">✓ Submitted — thanks! (In a real app this would send to a server.)</div>
+    </form>
+  </section>
+
+  <!-- ── FOOTER (footer, kbd, a) ── -->
+  <footer class="site-footer">
+    <span>Web Programming Course · Fall 2026</span>
+    <span><kbd>T</kbd> theme &nbsp;<kbd>G</kbd> GitHub &nbsp;<kbd>/</kbd> ask</span>
+    <a href="https://github.com/muxiddin19/WebPro">View repository on GitHub ↗</a>
+  </footer>
+</div>
+</main>
+
+<!-- ── TASK VIEWER PANEL (slide-in from right) ── -->
+<div class="tp-backdrop" id="tp-back" onclick="closeTaskPanel()" aria-hidden="true"></div>
+<aside class="task-panel" id="task-panel" aria-label="Task viewer">
+  <div class="tp-header">
+    <div class="tp-titles">
+      <div class="tp-title" id="tp-title">Task</div>
+      <span class="tp-sub"  id="tp-sub"></span>
+    </div>
+    <a  class="tp-btn" id="tp-open-link" href="#" target="_blank" rel="noopener">↗ Open</a>
+    <button class="tp-btn" id="tp-edit-btn" title="Change task URL">✎ URL</button>
+    <button class="tp-btn tp-danger" id="tp-del-btn" title="Remove task URL">✕ Remove</button>
+    <button class="tp-btn tp-close" onclick="closeTaskPanel()" title="Close panel" aria-label="Close">×</button>
+  </div>
+  <div class="tp-frame-wrap">
+    <iframe class="tp-frame" id="tp-frame"
+      sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+      title="Task preview" src="about:blank"></iframe>
+    <div class="tp-empty" id="tp-empty">
+      <div class="tp-empty-icon">📂</div>
+      <p>No task URL set for this week yet.<br>Paste your submitted page link below.</p>
+      <button class="btn btn-outline" id="tp-add-btn">＋ Add task URL</button>
+    </div>
+  </div>
+</aside>
+
+<!-- ── URL-SETTING DIALOG ── -->
+<dialog id="url-dlg" aria-labelledby="url-dlg-t">
+  <h3 id="url-dlg-t">Set task URL</h3>
+  <p id="url-dlg-sub"></p>
+  <div class="form-group" style="margin-bottom:1.1rem;">
+    <label for="url-inp">Your submitted GitHub Pages URL</label>
+    <input type="url" id="url-inp"
+      placeholder="https://muxiddin19.github.io/Web-Programming/Week4/…">
+  </div>
+  <div style="display:flex;gap:.5rem;justify-content:flex-end;">
+    <button class="btn btn-ghost" id="url-cancel">Cancel</button>
+    <button class="btn btn-primary" id="url-save">Save</button>
+  </div>
+</dialog>
+
+<!-- ── ABOUT DIALOG (HTML5 dialog element) ── -->
+<dialog id="about-dlg" aria-labelledby="dlg-title">
+  <h3 id="dlg-title">About the Instructor</h3>
+  <p>
+    Dr. Mukhiddin Toshpulatov teaches web programming at Gachon University.
+    This repository is the course hub for Web Programming K0126002 — lecture notes,
+    source code, and reference material in one place.
+  </p>
+  <p>
+    Contact: <a href="mailto:muhiddin1979@inha.edu" style="color:var(--accent);">muhiddin1979@inha.edu</a>
+  </p>
+  <ol style="font-size:.88rem;color:var(--muted);padding-left:1.25rem;list-style:decimal;">
+    <li style="margin-bottom:.35rem;">Clone or download the repository</li>
+    <li style="margin-bottom:.35rem;">Follow along in each weekly folder</li>
+    <li>Submit your work via the student showcase</li>
+  </ol>
+  <div style="margin-top:1.5rem;display:flex;justify-content:flex-end;gap:.5rem;">
+    <button class="btn btn-outline" id="close-dlg">Close</button>
+  </div>
+</dialog>
+
+<!-- ── JAVASCRIPT ──────────────────────────────────────────────── -->
+<script>
+'use strict';
+
+// ── Data constants ─────────────────────────────────────────────
+const REPO      = 'muxiddin19/WebPro';
+const SK_PROG   = 'wpro_prog_2026';
+const SK_NOTE   = 'wpro_note_2026';
+const SK_THEME  = 'wpro_theme_2026';
+const SK_TASKS  = 'wpro_tasks_2026';
+
+// Task URLs: weekId → submitted page URL (stored in localStorage)
+let taskUrls = {};
+try { taskUrls = JSON.parse(localStorage.getItem(SK_TASKS) || '{}'); } catch {}
+function saveTaskUrls() { try { localStorage.setItem(SK_TASKS, JSON.stringify(taskUrls)); } catch {} }
+
+const WEEKS = [
+  {id:'w1',  label:'Week 1',  topic:'HTML Basics'},
+  {id:'w2',  label:'Week 2',  topic:'CSS Fundamentals'},
+  {id:'w3',  label:'Week 3',  topic:'DOM & Events'},
+  {id:'w4',  label:'Week 4',  topic:'Conditions (if/else)'},
+  {id:'w5',  label:'Week 5',  topic:'Loops & Arrays'},
+  {id:'w6',  label:'Week 6',  topic:'Functions & Scope'},
+  {id:'w7',  label:'Week 7',  topic:'localStorage'},
+  {id:'w8',  label:'Week 8',  topic:'fetch & async/await'},
+  {id:'w9',  label:'Week 9',  topic:'Forms & Validation'},
+  {id:'w10', label:'Week 10', topic:'CSS Grid & Flexbox'},
+  {id:'w11', label:'Week 11', topic:'APIs & JSON'},
+  {id:'w12', label:'Week 12', topic:'Responsive Design'},
+];
+
+const CURRICULUM = [
+  {wk:1,  topic:'HTML Structure',  concepts:'Semantic elements, headings, links, images', type:'Lecture'},
+  {wk:2,  topic:'CSS Styling',     concepts:'Box model, selectors, typography, colors',   type:'Lab'},
+  {wk:3,  topic:'DOM & Events',    concepts:'querySelector, addEventListener, classList',  type:'Lab'},
+  {wk:4,  topic:'Conditions',      concepts:'if/else if, ternary, switch',                type:'Lecture'},
+  {wk:5,  topic:'Loops & Arrays',  concepts:'for, for-of, forEach, .map, .filter',        type:'Lab'},
+  {wk:6,  topic:'Functions',       concepts:'Arrow functions, scope, closures',            type:'Lecture'},
+  {wk:7,  topic:'Storage',         concepts:'localStorage, sessionStorage, JSON',          type:'Lab'},
+  {wk:8,  topic:'Fetch API',       concepts:'async/await, try/catch, REST APIs',           type:'Lab'},
+  {wk:9,  topic:'Forms',           concepts:'Validation, submit event, FormData',          type:'Lab'},
+  {wk:10, topic:'Layout',          concepts:'Flexbox, CSS Grid, custom properties',        type:'Lecture'},
+  {wk:11, topic:'APIs',            concepts:'Public APIs, rate limits, error handling',    type:'Project'},
+  {wk:12, topic:'Responsive',      concepts:'Media queries, clamp(), mobile-first',        type:'Lecture'},
+];
+
+const TOPICS = ['HTML', 'CSS', 'JavaScript', 'DOM API', 'fetch/async', 'localStorage', 'REST APIs'];
+
+// ── Utility: toast notification ────────────────────────────────
+// Uses: DOM createElement, CSS class add/remove, setTimeout, transitionend
+function toast(msg) {
+  const box = document.getElementById('toasts');
+  const el  = document.createElement('div');
+  el.className   = 'toast';
+  el.textContent = msg;
+  box.appendChild(el);
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('on')));
+  setTimeout(() => {
+    el.classList.remove('on');
+    el.addEventListener('transitionend', () => el.remove(), {once: true});
+  }, 2600);
+}
+
+// ── Theme toggle (CSS custom properties, localStorage, data-* attribute) ──
+const themeBtn = document.getElementById('theme-btn');
+let theme = localStorage.getItem(SK_THEME) || 'auto';
+
+function applyTheme(t) {
+  theme = t;
+  if      (t === 'dark')  { document.documentElement.dataset.theme = 'dark';  themeBtn.textContent = '☀ Theme'; }
+  else if (t === 'light') { document.documentElement.dataset.theme = 'light'; themeBtn.textContent = '☽ Theme'; }
+  else    { delete document.documentElement.dataset.theme; themeBtn.textContent = '☽ Theme'; }
+  try { localStorage.setItem(SK_THEME, t); } catch {}
+}
+applyTheme(theme);
+
+themeBtn.addEventListener('click', () => {
+  applyTheme(theme === 'dark' ? 'light' : 'dark');
+  toast('Switched to ' + theme + ' mode');
+});
+
+// ── Scroll progress bar ────────────────────────────────────────
+// Uses: scroll event, style.width, classList.toggle
+const scrollBar = document.getElementById('scroll-bar');
+const siteNav   = document.querySelector('.site-nav');
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight) * 100;
+  scrollBar.style.width = Math.min(pct, 100) + '%';
+  siteNav.classList.toggle('scrolled', window.scrollY > 30);
+}, {passive: true});
+
+// ── Typewriter effect ──────────────────────────────────────────
+// Uses: setInterval, clearInterval, String.slice, textContent
+const typeEl   = document.getElementById('type-out');
+const typeText = 'Web Programming';
+let   typeIdx  = 0;
+const typeTmr  = setInterval(() => {
+  typeEl.textContent = typeText.slice(0, typeIdx++);
+  if (typeIdx > typeText.length) clearInterval(typeTmr);
+}, 75);
+
+// ── Countdown to next Monday lecture (Date, setInterval, Math.floor) ──
+function nextMonday() {
+  const d = new Date();
+  d.setHours(10, 0, 0, 0);
+  const offset = ((1 - d.getDay() + 7) % 7) || 7;
+  d.setDate(d.getDate() + offset);
+  return d;
+}
+const fmt2 = n => String(n).padStart(2, '0');
+function tickCountdown() {
+  const diff = nextMonday() - Date.now();
+  document.getElementById('cd-d').textContent = Math.floor(diff / 86400000);
+  document.getElementById('cd-h').textContent = fmt2(Math.floor(diff % 86400000 / 3600000));
+  document.getElementById('cd-m').textContent = fmt2(Math.floor(diff % 3600000 / 60000));
+  document.getElementById('cd-s').textContent = fmt2(Math.floor(diff % 60000 / 1000));
+}
+tickCountdown();
+setInterval(tickCountdown, 1000);
+
+// ── Copy repo URL (async/await, navigator.clipboard, try/catch) ──
+document.getElementById('copy-btn').addEventListener('click', async () => {
+  const url = `https://github.com/${REPO}`;
+  try {
+    await navigator.clipboard.writeText(url);
+    toast('Repo URL copied!');
+  } catch {
+    toast('Copy: ' + url);
+  }
+});
+
+// ── Counter demo (DOM, events, classList, animation reflow) ──
+let cnt = 0;
+const cntEl = document.getElementById('cnt-val');
+function setCnt(n) {
+  cnt = n;
+  cntEl.textContent = cnt;
+  cntEl.classList.remove('bump');
+  void cntEl.offsetWidth;          // force reflow to restart animation
+  cntEl.classList.add('bump');
+}
+document.getElementById('cnt-up').addEventListener('click', () => setCnt(cnt + 1));
+document.getElementById('cnt-dn').addEventListener('click', () => setCnt(cnt - 1));
+document.getElementById('cnt-rs').addEventListener('click', () => setCnt(0));
+
+// ── Grade checker demo (if/else if, parseInt, DOM) ──
+document.getElementById('grade-btn').addEventListener('click', () => {
+  const score = parseInt(document.getElementById('score-in').value, 10);
+  const el    = document.getElementById('grade-out');
+  if (isNaN(score) || score < 0 || score > 100) { el.textContent = '?'; return; }
+  let g;
+  if      (score >= 90) g = 'A';
+  else if (score >= 80) g = 'B';
+  else if (score >= 70) g = 'C';
+  else if (score >= 60) g = 'D';
+  else                  g = 'F';
+  el.textContent = g;
+  toast(`Score ${score} → Grade ${g}`);
+});
+
+// ── Loops demo (for, for-of, createElement, appendChild) ──
+function addLine(text) {
+  const ul = document.getElementById('loop-out');
+  const li = document.createElement('li');
+  li.textContent = text;
+  ul.appendChild(li);
+  ul.scrollTop = ul.scrollHeight;
+}
+document.getElementById('loop-n').addEventListener('click', () => {
+  document.getElementById('loop-out').innerHTML = '';
+  for (let i = 1; i <= 10; i++) addLine(`Iteration ${i}`);
+});
+document.getElementById('loop-t').addEventListener('click', () => {
+  document.getElementById('loop-out').innerHTML = '';
+  for (const t of TOPICS) addLine(`Topic: ${t}`);
+});
+document.getElementById('loop-c').addEventListener('click', () => {
+  document.getElementById('loop-out').innerHTML = '';
+});
+
+// ── Functions demo (arrow functions, template literals, closure) ──
+const greet = (name, times = 1) => {
+  const msgs = [];
+  for (let i = 0; i < times; i++) msgs.push(`Hello, ${name || 'World'}! Welcome to Web Programming.`);
+  return msgs.join(' ');
+};
+document.getElementById('fn-greet').addEventListener('click', () => {
+  const name = document.getElementById('fn-name').value.trim();
+  document.getElementById('fn-out').textContent = greet(name || 'Student');
+});
+
+// ── localStorage demo (setItem, getItem, removeItem, JSON) ──
+const noteIn = document.getElementById('note-in');
+try {
+  const saved = localStorage.getItem(SK_NOTE);
+  if (saved) { noteIn.value = saved; document.getElementById('note-st').textContent = 'Loaded saved note.'; }
+} catch {}
+
+document.getElementById('note-save').addEventListener('click', () => {
+  try {
+    localStorage.setItem(SK_NOTE, noteIn.value);
+    document.getElementById('note-st').textContent = '✓ Saved at ' + new Date().toLocaleTimeString();
+    toast('Note saved!');
+  } catch { toast('Storage unavailable.'); }
+});
+document.getElementById('note-clr').addEventListener('click', () => {
+  try { localStorage.removeItem(SK_NOTE); } catch {}
+  noteIn.value = '';
+  document.getElementById('note-st').textContent = 'Cleared.';
+});
+
+// ── Fetch API demo (async/await, try/catch, .json()) ──
+document.getElementById('joke-btn').addEventListener('click', async () => {
+  const el = document.getElementById('joke-out');
+  el.textContent = 'Loading…';
+  try {
+    const res  = await fetch('https://official-joke-api.appspot.com/jokes/programming/random');
+    const data = await res.json();
+    const joke = Array.isArray(data) ? data[0] : data;
+    el.textContent = `${joke.setup} — ${joke.punchline}`;
+  } catch (err) {
+    el.textContent = '⚠ Could not load (offline?). Error: ' + err.message;
+  }
+});
+
+// ── Curriculum table (Array.forEach, innerHTML, table elements) ──
+const tbody = document.getElementById('cur-body');
+CURRICULUM.forEach(row => {
+  const wid = 'w' + row.wk;
+  const hasUrl = !!taskUrls[wid];
+  const tr = document.createElement('tr');
+  tr.style.cursor = 'pointer';
+  tr.title = hasUrl ? `Open Week ${row.wk} task` : `Add task URL for Week ${row.wk}`;
+  tr.innerHTML = `
+    <td style="font-family:var(--mono);font-size:.82rem;color:var(--muted);">${row.wk}</td>
+    <td style="font-weight:500;">${row.topic}</td>
+    <td style="color:var(--muted);font-size:.85rem;">${row.concepts}</td>
+    <td><span class="badge">${row.type}</span></td>
+    <td style="text-align:right;padding-right:.75rem;">
+      <button style="
+        font-family:var(--mono);font-size:.72rem;font-weight:600;padding:.15rem .55rem;
+        border-radius:99px;border:1.5px solid ${hasUrl?'var(--accent)':'var(--border)'};
+        background:none;color:${hasUrl?'var(--accent)':'var(--muted)'};
+        cursor:pointer;transition:all .15s;"
+        title="${hasUrl?'View task':'Add task URL'}"
+        onclick="event.stopPropagation();openTaskPanel('${wid}')"
+      >${hasUrl ? '▶' : '＋'}</button>
+    </td>`;
+  tr.addEventListener('click', () => openTaskPanel(wid));
+  tbody.appendChild(tr);
+});
+
+// ── Populate week select in contact form ──
+const wkSel = document.getElementById('cf-week');
+WEEKS.forEach(w => {
+  const opt = new Option(`${w.label} — ${w.topic}`, w.id);
+  wkSel.appendChild(opt);
+});
+
+// ── Progress tracker (localStorage + CSS Grid + forEach) ──
+let prog = {};
+try { prog = JSON.parse(localStorage.getItem(SK_PROG) || '{}'); } catch {}
+
+function saveProg() { try { localStorage.setItem(SK_PROG, JSON.stringify(prog)); } catch {} }
+function updateProgBar() {
+  const done = WEEKS.filter(w => prog[w.id]).length;
+  const pct  = Math.round(done / WEEKS.length * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent  = pct + '%';
+  document.getElementById('prog-track').setAttribute('aria-valuenow', pct);
+}
+
+function buildTracker() {
+  const grid = document.getElementById('week-grid');
+  grid.innerHTML = '';
+  WEEKS.forEach(w => {
+    const hasUrl = !!taskUrls[w.id];
+    const el = document.createElement('div');
+    el.className = `week-item${prog[w.id] ? ' done' : ''}`;
+    el.dataset.id = w.id;
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+    el.title = hasUrl ? `Open ${w.label} task` : `Add task URL for ${w.label}`;
+
+    // Checkbox — only this toggles done/undone (stops propagation)
+    const chk = document.createElement('div');
+    chk.className = 'wchk';
+    chk.title = prog[w.id] ? `Unmark ${w.label}` : `Mark ${w.label} done`;
+    chk.textContent = prog[w.id] ? '✓' : '';
+
+    const toggle = (e) => {
+      e.stopPropagation();
+      prog[w.id] = !prog[w.id];
+      saveProg();
+      el.classList.toggle('done', !!prog[w.id]);
+      chk.textContent = prog[w.id] ? '✓' : '';
+      chk.title = prog[w.id] ? `Unmark ${w.label}` : `Mark ${w.label} done`;
+      updateProgBar();
+      if (prog[w.id]) toast(`${w.label} complete!`);
+    };
+    chk.addEventListener('click', toggle);
+
+    // Info
+    const info = document.createElement('div');
+    info.style.cssText = 'flex:1;min-width:0;';
+    info.innerHTML = `<div class="wlabel">${w.label}</div><div class="wtopic">${w.topic}</div>`;
+
+    // Task indicator (▶ if URL set, ＋ if not)
+    const ind = document.createElement('span');
+    ind.className = `wtask-ind${hasUrl ? ' has-url' : ''}`;
+    ind.textContent = hasUrl ? '▶' : '＋';
+
+    // Whole card click → open task panel
+    el.addEventListener('click', () => openTaskPanel(w.id));
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') openTaskPanel(w.id); });
+
+    el.appendChild(chk);
+    el.appendChild(info);
+    el.appendChild(ind);
+    grid.appendChild(el);
+  });
+  updateProgBar();
+}
+buildTracker();
+
+// ── GitHub stats (fetch, async/await, destructuring) ──
+async function loadStats() {
+  try {
+    const res  = await fetch(`https://api.github.com/repos/${REPO}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const { stargazers_count, forks_count, subscribers_count, open_issues_count } = await res.json();
+    document.getElementById('s-stars').textContent  = stargazers_count   ?? '—';
+    document.getElementById('s-forks').textContent  = forks_count        ?? '—';
+    document.getElementById('s-watch').textContent  = subscribers_count  ?? '—';
+    document.getElementById('s-issues').textContent = open_issues_count  ?? '—';
+  } catch {
+    ['s-stars','s-forks','s-watch','s-issues'].forEach(id => {
+      document.getElementById(id).textContent = '—';
+    });
+  }
+}
+loadStats();
+
+// ── Contact form validation (submit event, regex, DOM, try/catch) ──
+document.getElementById('cf').addEventListener('submit', e => {
+  e.preventDefault();
+  const name  = document.getElementById('cf-name').value.trim();
+  const email = document.getElementById('cf-email').value.trim();
+  const week  = document.getElementById('cf-week').value;
+  const msg   = document.getElementById('cf-msg').value.trim();
+  let valid = true;
+
+  const setErr = (id, txt) => { document.getElementById(id).textContent = txt; if (txt) valid = false; };
+  setErr('err-name',  name             ? '' : 'Please enter your name.');
+  setErr('err-email', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? '' : 'Enter a valid email address.');
+  setErr('err-week',  week             ? '' : 'Please select a week.');
+  setErr('err-msg',   msg.length >= 10 ? '' : 'Question must be at least 10 characters.');
+
+  if (valid) {
+    const ok = document.getElementById('form-ok');
+    ok.style.display = 'block';
+    e.target.reset();
+    toast('Question submitted!');
+    setTimeout(() => { ok.style.display = 'none'; }, 4500);
+  }
+});
+
+// ── Dialog (showModal, close, click-outside-to-close) ──
+const dlg = document.getElementById('about-dlg');
+document.getElementById('open-dlg').addEventListener('click', () => dlg.showModal());
+document.getElementById('close-dlg').addEventListener('click', () => dlg.close());
+dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+
+// ── Task viewer panel ─────────────────────────────────────────
+let tpWid = null;
+
+// Generic panel opener — works for any URL (folders, tasks, etc.)
+function openPanel(title, subtitle, url, wid) {
+  tpWid = wid;
+  const frame   = document.getElementById('tp-frame');
+  const empty   = document.getElementById('tp-empty');
+  const openLnk = document.getElementById('tp-open-link');
+  const editBtn = document.getElementById('tp-edit-btn');
+  const delBtn  = document.getElementById('tp-del-btn');
+
+  document.getElementById('tp-title').textContent = title;
+  document.getElementById('tp-sub').textContent   = subtitle || url || '';
+
+  if (url) {
+    frame.src = url;
+    frame.style.display  = 'block';
+    empty.style.display  = 'none';
+    openLnk.href         = url;
+    openLnk.style.display = '';
+    editBtn.style.display = wid ? '' : 'none';
+    delBtn.style.display  = wid ? '' : 'none';
+  } else {
+    frame.src = 'about:blank';
+    frame.style.display  = 'none';
+    empty.style.display  = 'flex';
+    openLnk.style.display = 'none';
+    editBtn.style.display = wid ? '' : 'none';
+    delBtn.style.display  = 'none';
+  }
+
+  document.getElementById('task-panel').classList.add('open');
+  document.getElementById('tp-back').classList.add('on');
+}
+
+// Week-task panel opener
+function openTaskPanel(wid) {
+  const w = WEEKS.find(x => x.id === wid);
+  if (!w) return;
+  const url = taskUrls[wid] || '';
+  openPanel(`${w.label} — ${w.topic}`, url || 'No task URL set yet', url, wid);
+}
+
+function closeTaskPanel() {
+  document.getElementById('task-panel').classList.remove('open');
+  document.getElementById('tp-back').classList.remove('on');
+  setTimeout(() => {
+    if (!document.getElementById('task-panel').classList.contains('open'))
+      document.getElementById('tp-frame').src = 'about:blank';
+  }, 380);
+}
+
+function openUrlDlg(wid) {
+  const w = WEEKS.find(x => x.id === wid) || {label:'', topic:''};
+  document.getElementById('url-dlg-sub').textContent = `${w.label} — ${w.topic}`;
+  document.getElementById('url-inp').value = taskUrls[wid] || '';
+  const d = document.getElementById('url-dlg');
+  d._wid = wid;
+  d.showModal();
+  setTimeout(() => document.getElementById('url-inp').select(), 60);
+}
+
+// URL dialog save / cancel
+document.getElementById('url-cancel').addEventListener('click', () =>
+  document.getElementById('url-dlg').close());
+document.getElementById('url-save').addEventListener('click', () => {
+  const d   = document.getElementById('url-dlg');
+  const url = document.getElementById('url-inp').value.trim();
+  const wid = d._wid;
+  if (url && !/^https?:\/\//.test(url)) { toast('URL must start with https://'); return; }
+  if (url) { taskUrls[wid] = url; } else { delete taskUrls[wid]; }
+  saveTaskUrls();
+  d.close();
+  buildTracker();
+  rebuildCurTable();
+  if (url) openTaskPanel(wid);
+  else     toast('Task URL cleared.');
+});
+
+// Header buttons inside panel
+document.getElementById('tp-edit-btn').addEventListener('click', () => {
+  if (tpWid) openUrlDlg(tpWid);
+});
+document.getElementById('tp-del-btn').addEventListener('click', () => {
+  if (!tpWid) return;
+  if (!confirm(`Remove task URL for ${WEEKS.find(x=>x.id===tpWid)?.label}?`)) return;
+  delete taskUrls[tpWid];
+  saveTaskUrls();
+  buildTracker();
+  rebuildCurTable();
+  closeTaskPanel();
+  toast('Task URL removed.');
+});
+document.getElementById('tp-add-btn').addEventListener('click', () => {
+  if (tpWid) openUrlDlg(tpWid);
+});
+
+// Rebuild the curriculum table after URL changes
+function rebuildCurTable() {
+  const tb = document.getElementById('cur-body');
+  tb.innerHTML = '';
+  CURRICULUM.forEach(row => {
+    const wid = 'w' + row.wk;
+    const hasUrl = !!taskUrls[wid];
+    const tr = document.createElement('tr');
+    tr.style.cursor = 'pointer';
+    tr.title = hasUrl ? `Open Week ${row.wk} task` : `Add task URL for Week ${row.wk}`;
+    tr.innerHTML = `
+      <td style="font-family:var(--mono);font-size:.82rem;color:var(--muted);">${row.wk}</td>
+      <td style="font-weight:500;">${row.topic}</td>
+      <td style="color:var(--muted);font-size:.85rem;">${row.concepts}</td>
+      <td><span class="badge">${row.type}</span></td>
+      <td style="text-align:right;padding-right:.75rem;">
+        <button style="
+          font-family:var(--mono);font-size:.72rem;font-weight:600;padding:.15rem .55rem;
+          border-radius:99px;border:1.5px solid ${hasUrl?'var(--accent)':'var(--border)'};
+          background:none;color:${hasUrl?'var(--accent)':'var(--muted)'};
+          cursor:pointer;transition:all .15s;"
+          title="${hasUrl?'View task':'Add task URL'}"
+          onclick="event.stopPropagation();openTaskPanel('${wid}')"
+        >${hasUrl ? '▶' : '＋'}</button>
+      </td>`;
+    tr.addEventListener('click', () => openTaskPanel(wid));
+    tb.appendChild(tr);
+  });
+}
+
+// Escape key closes panel
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('task-panel').classList.contains('open'))
+    closeTaskPanel();
+});
+
+// ── Keyboard shortcuts (keydown, switch, focus) ──
+document.addEventListener('keydown', e => {
+  if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+  switch (e.key.toLowerCase()) {
+    case 't': themeBtn.click(); break;
+    case 'g': window.open(`https://github.com/${REPO}`, '_blank', 'noopener'); break;
+    case '/': e.preventDefault(); document.getElementById('cf-name').focus(); break;
+    case 'k': toast('Shortcuts → T: theme  G: GitHub  /: ask  K: this'); break;
+  }
+});
+
+// ── Course Materials tree — open links in the task panel ──
+document.querySelectorAll('.tree a').forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    const title = (link.querySelector('.path')?.textContent || link.textContent).trim();
+    const sub   = (link.querySelector('.fdesc')?.textContent || '').trim();
+    openPanel(title, sub, link.href, null);
+  });
+});
+
+// ── IntersectionObserver — fade-in on scroll ──
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('vis'); revealObs.unobserve(en.target); } });
+}, {threshold: 0.08});
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+// ── Stat cards staggered reveal (querySelectorAll, Array.from, setTimeout) ──
+const statsObs = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) {
+    Array.from(document.querySelectorAll('.stat-card')).forEach((c, i) => setTimeout(() => c.classList.add('vis'), i * 100));
+    statsObs.disconnect();
+  }
+}, {threshold: 0.2});
+statsObs.observe(document.getElementById('stats-grid'));
+
+// ── Wave canvas (Canvas API, Math.sin, requestAnimationFrame) ──
+const waveCv  = document.getElementById('wave-cv');
+const wctx    = waveCv.getContext('2d');
+let   wt      = 0;
+function drawWave() {
+  const W = waveCv.offsetWidth || 600;
+  waveCv.width = W;
+  const H = waveCv.height;
+  const col = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+  wctx.clearRect(0, 0, W, H);
+
+  // Wave 1
+  wctx.beginPath();
+  wctx.strokeStyle = col; wctx.lineWidth = 2; wctx.globalAlpha = 1;
+  for (let x = 0; x <= W; x++) {
+    const y = H / 2 + Math.sin((x / W) * Math.PI * 4 + wt) * (H / 3.2);
+    x ? wctx.lineTo(x, y) : wctx.moveTo(x, y);
+  }
+  wctx.stroke();
+
+  // Wave 2 (offset, fainter)
+  wctx.beginPath();
+  wctx.strokeStyle = col; wctx.lineWidth = 1.5; wctx.globalAlpha = 0.35;
+  for (let x = 0; x <= W; x++) {
+    const y = H / 2 + Math.sin((x / W) * Math.PI * 4 + wt + 1.3) * (H / 5);
+    x ? wctx.lineTo(x, y) : wctx.moveTo(x, y);
+  }
+  wctx.stroke();
+  wctx.globalAlpha = 1;
+  wt += 0.03;
+  requestAnimationFrame(drawWave);
+}
+drawWave();
+
+// ── Background dot-grid canvas (Canvas API, nested loops, Math.sin) ──
+(function bgDots() {
+  const c = document.getElementById('bg-canvas');
+  const cx = c.getContext('2d');
+  let frame = 0;
+  function draw() {
+    c.width = window.innerWidth; c.height = window.innerHeight;
+    const ink = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || '#1C2541';
+    const gap = 40;
+    cx.clearRect(0, 0, c.width, c.height);
+    for (let r = 0; r <= Math.ceil(c.height / gap); r++) {
+      for (let col = 0; col <= Math.ceil(c.width / gap); col++) {
+        const pulse = (Math.sin(frame * 0.018 + r * 0.4 + col * 0.3) + 1) / 2;
+        cx.globalAlpha = pulse * 0.045 + 0.01;
+        cx.fillStyle   = ink;
+        cx.fillRect(col * gap, r * gap, 1.5, 1.5);
+      }
+    }
+    frame++;
+    requestAnimationFrame(draw);
+  }
+  draw();
+  window.addEventListener('resize', () => { c.width = window.innerWidth; c.height = window.innerHeight; }, {passive: true});
+})();
+</script>
+</body>
+</html>
