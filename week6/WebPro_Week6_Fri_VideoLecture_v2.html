@@ -1,0 +1,690 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fetch API — Video Lecture v2</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+:root {
+  --dark: #0f172a; --navy: #1e3a5f; --blue: #1a73e8; --teal: #0891b2;
+  --green: #16a34a; --red: #dc2626; --amber: #d97706;
+  --jsyel: #f7df1e; --text: #f1f5f9; --sub: #94a3b8; --bdr: rgba(255,255,255,.12);
+  --code-bg: #0d1117; --code-txt: #e6edf3;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; font-family: Inter, sans-serif; background: #000; }
+
+/* ── PLAYER SHELL ─────────────────────────────────── */
+#player { display: flex; flex-direction: column; width: 100%; height: 100vh; }
+#player.notes-open { flex-direction: row; }
+
+#slide-area { flex: 1; position: relative; overflow: hidden; }
+#player.notes-open #slide-area { flex: 0 0 65%; }
+
+/* ── SLIDES ──────────────────────────────────────── */
+.slide { display: none; position: absolute; inset: 0; padding: 0; }
+.slide.active { display: flex; flex-direction: column; }
+
+/* Chapter badge */
+.chapter-tag { position: absolute; top: 20px; right: 24px; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: rgba(255,255,255,.1); color: var(--sub); }
+
+/* Title slide */
+.s-title { background: var(--dark); align-items: center; justify-content: center; text-align: center; }
+.s-title .big-badge { font-size: 13px; font-weight: 700; letter-spacing: .12em; background: var(--jsyel); color: #000; padding: 6px 16px; border-radius: 20px; margin-bottom: 28px; text-transform: uppercase; }
+.s-title h1 { font-size: 42px; font-weight: 800; color: var(--text); line-height: 1.15; margin-bottom: 12px; }
+.s-title .sub { font-size: 20px; color: var(--sub); margin-bottom: 40px; }
+.s-title .meta { font-size: 14px; color: #475569; }
+
+/* Chapter divider */
+.s-chapter { justify-content: center; align-items: center; text-align: center; }
+.s-chapter .ch-num { font-size: 13px; font-weight: 600; letter-spacing: .12em; color: var(--sub); margin-bottom: 12px; }
+.s-chapter h2 { font-size: 36px; font-weight: 800; color: var(--text); line-height: 1.2; }
+.s-chapter p { font-size: 16px; color: var(--sub); margin-top: 12px; }
+
+/* Content slides */
+.s-content { padding: 40px 52px; }
+.s-content.dark-bg { background: var(--dark); color: var(--text); }
+.s-content.navy-bg { background: var(--navy); color: var(--text); }
+.s-content.code-bg { background: #0a0e1a; color: var(--text); }
+.s-content .slide-title { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+.s-content .slide-sub { font-size: 15px; color: var(--sub); margin-bottom: 28px; }
+
+/* Analogy card */
+.analogy { background: rgba(247,223,30,.1); border-left: 4px solid var(--jsyel); padding: 14px 16px; border-radius: 0 8px 8px 0; margin-bottom: 20px; font-size: 15px; line-height: 1.6; }
+.analogy strong { color: var(--jsyel); }
+
+/* Code block */
+.code-box { background: var(--code-bg); border-radius: 10px; padding: 20px 22px; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.8; color: var(--code-txt); overflow-x: auto; position: relative; }
+.code-box .cm { color: #8b949e; }
+.code-box .ck { color: #ff7b72; }
+.code-box .cs { color: #a5d6ff; }
+.code-box .cn { color: #79c0ff; }
+.code-box .cf { color: #d2a8ff; }
+.code-box .cv { color: #ffa657; }
+.code-box .cnum { color: #f8c555; }
+
+/* Step-reveal lines */
+.code-box .line { opacity: .18; transition: opacity .4s; }
+.code-box .line.show { opacity: 1; }
+.code-box .line.hl { background: rgba(26,115,232,.18); border-radius: 3px; }
+
+/* Output box */
+.output-box { background: #1a2540; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: 14px 18px; font-family: 'Courier New', monospace; font-size: 13px; color: #80ff90; margin-top: 12px; }
+.output-box .out-label { font-family: Inter, sans-serif; font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: #4ade80; margin-bottom: 6px; font-weight: 600; }
+
+/* Two-column layouts */
+.cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.cols3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+/* State card (Promise states) */
+.state-card { border-radius: 10px; padding: 20px; text-align: center; }
+.state-card.pending { background: rgba(217,119,6,.15); border: 1px solid var(--amber); }
+.state-card.fulfilled { background: rgba(22,163,74,.15); border: 1px solid var(--green); }
+.state-card.rejected { background: rgba(220,38,38,.15); border: 1px solid var(--red); }
+.state-icon { font-size: 30px; margin-bottom: 8px; }
+.state-name { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+.state-desc { font-size: 13px; color: var(--sub); line-height: 1.5; }
+.state-card.pending .state-name { color: var(--amber); }
+.state-card.fulfilled .state-name { color: #4ade80; }
+.state-card.rejected .state-name { color: #f87171; }
+
+/* Info rows */
+.info-row { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 16px; }
+.info-dot { width: 28px; height: 28px; min-width: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+.info-dot.blue { background: rgba(26,115,232,.25); color: #60a5fa; }
+.info-dot.green { background: rgba(22,163,74,.25); color: #4ade80; }
+.info-dot.red { background: rgba(220,38,38,.25); color: #f87171; }
+.info-dot.amber { background: rgba(217,119,6,.25); color: #fbbf24; }
+.info-body { flex: 1; }
+.info-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.info-desc { font-size: 13px; color: var(--sub); line-height: 1.5; }
+
+/* Warning box */
+.warn-box { background: rgba(220,38,38,.12); border: 1px solid rgba(220,38,38,.4); border-radius: 8px; padding: 14px 16px; font-size: 14px; line-height: 1.6; }
+.warn-box .warn-head { font-weight: 700; color: #f87171; margin-bottom: 6px; }
+
+/* Comparison table */
+.cmp-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.cmp-table th { padding: 10px 14px; text-align: left; font-weight: 600; border-bottom: 1px solid var(--bdr); font-size: 13px; color: var(--sub); }
+.cmp-table td { padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,.06); vertical-align: top; line-height: 1.5; }
+.cmp-table td:first-child { font-family: 'Courier New', monospace; font-size: 13px; color: #80c4f8; }
+.badge-red { background: rgba(220,38,38,.2); color: #f87171; border-radius: 4px; padding: 1px 6px; font-size: 12px; }
+.badge-green { background: rgba(22,163,74,.2); color: #4ade80; border-radius: 4px; padding: 1px 6px; font-size: 12px; }
+
+/* Journey animation */
+.journey { display: flex; align-items: center; justify-content: center; gap: 0; padding: 24px 0; }
+.j-node { text-align: center; }
+.j-box { padding: 12px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.j-box.browser { background: rgba(26,115,232,.2); border: 1px solid var(--blue); color: #60a5fa; }
+.j-box.internet { background: rgba(148,163,184,.1); border: 1px solid #475569; color: var(--sub); }
+.j-box.server { background: rgba(22,163,74,.2); border: 1px solid var(--green); color: #4ade80; }
+.j-box.js { background: rgba(247,223,30,.15); border: 1px solid var(--jsyel); color: var(--jsyel); }
+.j-label { font-size: 11px; color: var(--sub); }
+.j-arrow { display: flex; flex-direction: column; align-items: center; padding: 0 12px; }
+.j-line { width: 80px; height: 2px; background: linear-gradient(90deg, #1a73e8, #0891b2); position: relative; }
+.j-line::after { content: '▶'; position: absolute; right: -8px; top: -8px; font-size: 12px; color: #0891b2; }
+.j-step { font-size: 11px; color: var(--sub); margin-top: 4px; white-space: nowrap; }
+
+/* Big keyword */
+.big-keyword { font-size: 56px; font-weight: 800; line-height: 1; }
+.big-keyword.blue { color: #60a5fa; }
+.big-keyword.yellow { color: var(--jsyel); }
+.big-keyword.green { color: #4ade80; }
+
+/* Summary grid */
+.summary-item { background: rgba(255,255,255,.05); border: 1px solid var(--bdr); border-radius: 8px; padding: 16px; }
+.summary-item .s-icon { font-size: 22px; margin-bottom: 8px; }
+.summary-item .s-title { font-size: 13px; font-weight: 700; color: var(--jsyel); margin-bottom: 4px; }
+.summary-item .s-body { font-size: 12px; color: var(--sub); line-height: 1.5; }
+
+/* ── CONTROLS ─────────────────────────────────────── */
+.controls { background: #0a0a0a; border-top: 1px solid #1e1e1e; padding: 10px 20px; display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+.btn-ctrl { background: #1e1e1e; border: none; color: #ccc; border-radius: 6px; padding: 7px 14px; font-size: 13px; cursor: pointer; transition: background .15s; }
+.btn-ctrl:hover { background: #2e2e2e; }
+.btn-ctrl.active { background: var(--blue); color: #fff; }
+.slide-counter { font-size: 13px; color: #555; margin: 0 4px; }
+.progress-track { flex: 1; height: 4px; background: #222; border-radius: 2px; cursor: pointer; }
+.progress-fill { height: 4px; background: var(--blue); border-radius: 2px; transition: width .5s; }
+.timer-bar { height: 3px; background: #333; border-radius: 1px; margin-top: 2px; }
+.timer-fill { height: 3px; background: var(--teal); border-radius: 1px; transition: width .1s linear; }
+
+/* ── NOTES PANEL ─────────────────────────────────── */
+#notes-panel { display: none; flex: 1; background: #0e1219; border-left: 1px solid #1e2432; overflow-y: auto; padding: 32px 28px; }
+#player.notes-open #notes-panel { display: block; }
+#notes-panel h3 { font-size: 14px; font-weight: 700; color: var(--sub); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 16px; }
+#notes-text { font-size: 15px; color: #c9d1d9; line-height: 1.8; }
+#notes-text p { margin-bottom: 12px; }
+#notes-text strong { color: var(--text); }
+</style>
+</head>
+<body>
+
+<div id="player">
+  <div id="slide-area">
+
+    <!-- S1: Title -->
+    <div class="slide s-title active" style="background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);">
+      <div class="big-badge">Web Programming · Week 6 · Fetch API</div>
+      <h1>Talking to the Internet<br>from JavaScript</h1>
+      <p class="sub">fetch() · Promise · async/await · Error Handling</p>
+      <p class="meta">Gachon University · Fall 2026 · Detailed Lecture v2</p>
+    </div>
+
+    <!-- S2: Chapter 1 -->
+    <div class="slide s-chapter" style="background: linear-gradient(135deg,#0a0e1a,#1e293b);">
+      <div class="ch-num">Chapter 1 of 5</div>
+      <h2>Why Do We Need<br><span style="color:var(--jsyel)">Fetch?</span></h2>
+      <p>The problem with old JavaScript & the new solution</p>
+    </div>
+
+    <!-- S3: The Problem -->
+    <div class="slide s-content dark-bg">
+      <div class="chapter-tag">Ch.1 · Why Fetch</div>
+      <div class="slide-title">Websites Are Not Islands</div>
+      <div class="slide-sub">Almost every modern website gets data from somewhere else</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px">
+        <div style="background:rgba(26,115,232,.1);border:1px solid rgba(26,115,232,.3);border-radius:8px;padding:16px">
+          <div style="font-size:22px;margin-bottom:8px">🌤️</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px;color:#60a5fa">Weather Apps</div>
+          <div style="font-size:12px;color:var(--sub)">Pull live data from a weather server API</div>
+        </div>
+        <div style="background:rgba(22,163,74,.1);border:1px solid rgba(22,163,74,.3);border-radius:8px;padding:16px">
+          <div style="font-size:22px;margin-bottom:8px">😂</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px;color:#4ade80">Joke Apps</div>
+          <div style="font-size:12px;color:var(--sub)">Fetch a random joke from a joke API</div>
+        </div>
+        <div style="background:rgba(217,119,6,.1);border:1px solid rgba(217,119,6,.3);border-radius:8px;padding:16px">
+          <div style="font-size:22px;margin-bottom:8px">📰</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px;color:#fbbf24">News Sites</div>
+          <div style="font-size:12px;color:var(--sub)">Load article headlines without refreshing the page</div>
+        </div>
+        <div style="background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.3);border-radius:8px;padding:16px">
+          <div style="font-size:22px;margin-bottom:8px">🛒</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px;color:#c084fc">Shopping Sites</div>
+          <div style="font-size:12px;color:var(--sub)">Update cart totals and product info dynamically</div>
+        </div>
+      </div>
+      <div class="analogy"><strong>Key idea:</strong> Our JavaScript code needs to "call" another server, wait for the answer, then use the data — all without reloading the page.</div>
+    </div>
+
+    <!-- S4: Old Way vs New Way -->
+    <div class="slide s-content dark-bg">
+      <div class="chapter-tag">Ch.1 · Why Fetch</div>
+      <div class="slide-title">Before <code style="font-size:22px">fetch()</code> — The Old Way</div>
+      <div class="slide-sub">XMLHttpRequest was powerful but very hard to read</div>
+      <div class="cols2">
+        <div>
+          <div style="font-size:12px;font-weight:600;color:#f87171;letter-spacing:.08em;margin-bottom:8px">❌ OLD WAY (XMLHttpRequest)</div>
+          <div class="code-box" style="font-size:12px">
+<span class="ck">const</span> xhr = <span class="ck">new</span> <span class="cn">XMLHttpRequest</span>();<br>
+xhr.<span class="cf">open</span>(<span class="cs">'GET'</span>, url);<br>
+xhr.<span class="cv">onload</span> = <span class="ck">function</span>() {<br>
+&nbsp;&nbsp;<span class="ck">if</span> (xhr.<span class="cv">status</span> === 200) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ck">const</span> data = <span class="cn">JSON</span>.<span class="cf">parse</span>(xhr.<span class="cv">responseText</span>);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// use data here</span><br>
+&nbsp;&nbsp;}<br>
+};<br>
+xhr.<span class="cf">send</span>();
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:600;color:#4ade80;letter-spacing:.08em;margin-bottom:8px">✓ NEW WAY (fetch + async/await)</div>
+          <div class="code-box" style="font-size:12px">
+<span class="ck">async function</span> <span class="cf">loadData</span>() {<br>
+&nbsp;&nbsp;<span class="ck">const</span> res = <span class="ck">await</span> <span class="cf">fetch</span>(url);<br>
+&nbsp;&nbsp;<span class="ck">const</span> data = <span class="ck">await</span> res.<span class="cf">json</span>();<br>
+&nbsp;&nbsp;<span class="cm">// use data here</span><br>
+}
+          </div>
+        </div>
+      </div>
+      <div class="analogy" style="margin-top:16px"><strong>Why it matters:</strong> <code>fetch()</code> + <code>async/await</code> makes network code as easy to read as normal synchronous code.</div>
+    </div>
+
+    <!-- S5: Chapter 2 -->
+    <div class="slide s-chapter" style="background:linear-gradient(135deg,#0a0e1a,#1a2540);">
+      <div class="ch-num">Chapter 2 of 5</div>
+      <h2>The <span style="color:var(--jsyel)">Promise</span></h2>
+      <p>JavaScript's way of saying "I'll get back to you"</p>
+    </div>
+
+    <!-- S6: What is a Promise -->
+    <div class="slide s-content dark-bg">
+      <div class="chapter-tag">Ch.2 · Promise</div>
+      <div class="slide-title">What Is a Promise?</div>
+      <div class="slide-sub">A placeholder for a value that hasn't arrived yet</div>
+      <div class="analogy"><strong>Café analogy:</strong> When you order at a café, they give you a <strong>receipt ticket</strong>. That ticket is the Promise — you don't have the coffee yet, but you WILL get it (or they'll tell you they ran out). You don't wait frozen at the counter; you sit down and do other things.</div>
+      <div class="cols3" style="margin-top:20px">
+        <div class="state-card pending">
+          <div class="state-icon">⏳</div>
+          <div class="state-name">PENDING</div>
+          <div class="state-desc">Request is in flight. Waiting for the server to respond.</div>
+        </div>
+        <div class="state-card fulfilled">
+          <div class="state-icon">✅</div>
+          <div class="state-name">FULFILLED</div>
+          <div class="state-desc">Server responded successfully. The data is ready.</div>
+        </div>
+        <div class="state-card rejected">
+          <div class="state-icon">❌</div>
+          <div class="state-name">REJECTED</div>
+          <div class="state-desc">Something went wrong — no internet, server crashed, timeout.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S7: fetch() returns a Promise -->
+    <div class="slide s-content code-bg">
+      <div class="chapter-tag">Ch.2 · Promise</div>
+      <div class="slide-title"><code style="font-size:24px;color:#60a5fa">fetch(url)</code> Returns a Promise</div>
+      <div class="slide-sub">The data is NOT ready yet when fetch() returns</div>
+      <div class="code-box">
+<span class="cm">// This runs IMMEDIATELY — before the server responds</span><br>
+<span class="ck">const</span> <span class="cv">promise</span> = <span class="cf">fetch</span>(<span class="cs">'https://v2.jokeapi.dev/joke/Programming'</span>);<br><br>
+<span class="cn">console</span>.<span class="cf">log</span>(<span class="cv">promise</span>); <span class="cm">// → Promise { &lt;pending&gt; }</span>
+      </div>
+      <div style="margin-top:20px">
+        <div class="info-row">
+          <div class="info-dot blue">1</div>
+          <div class="info-body">
+            <div class="info-title">fetch() returns a Promise object RIGHT AWAY</div>
+            <div class="info-desc">JavaScript does not wait for the server. It immediately moves on.</div>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-dot blue">2</div>
+          <div class="info-body">
+            <div class="info-title">The Promise starts in "Pending" state</div>
+            <div class="info-desc">It means: "I've sent the request — I'm waiting for the answer."</div>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-dot blue">3</div>
+          <div class="info-body">
+            <div class="info-title">Later, the Promise resolves to a Response object</div>
+            <div class="info-desc">The Response contains the HTTP status code, headers, and body.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S8: Chapter 3 -->
+    <div class="slide s-chapter" style="background:linear-gradient(135deg,#0a0e1a,#0d2744);">
+      <div class="ch-num">Chapter 3 of 5</div>
+      <h2><span style="color:#60a5fa">async</span> / <span style="color:var(--jsyel)">await</span></h2>
+      <p>Making asynchronous code look and feel synchronous</p>
+    </div>
+
+    <!-- S9: The Journey -->
+    <div class="slide s-content dark-bg">
+      <div class="chapter-tag">Ch.3 · async/await</div>
+      <div class="slide-title">The Four Steps of a Fetch Request</div>
+      <div class="slide-sub">Our code → Internet → Server → Back to our code</div>
+      <div class="journey">
+        <div class="j-node"><div class="j-box js">Your JS Code</div><div class="j-label">calls fetch(url)</div></div>
+        <div class="j-arrow"><div class="j-line"></div><div class="j-step">① send request</div></div>
+        <div class="j-node"><div class="j-box internet">Internet</div><div class="j-label">packets travel</div></div>
+        <div class="j-arrow"><div class="j-line"></div><div class="j-step">② arrives</div></div>
+        <div class="j-node"><div class="j-box server">Joke Server</div><div class="j-label">processes request</div></div>
+        <div class="j-arrow"><div class="j-line" style="background:linear-gradient(90deg,#16a34a,#0891b2)"></div><div class="j-step">③ sends reply</div></div>
+        <div class="j-node"><div class="j-box browser">Browser</div><div class="j-label">receives response</div></div>
+      </div>
+      <div class="info-row" style="margin-top:8px">
+        <div class="info-dot amber">!</div>
+        <div class="info-body">
+          <div class="info-title">Steps ①②③ take 50–500 milliseconds</div>
+          <div class="info-desc">During that wait, your JavaScript continues running other code — it doesn't freeze. <strong>await</strong> is what makes your function pause and wait at the right moment.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S10: async keyword -->
+    <div class="slide s-content code-bg">
+      <div class="chapter-tag">Ch.3 · async/await</div>
+      <div class="slide-title">The <span style="color:#60a5fa">async</span> Keyword</div>
+      <div class="slide-sub">Any function that uses await must be declared async</div>
+      <div class="cols2">
+        <div>
+          <div style="font-size:12px;color:#f87171;font-weight:600;margin-bottom:8px">❌ This FAILS</div>
+          <div class="code-box" style="font-size:13px">
+<span class="ck">function</span> <span class="cf">loadJoke</span>() {<br>
+&nbsp;&nbsp;<span class="cm">// ERROR: await only</span><br>
+&nbsp;&nbsp;<span class="cm">// works inside async</span><br>
+&nbsp;&nbsp;<span class="ck">const</span> res = <span class="ck">await</span> <span class="cf">fetch</span>(url);<br>
+}
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;color:#4ade80;font-weight:600;margin-bottom:8px">✓ This WORKS</div>
+          <div class="code-box" style="font-size:13px">
+<span class="ck">async function</span> <span class="cf">loadJoke</span>() {<br>
+&nbsp;&nbsp;<span class="cm">// OK: function is async</span><br>
+&nbsp;&nbsp;<span class="ck">const</span> res = <span class="ck">await</span> <span class="cf">fetch</span>(url);<br>
+&nbsp;&nbsp;<span class="ck">const</span> data = <span class="ck">await</span> res.<span class="cf">json</span>();<br>
+}
+          </div>
+        </div>
+      </div>
+      <div class="analogy" style="margin-top:20px"><strong>Rule to remember:</strong> <code>async</code> and <code>await</code> always come in a pair. No <code>async</code> → no <code>await</code>. They are like left shoe and right shoe.</div>
+    </div>
+
+    <!-- S11: The Two-Await Pattern -->
+    <div class="slide s-content code-bg">
+      <div class="chapter-tag">Ch.3 · async/await</div>
+      <div class="slide-title">Why We Need TWO <span style="color:var(--jsyel)">await</span> Calls</div>
+      <div class="slide-sub">Getting the Response is step 1. Reading its body is step 2.</div>
+      <div class="code-box">
+<span class="ck">async function</span> <span class="cf">loadJoke</span>() {<br>
+&nbsp;&nbsp;<span class="cm">// Step 1: Wait for the server to RESPOND (headers arrive)</span><br>
+&nbsp;&nbsp;<span class="ck">const</span> <span class="cv">res</span> = <span class="ck">await</span> <span class="cf">fetch</span>(<span class="cs">'https://v2.jokeapi.dev/joke/Programming'</span>);<br>
+&nbsp;&nbsp;<span class="cm">// res = Response { status: 200, ok: true, ... }</span><br><br>
+&nbsp;&nbsp;<span class="cm">// Step 2: Wait for the BODY to be fully downloaded &amp; parsed</span><br>
+&nbsp;&nbsp;<span class="ck">const</span> <span class="cv">data</span> = <span class="ck">await</span> res.<span class="cf">json</span>();<br>
+&nbsp;&nbsp;<span class="cm">// data = { setup: "Why ...", punchline: "Because ..." }</span><br><br>
+&nbsp;&nbsp;<span class="cn">console</span>.<span class="cf">log</span>(<span class="cv">data</span>.<span class="cv">setup</span>);<br>
+}
+      </div>
+      <div class="cols2" style="margin-top:16px">
+        <div class="info-row">
+          <div class="info-dot blue">1</div>
+          <div class="info-body"><div class="info-title">First await = headers ready</div><div class="info-desc">Status code (200/404/500) and other headers arrive first.</div></div>
+        </div>
+        <div class="info-row">
+          <div class="info-dot green">2</div>
+          <div class="info-body"><div class="info-title">Second await = body ready</div><div class="info-desc">The JSON body streams in and is parsed. This can take extra time for large responses.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S12: res.ok Gotcha -->
+    <div class="slide s-content dark-bg">
+      <div class="chapter-tag">Ch.3 · async/await</div>
+      <div class="slide-title">The Hidden Danger: <code style="font-size:22px">res.ok</code></div>
+      <div class="slide-sub">fetch() does NOT throw an error for 404 or 500 — you must check</div>
+      <div class="warn-box">
+        <div class="warn-head">⚠ Common Beginner Mistake</div>
+        fetch() only rejects (throws) for network failures — no internet, DNS error, timeout.<br>
+        HTTP error codes like 404 (Not Found) or 500 (Server Error) are treated as <em>successful</em> responses!
+      </div>
+      <div style="margin-top:16px">
+        <table class="cmp-table">
+          <thead><tr><th>Situation</th><th>res.ok</th><th>res.status</th><th>fetch() throws?</th></tr></thead>
+          <tbody>
+            <tr><td>Success</td><td><span class="badge-green">true</span></td><td>200</td><td>No</td></tr>
+            <tr><td>Not Found</td><td><span class="badge-red">false</span></td><td>404</td><td><strong>No — YOU must check</strong></td></tr>
+            <tr><td>Server Error</td><td><span class="badge-red">false</span></td><td>500</td><td><strong>No — YOU must check</strong></td></tr>
+            <tr><td>No Internet</td><td>—</td><td>—</td><td>Yes (rejects)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- S13: Chapter 4 -->
+    <div class="slide s-chapter" style="background:linear-gradient(135deg,#1a0a0a,#2d1515);">
+      <div class="ch-num">Chapter 4 of 5</div>
+      <h2><span style="color:#f87171">Error</span> Handling</h2>
+      <p>try / catch / finally — what to do when things go wrong</p>
+    </div>
+
+    <!-- S14: try/catch -->
+    <div class="slide s-content code-bg">
+      <div class="chapter-tag">Ch.4 · Error Handling</div>
+      <div class="slide-title">try / catch / finally</div>
+      <div class="slide-sub">The professional pattern for safe fetch requests</div>
+      <div class="code-box">
+<span class="ck">async function</span> <span class="cf">loadJoke</span>() {<br>
+&nbsp;&nbsp;<span class="ck">try</span> {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ck">const</span> res = <span class="ck">await</span> <span class="cf">fetch</span>(url);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ck">if</span> (!res.<span class="cv">ok</span>) <span class="ck">throw new</span> <span class="cn">Error</span>(<span class="cs">`HTTP error: <span class="cnum">${res.status}</span>`</span>);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ck">const</span> data = <span class="ck">await</span> res.<span class="cf">json</span>();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;showJoke(data); <span class="cm">// ← happy path</span><br>
+&nbsp;&nbsp;} <span class="ck">catch</span> (err) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cn">console</span>.<span class="cf">error</span>(<span class="cs">'Failed:'</span>, err.<span class="cv">message</span>);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;showError(<span class="cs">'Could not load joke 😔'</span>);<br>
+&nbsp;&nbsp;} <span class="ck">finally</span> {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hideSpinner(); <span class="cm">// ← ALWAYS runs</span><br>
+&nbsp;&nbsp;}<br>
+}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:16px">
+        <div class="info-row"><div class="info-dot blue">try</div><div class="info-body"><div class="info-desc">Runs the risky code. If anything throws, jumps to catch.</div></div></div>
+        <div class="info-row"><div class="info-dot red">catch</div><div class="info-body"><div class="info-desc">Catches ANY error (network failure OR our manual throw).</div></div></div>
+        <div class="info-row"><div class="info-dot green">finally</div><div class="info-body"><div class="info-desc">ALWAYS runs — perfect for hiding loading spinners.</div></div></div>
+      </div>
+    </div>
+
+    <!-- S15: finally analogy -->
+    <div class="slide s-content dark-bg">
+      <div class="chapter-tag">Ch.4 · Error Handling</div>
+      <div class="slide-title">Understanding <code style="font-size:22px;color:#4ade80">finally</code></div>
+      <div class="slide-sub">It runs no matter what — success, error, or exception</div>
+      <div class="analogy"><strong>Real-life analogy:</strong> When you leave your house, you <strong>lock the door</strong> whether your trip was successful (you found what you needed) or a failure (the shop was closed). Locking the door is "finally" — it happens regardless.</div>
+      <div style="margin-top:20px">
+        <div class="info-row">
+          <div class="info-dot green">✓</div>
+          <div class="info-body">
+            <div class="info-title">Loading spinner / skeleton screen</div>
+            <div class="info-desc">Show a spinner before fetch(), hide it in finally — whether the data arrived or an error occurred, the spinner always disappears.</div>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-dot green">✓</div>
+          <div class="info-body">
+            <div class="info-title">Re-enabling submit buttons</div>
+            <div class="info-desc">Disable a button while submitting a form, re-enable it in finally — even if the server returned an error.</div>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-dot green">✓</div>
+          <div class="info-body">
+            <div class="info-title">Logging and analytics</div>
+            <div class="info-desc">Record how long the request took, regardless of outcome.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S16: Chapter 5 -->
+    <div class="slide s-chapter" style="background:linear-gradient(135deg,#0a1a0a,#0d2b1a);">
+      <div class="ch-num">Chapter 5 of 5</div>
+      <h2><span style="color:#4ade80">Complete</span> Patterns</h2>
+      <p>POST requests, real-world code, and best practices</p>
+    </div>
+
+    <!-- S17: POST requests -->
+    <div class="slide s-content code-bg">
+      <div class="chapter-tag">Ch.5 · Complete Patterns</div>
+      <div class="slide-title">Sending Data: POST Requests</div>
+      <div class="slide-sub">Add a second argument to fetch() with method, headers, and body</div>
+      <div class="code-box">
+<span class="ck">async function</span> <span class="cf">saveScore</span>(studentId, score) {<br>
+&nbsp;&nbsp;<span class="ck">try</span> {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ck">const</span> res = <span class="ck">await</span> <span class="cf">fetch</span>(<span class="cs">'/api/scores'</span>, {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cv">method</span>: <span class="cs">'POST'</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cv">headers</span>: { <span class="cs">'Content-Type'</span>: <span class="cs">'application/json'</span> },<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cv">body</span>: <span class="cn">JSON</span>.<span class="cf">stringify</span>({ studentId, score }),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;});<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ck">if</span> (!res.<span class="cv">ok</span>) <span class="ck">throw new</span> <span class="cn">Error</span>(<span class="cs">'Save failed'</span>);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ck">const</span> result = <span class="ck">await</span> res.<span class="cf">json</span>();<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cn">console</span>.<span class="cf">log</span>(<span class="cs">'Saved!'</span>, result);<br>
+&nbsp;&nbsp;} <span class="ck">catch</span> (err) { <span class="cn">console</span>.<span class="cf">error</span>(err); }<br>
+}
+      </div>
+      <div class="cols2" style="margin-top:14px">
+        <div class="info-row"><div class="info-dot blue">method</div><div class="info-body"><div class="info-desc">'GET', 'POST', 'PUT', 'DELETE' — GET is the default.</div></div></div>
+        <div class="info-row"><div class="info-dot blue">body</div><div class="info-body"><div class="info-desc">Must be a string — use JSON.stringify() to convert objects.</div></div></div>
+      </div>
+    </div>
+
+    <!-- S18: Complete Professional Pattern -->
+    <div class="slide s-content code-bg">
+      <div class="chapter-tag">Ch.5 · Complete Patterns</div>
+      <div class="slide-title">The Complete Professional Pattern</div>
+      <div class="slide-sub">Everything together — the pattern to memorize</div>
+      <div class="code-box" style="font-size:13px">
+<span class="ck">async function</span> <span class="cf">loadJoke</span>() {<br>
+&nbsp;&nbsp;<span class="cf">showSpinner</span>(); <span class="cm">// show loading indicator</span><br>
+&nbsp;&nbsp;<span class="ck">try</span> {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// 1. Send the request — await the server's headers</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ck">const</span> res = <span class="ck">await</span> <span class="cf">fetch</span>(<span class="cs">'https://v2.jokeapi.dev/joke/Programming'</span>);<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// 2. Check HTTP status (fetch never throws for 404!)</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ck">if</span> (!res.<span class="cv">ok</span>) <span class="ck">throw new</span> <span class="cn">Error</span>(<span class="cs">`Server returned <span class="cnum">${res.status}</span>`</span>);<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// 3. Await the body — parse JSON</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ck">const</span> data = <span class="ck">await</span> res.<span class="cf">json</span>();<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// 4. Use the data ✓</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;document.<span class="cf">getElementById</span>(<span class="cs">'setup'</span>).<span class="cv">textContent</span> = data.<span class="cv">setup</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;document.<span class="cf">getElementById</span>(<span class="cs">'punchline'</span>).<span class="cv">textContent</span> = data.<span class="cv">punchline</span>;<br>
+&nbsp;&nbsp;} <span class="ck">catch</span> (err) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;document.<span class="cf">getElementById</span>(<span class="cs">'error'</span>).<span class="cv">textContent</span> = <span class="cs">'Could not load 😔'</span>;<br>
+&nbsp;&nbsp;} <span class="ck">finally</span> {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="cf">hideSpinner</span>(); <span class="cm">// always hide the spinner</span><br>
+&nbsp;&nbsp;}<br>
+}
+      </div>
+    </div>
+
+    <!-- S19: Summary -->
+    <div class="slide s-content dark-bg">
+      <div class="slide-title">Summary: 7 Things to Remember</div>
+      <div class="slide-sub">The complete mental model for Fetch API</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="summary-item"><div class="s-icon">🚀</div><div class="s-title">fetch(url)</div><div class="s-body">Sends a GET request and returns a Promise immediately.</div></div>
+        <div class="summary-item"><div class="s-icon">⏳</div><div class="s-title">Promise 3 States</div><div class="s-body">Pending → Fulfilled or Rejected. Always starts as Pending.</div></div>
+        <div class="summary-item"><div class="s-icon">🔑</div><div class="s-title">async function</div><div class="s-body">Required before any function that uses await inside.</div></div>
+        <div class="summary-item"><div class="s-icon">⏸️</div><div class="s-title">await pauses...</div><div class="s-body">Only the current async function — not the whole page.</div></div>
+        <div class="summary-item"><div class="s-icon">2️⃣</div><div class="s-title">Two awaits</div><div class="s-body">First for headers (res), second for body (res.json()).</div></div>
+        <div class="summary-item"><div class="s-icon">⚠️</div><div class="s-title">Check res.ok</div><div class="s-body">404/500 do NOT throw! Always check res.ok yourself.</div></div>
+        <div class="summary-item" style="grid-column:1/-1"><div class="s-icon">🛡️</div><div class="s-title">try / catch / finally</div><div class="s-body">try: happy path · catch: handle all errors · finally: cleanup code (hide spinner) that ALWAYS runs.</div></div>
+      </div>
+    </div>
+
+    <!-- S20: Assignment -->
+    <div class="slide s-content" style="background:linear-gradient(135deg,#0f172a,#1e3a5f);justify-content:center;">
+      <div style="max-width:520px">
+        <div style="font-size:13px;font-weight:700;letter-spacing:.1em;color:var(--sub);margin-bottom:16px">WEEK 6 ASSIGNMENT</div>
+        <h2 style="font-size:30px;font-weight:800;margin-bottom:12px;line-height:1.3">Build Your Own<br><span style="color:var(--jsyel)">API App</span></h2>
+        <p style="color:var(--sub);font-size:15px;line-height:1.7;margin-bottom:24px">Create an HTML page that fetches data from a public API of your choice and displays it beautifully. Use the complete pattern: async function, two awaits, res.ok check, try/catch/finally, and a loading indicator.</p>
+        <div style="background:rgba(247,223,30,.1);border:1px solid rgba(247,223,30,.3);border-radius:8px;padding:16px;font-size:13px;color:var(--sub);line-height:1.7">
+          <strong style="color:var(--jsyel)">Requirements:</strong><br>
+          ① Use <code>async function</code> + <code>await</code><br>
+          ② Show a loading state while fetching<br>
+          ③ Check <code>res.ok</code> and handle errors with <code>try/catch</code><br>
+          ④ Display the result on the page (not just console.log)
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end slide-area -->
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="btn-ctrl" id="btn-play" onclick="togglePlay()">⏸ Pause</button>
+    <button class="btn-ctrl" onclick="prevSlide()">← Prev</button>
+    <button class="btn-ctrl" onclick="nextSlide()">Next →</button>
+    <span class="slide-counter" id="counter">1 / 20</span>
+    <div class="progress-track" id="track" onclick="jumpTo(event)">
+      <div class="progress-fill" id="pfill"></div>
+      <div class="timer-fill" id="tfill"></div>
+    </div>
+    <button class="btn-ctrl" id="btn-notes" onclick="toggleNotes()">📝 Notes</button>
+    <button class="btn-ctrl" onclick="goFullscreen()">⛶</button>
+  </div>
+
+  <!-- Notes panel -->
+  <div id="notes-panel">
+    <h3>Speaker Notes</h3>
+    <div id="notes-text"></div>
+  </div>
+</div>
+
+<script>
+const DURATION = 12000;
+const NOTES = [
+  `<p>Welcome to the Week 6 Fetch API lecture. Today we'll learn how JavaScript communicates with servers on the internet. By the end of this lecture, you'll be able to write professional network request code using <strong>fetch()</strong>, <strong>async/await</strong>, and proper error handling. Let's get started!</p>`,
+  `<p>This is Chapter 1: Why do we need fetch? Every modern website you use pulls in data from external servers. Let me give you a mental picture of what this means.</p>`,
+  `<p>Think about the websites you use every day. A weather app shows today's temperature — where does that number come from? A joke app shows a different joke every time — who makes those? All of this data comes from external <strong>APIs</strong> — Application Programming Interfaces — which are servers that exist just to send data. Our JavaScript code needs a way to ask those servers for data while the page is already open.</p>`,
+  `<p>Before fetch() was introduced, developers used something called <strong>XMLHttpRequest</strong>. You can see it on the left — lots of code just to do a simple GET request! The newer way, using fetch() with async/await, is much cleaner and much easier to understand. This is what we'll learn today.</p>`,
+  `<p>Chapter 2: The Promise. This is one of the most important concepts in modern JavaScript. When you ask a server for data, you don't get it back instantly — it takes time to travel across the internet and back. A Promise is JavaScript's way of handling this delay.</p>`,
+  `<p>A Promise is like a receipt ticket at a café. When you order, they don't hand you the coffee right away — they give you a ticket (the Promise). You go sit down (JavaScript keeps running). Later, either you get your coffee (Fulfilled) or they apologize they ran out (Rejected). The three states are <strong>Pending</strong> (waiting), <strong>Fulfilled</strong> (success), and <strong>Rejected</strong> (error). Notice: a Promise can only change state ONCE — from Pending to either Fulfilled or Rejected.</p>`,
+  `<p>When you call fetch(url), it returns a Promise IMMEDIATELY — before the server has even received your request! The Promise starts in the Pending state. Later, when the server responds, the Promise transitions to Fulfilled and you get a Response object. If the network fails completely (no internet, DNS error, timeout), the Promise is Rejected and throws an error.</p>`,
+  `<p>Chapter 3: async and await. These two keywords work together to make it easy to USE the Promise that fetch() returns. Instead of using complicated .then() chains, we can write code that looks almost like normal synchronous code.</p>`,
+  `<p>Here's the journey of a fetch request. Your JS code calls fetch(url) — step 1. The request travels across the internet — step 2. It arrives at the joke API server, which processes it and sends back a JSON response — step 3. The browser receives the response and your waiting async function continues. The total round trip is typically 50 to 500 milliseconds. During that wait, your JavaScript is NOT frozen — it's running other code. <strong>await</strong> is what tells your function to pause and wait here specifically.</p>`,
+  `<p>The <strong>async</strong> keyword goes before your function declaration. It does two things: it allows you to use <strong>await</strong> inside the function, and it makes the function automatically return a Promise. The rule is simple: if you use <strong>await</strong> anywhere in a function, you MUST put <strong>async</strong> before that function. Think of them as a matched pair — like left shoe and right shoe.</p>`,
+  `<p>Here's one of the most common questions students ask: why do we write BOTH <code>await fetch(url)</code> AND <code>await res.json()</code>? The answer is that these are two separate asynchronous operations. The FIRST await waits for the server to send back the response headers — at this point we know the status code (200, 404, etc.) but the body hasn't fully arrived yet. The SECOND await reads and parses the response body as JSON — this can take extra time for large responses. Each await is doing real async work, so each needs its own await keyword.</p>`,
+  `<p>This is a very important warning slide. Many beginners assume that if the server returns a 404 or 500 error, fetch() will throw an error. IT DOES NOT! fetch() only rejects its Promise for network-level failures — like having no internet at all. For HTTP error codes, the Promise RESOLVES (the first await completes normally), but <code>res.ok</code> is <strong>false</strong>. This is why you must ALWAYS check <code>res.ok</code> or <code>res.status</code> yourself and throw your own error if needed.</p>`,
+  `<p>Chapter 4: Error Handling. Now we put it all together with the professional try/catch/finally pattern. If anything goes wrong inside the try block — either fetch() rejects, OR we manually throw an error after checking res.ok — execution immediately jumps to the catch block. The finally block runs no matter what — whether the try succeeded or catch ran. It's the perfect place to hide loading spinners and re-enable buttons.</p>`,
+  `<p>This slide focuses on try/catch/finally and the complete pattern. Study each section carefully: the try block contains all the network code. The catch block gets the error object with a message property. The finally block is guaranteed to run — use it for cleanup like hiding spinners or re-enabling submit buttons.</p>`,
+  `<p>The finally keyword runs its code regardless of what happened above. A real-life analogy: when you leave your house, you lock the door whether your trip was successful or not. The door-locking is "finally." In web development, the most common use is hiding a loading spinner. You show the spinner before fetch(), then in finally, you always hide it — whether the data loaded successfully or an error occurred.</p>`,
+  `<p>Chapter 5: Complete Patterns. Now let's look at POST requests and some best practices. So far all our examples were GET requests — we were asking the server to give us data. POST requests are for SENDING data to the server, like submitting a form or saving a score.</p>`,
+  `<p>For a POST request, you pass a second argument to fetch() with an object containing three things: method set to 'POST', headers to tell the server you're sending JSON, and body containing your data. The body must be a string — that's why we use JSON.stringify() to convert our JavaScript object to a JSON string first. The pattern for handling the response is exactly the same as GET.</p>`,
+  `<p>Here is the complete professional pattern that you should memorize. It combines everything: show spinner, try block with fetch + res.ok check + res.json(), display data, catch block for error handling, finally block to hide spinner. This exact pattern is used in real professional web applications. Notice how readable it is — async/await makes network code look almost like synchronous code.</p>`,
+  `<p>Let's review the 7 key things to remember from today's lecture. fetch(url) returns a Promise immediately. A Promise has three states: Pending, Fulfilled, Rejected. You must mark functions with async to use await. await pauses only the current async function. You need two awaits: one for the response headers and one for the body. You must check res.ok yourself for 404/500 errors. And finally, always use try/catch/finally for robust error handling.</p>`,
+  `<p>Your assignment for this week: build your own API app. Choose any public API — jokes, weather, cat facts, movie data, whatever interests you. Create an HTML page that fetches from that API and displays the result. Remember the four requirements: use async/await, show a loading state, check res.ok, and display the result on the page. Good luck, and I'll see you next week!</p>`
+];
+
+const slides = document.querySelectorAll('.slide');
+let cur = 0, playing = true, timer = null, elapsed = 0, timerRaf = null, lastTs = null;
+
+function showSlide(n) {
+  slides[cur].classList.remove('active');
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slides[cur].classList.add('active');
+  document.getElementById('counter').textContent = `${cur+1} / ${slides.length}`;
+  document.getElementById('pfill').style.width = ((cur+1)/slides.length*100) + '%';
+  document.getElementById('notes-text').innerHTML = NOTES[cur] || '';
+  elapsed = 0; resetTimerBar();
+  if (playing) startTimer();
+}
+
+function startTimer() {
+  cancelAnimationFrame(timerRaf); clearTimeout(timer);
+  lastTs = performance.now();
+  const tick = (ts) => {
+    if (!playing) return;
+    elapsed += ts - lastTs; lastTs = ts;
+    document.getElementById('tfill').style.width = Math.min(elapsed/DURATION*100, 100) + '%';
+    if (elapsed >= DURATION) { nextSlide(); return; }
+    timerRaf = requestAnimationFrame(tick);
+  };
+  timerRaf = requestAnimationFrame(tick);
+}
+
+function resetTimerBar() { document.getElementById('tfill').style.width = '0%'; }
+
+function nextSlide() { if (cur < slides.length-1) showSlide(cur+1); else { playing = false; updatePlayBtn(); } }
+function prevSlide() { showSlide(cur-1); }
+
+function togglePlay() {
+  playing = !playing;
+  if (playing) { lastTs = performance.now(); startTimer(); }
+  else { cancelAnimationFrame(timerRaf); clearTimeout(timer); }
+  updatePlayBtn();
+}
+function updatePlayBtn() { document.getElementById('btn-play').textContent = playing ? '⏸ Pause' : '▶ Play'; }
+
+function toggleNotes() {
+  const p = document.getElementById('player');
+  const btn = document.getElementById('btn-notes');
+  p.classList.toggle('notes-open');
+  btn.classList.toggle('active');
+}
+
+function goFullscreen() { document.documentElement.requestFullscreen?.(); }
+
+function jumpTo(e) {
+  const rect = document.getElementById('track').getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  showSlide(Math.round(pct * (slides.length - 1)));
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'n' || e.key === 'N') nextSlide();
+  else if (e.key === 'ArrowLeft' || e.key === 'p' || e.key === 'P') prevSlide();
+  else if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+});
+
+showSlide(0);
+</script>
+</body>
+</html>

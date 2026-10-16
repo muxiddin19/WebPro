@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Week 6 Video Lecture — Fetch API</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0f172a;--ink:#1e293b;--mid:#334155;
+  --muted:#64748b;--light:#e2e8f0;--white:#fff;
+  --ac:#1a56db;--yel:#f7df1e;--yldk:#3a3000;
+  --lime:#22c55e;--cor:#ef4444;--ora:#f59e0b;
+  --code:#0d1b2e;
+}
+html,body{width:100%;height:100%;background:#000;color:var(--white);font-family:'Inter',sans-serif;overflow:hidden}
+
+/* ── player shell ── */
+#player{position:fixed;inset:0;display:flex;flex-direction:column;background:var(--navy)}
+
+/* progress bar */
+#prog-bar{height:4px;background:rgba(255,255,255,.12);flex-shrink:0}
+#prog-fill{height:100%;background:var(--yel);transition:width .4s linear;width:0}
+
+/* slide viewport */
+#viewport{flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 60px;opacity:0;transform:translateY(24px);transition:opacity .5s,transform .5s;pointer-events:none}
+.slide.active{opacity:1;transform:translateY(0);pointer-events:auto}
+.slide.out{opacity:0;transform:translateY(-24px)}
+
+/* slide content helpers */
+.badge{display:inline-block;background:var(--yel);color:var(--yldk);font-weight:700;font-size:12px;padding:4px 14px;border-radius:20px;letter-spacing:.08em;margin-bottom:20px}
+.slide-title{font-size:clamp(1.8rem,4vw,3.2rem);font-weight:800;text-align:center;line-height:1.2;margin-bottom:16px}
+.slide-sub{color:var(--muted);font-size:clamp(14px,2vw,18px);text-align:center;max-width:680px;line-height:1.6}
+
+.reveal-items{display:flex;flex-direction:column;gap:14px;margin-top:24px;width:100%;max-width:720px}
+.ri{display:flex;align-items:center;gap:16px;background:var(--ink);border-radius:12px;padding:14px 20px;opacity:0;transform:translateX(-20px);transition:all .4s}
+.ri.show{opacity:1;transform:none}
+.ri .icon{font-size:1.8rem;flex-shrink:0}
+.ri .text{font-size:15px;color:var(--light);line-height:1.5}
+.ri .text strong{color:var(--yel)}
+
+/* comparison panels */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:24px;max-width:900px;width:100%}
+.panel{background:var(--ink);border-radius:14px;padding:20px 24px;border:2px solid rgba(255,255,255,.08)}
+.panel.highlight{border-color:var(--yel)}
+.panel h3{font-size:14px;font-weight:700;margin-bottom:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.panel.highlight h3{color:var(--yel)}
+.panel pre{font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.8;color:#c8daf8;background:none;overflow:visible;white-space:pre-wrap}
+
+/* code reveal */
+.code-box{background:var(--code);border-radius:14px;padding:24px 28px;max-width:700px;width:100%;border:1px solid rgba(255,255,255,.08);margin-top:20px}
+.code-box pre{font-family:'JetBrains Mono',monospace;font-size:14px;line-height:2;color:#c8daf8;white-space:pre-wrap}
+.code-line{display:block;opacity:0;transform:translateX(-12px);transition:all .35s}
+.code-line.show{opacity:1;transform:none}
+.hl-kw{color:#c792ea}.hl-fn{color:#82aaff}.hl-str{color:#c3e88d}.hl-cm{color:#546e7a;font-style:italic}.hl-kw2{color:#f7df1e}
+
+/* state boxes */
+.states{display:flex;gap:16px;margin-top:24px;max-width:720px;width:100%}
+.state{flex:1;border-radius:12px;padding:18px;text-align:center;opacity:0;transform:scale(.9);transition:all .4s;border:2px solid transparent}
+.state.show{opacity:1;transform:none}
+.state.s-pend{background:#1c1400;border-color:var(--ora)}
+.state.s-full{background:#052e16;border-color:var(--lime)}
+.state.s-rej{background:#200d0d;border-color:var(--cor)}
+.state .s-icon{font-size:2.4rem;margin-bottom:8px}
+.state h4{font-size:15px;font-weight:700;margin-bottom:6px}
+.state p{font-size:13px;color:var(--muted);line-height:1.5}
+.state.s-pend h4{color:var(--ora)}
+.state.s-full h4{color:var(--lime)}
+.state.s-rej  h4{color:var(--cor)}
+
+/* journey diagram */
+.journey{display:flex;align-items:center;gap:0;max-width:800px;width:100%;margin-top:28px}
+.j-node{background:var(--ink);border:2px solid var(--ac);border-radius:12px;padding:14px 18px;text-align:center;min-width:110px;font-size:13px;font-weight:600;color:#93c5fd;opacity:0;transform:scale(.8);transition:all .4s}
+.j-node.yel{border-color:var(--yel);color:var(--yel)}
+.j-node.grn{border-color:var(--lime);color:#86efac}
+.j-node.show{opacity:1;transform:none}
+.j-arr{flex:1;height:2px;background:rgba(255,255,255,.15);position:relative;overflow:hidden;opacity:0;transition:opacity .3s}
+.j-arr.show{opacity:1}
+.j-arr .j-dot{position:absolute;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--ac);left:0}
+.j-arr.go .j-dot{animation:dot-travel .9s ease forwards}
+.j-arr.back .j-dot{animation:dot-back .9s ease forwards;background:var(--lime)}
+@keyframes dot-travel{from{left:0}to{left:calc(100% - 10px)}}
+@keyframes dot-back{from{left:calc(100% - 10px)}to{left:0}}
+.j-lbl{display:block;font-size:10px;color:var(--muted);margin-top:5px;text-align:center}
+
+/* analogy card */
+.analogy-card{background:var(--ink);border-left:5px solid var(--yel);border-radius:0 14px 14px 0;padding:20px 24px;max-width:700px;width:100%;margin-top:20px;opacity:0;transform:translateY(12px);transition:all .4s}
+.analogy-card.show{opacity:1;transform:none}
+.analogy-card .anl{font-size:13px;font-weight:700;color:var(--yel);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+.analogy-card p{font-size:15px;color:var(--light);line-height:1.7}
+
+/* big number */
+.big-num{font-size:clamp(5rem,15vw,9rem);font-weight:800;color:var(--yel);line-height:1;margin-bottom:8px}
+.big-label{font-size:clamp(1rem,3vw,1.6rem);color:var(--muted);text-align:center}
+
+/* checklist */
+.cl{list-style:none;display:flex;flex-direction:column;gap:10px;max-width:600px;width:100%;margin-top:20px}
+.cl li{display:flex;align-items:flex-start;gap:12px;background:var(--ink);border-radius:10px;padding:11px 16px;font-size:14.5px;color:var(--light);opacity:0;transform:translateX(-16px);transition:all .35s}
+.cl li.show{opacity:1;transform:none}
+.cl li::before{content:'→';color:var(--yel);font-weight:700;flex-shrink:0;margin-top:1px}
+
+/* live demo mockup */
+.mockup{background:var(--ink);border-radius:16px;padding:24px 28px;max-width:480px;width:100%;margin-top:24px;border:1px solid rgba(255,255,255,.1)}
+.mockup-btn{background:var(--yel);color:var(--yldk);border:none;padding:10px 24px;border-radius:8px;font-size:15px;font-weight:700;cursor:default;margin-bottom:14px;font-family:inherit}
+.mockup-status{font-size:13px;color:var(--muted);min-height:20px;margin-bottom:12px;font-family:'JetBrains Mono',monospace}
+.mockup-output{background:var(--code);border-radius:10px;padding:14px 16px;min-height:80px;transition:opacity .4s}
+.mockup-output .setup{color:var(--muted);font-size:13px;margin-bottom:6px}
+.mockup-output .punch{color:var(--yel);font-size:17px;font-weight:600}
+
+/* gotcha box */
+.gotcha{background:#1a0505;border:2px solid var(--cor);border-radius:14px;padding:22px 26px;max-width:700px;width:100%;margin-top:20px;opacity:0;transform:scale(.95);transition:all .4s}
+.gotcha.show{opacity:1;transform:none}
+.gotcha h3{color:var(--cor);font-size:1.1rem;font-weight:700;margin-bottom:12px}
+.gotcha p{font-size:14.5px;color:var(--light);line-height:1.7}
+.gotcha code{font-family:'JetBrains Mono',monospace;background:rgba(239,68,68,.15);padding:2px 6px;border-radius:4px;font-size:.9em;color:#fca5a5}
+
+/* controls bar */
+#controls{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:var(--ink);border-top:1px solid rgba(255,255,255,.06);flex-shrink:0;gap:12px}
+.ctrl-btn{background:rgba(255,255,255,.08);border:none;color:var(--light);padding:8px 18px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;transition:background .2s}
+.ctrl-btn:hover{background:rgba(255,255,255,.15)}
+.ctrl-btn.play{background:var(--ac);color:#fff;min-width:72px}
+.ctrl-btn.play:hover{background:#1648c7}
+#slide-counter{font-size:14px;color:var(--muted);font-family:'JetBrains Mono',monospace;min-width:60px;text-align:center}
+.notes-btn{background:rgba(255,255,255,.06);border:none;color:var(--muted);padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit}
+.notes-btn:hover{color:var(--light)}
+#notes-panel{position:fixed;bottom:64px;left:0;right:0;background:#0a0f1e;border-top:1px solid rgba(255,255,255,.1);padding:14px 32px;font-size:13.5px;color:#94a3b8;line-height:1.6;max-height:110px;overflow-y:auto;display:none;z-index:10}
+#notes-panel strong{color:#c8daf8}
+
+@media(max-width:700px){
+  .slide{padding:24px 24px}
+  .two-col{grid-template-columns:1fr;gap:12px}
+  .states{flex-direction:column}
+  .journey{flex-wrap:wrap;justify-content:center;gap:8px}
+  .j-arr{display:none}
+  #controls{padding:0 14px}
+}
+</style>
+</head>
+<body>
+
+<div id="player">
+  <!-- progress -->
+  <div id="prog-bar"><div id="prog-fill"></div></div>
+
+  <!-- slides viewport -->
+  <div id="viewport">
+
+    <!-- ─── S1: Title ─── -->
+    <div class="slide" data-notes="Welcome to Week 6! Today we learn one of the most important skills in modern web development: how to fetch data from the internet. Every website you use every day — YouTube, Instagram, weather apps — all use this exact technique.">
+      <div class="badge">WEEK 6 · FRIDAY</div>
+      <div class="slide-title">Fetch API &amp;<br>Async / Await</div>
+      <div class="slide-sub" style="margin-top:12px">Web Programming K0126002 · Gachon University<br>Dr. Mukhiddin Toshpulatov</div>
+      <div style="margin-top:32px;font-size:14px;color:var(--muted)">By the end of this lecture, you will be able to load <strong style="color:var(--yel)">real data from the internet</strong> into your webpage.</div>
+    </div>
+
+    <!-- ─── S2: The problem ─── -->
+    <div class="slide" data-notes="Let's start with a question. Have you ever noticed that when you search on Google, the results appear without the page reloading? Or when you scroll on Instagram, new posts appear without a white flash? That's fetch(). The old way: reload the whole page. The new way: only update one part.">
+      <div class="badge">THE PROBLEM FETCH() SOLVES</div>
+      <div class="slide-title" style="font-size:clamp(1.5rem,3.5vw,2.4rem)">What problem does fetch() solve?</div>
+      <div class="reveal-items">
+        <div class="ri" data-delay="300"><div class="icon">😫</div><div class="text"><strong>Old way:</strong> To load new data, the ENTIRE page had to reload. Every time. Slow, annoying, white flash.</div></div>
+        <div class="ri" data-delay="700"><div class="icon">✨</div><div class="text"><strong>New way (fetch):</strong> Load data from the internet <strong>in the background</strong>. Only update the part that changed. Page never reloads.</div></div>
+        <div class="ri" data-delay="1100"><div class="icon">🌍</div><div class="text"><strong>You see this everywhere:</strong> Google Maps, YouTube comments, weather widgets, chat apps. All use fetch().</div></div>
+        <div class="ri" data-delay="1500"><div class="icon">💡</div><div class="text"><strong>Technical name:</strong> AJAX — Asynchronous JavaScript And XML (though today we use JSON, not XML).</div></div>
+      </div>
+    </div>
+
+    <!-- ─── S3: The journey ─── -->
+    <div class="slide" data-notes="Let's trace what happens when your browser fetches data. Step 1: your JavaScript sends a request. Step 2: it travels across the internet. Step 3: a server somewhere finds the data. Step 4: it sends back JSON text. Step 5: your JavaScript updates the page. The key point: while steps 2-4 are happening, your PAGE keeps working. You can still scroll, click buttons, watch animations. That's what 'asynchronous' means.">
+      <div class="badge">THE REQUEST JOURNEY</div>
+      <div class="slide-title" style="font-size:clamp(1.5rem,3.5vw,2.2rem)">What happens when you call fetch()?</div>
+      <div class="journey" id="journey">
+        <div class="j-node yel" id="jn0">YOUR<br>BROWSER<br><span style="font-size:10px;color:var(--muted)">writes fetch()</span></div>
+        <div class="j-arr" id="ja1"><div class="j-dot"></div><span class="j-lbl">request →</span></div>
+        <div class="j-node" id="jn1">INTERNET<br>🌐</div>
+        <div class="j-arr" id="ja2"><div class="j-dot"></div><span class="j-lbl">travels →</span></div>
+        <div class="j-node grn" id="jn2">SERVER<br>🗃️<br><span style="font-size:10px">has the data</span></div>
+        <div class="j-arr" id="ja3"><div class="j-dot"></div><span class="j-lbl">← JSON back</span></div>
+        <div class="j-node yel" id="jn3">YOUR<br>PAGE<br><span style="font-size:10px;color:var(--muted)">updates! ✓</span></div>
+      </div>
+      <div class="analogy-card" id="analogy3" style="margin-top:20px">
+        <div class="anl">Analogy</div>
+        <p>Like sending a text message 📱 — you hit send and put your phone down. You don't stand frozen waiting for a reply. When the reply arrives, your phone buzzes. <code style="background:rgba(247,223,30,.1);color:var(--yel);font-family:JetBrains Mono,monospace;font-size:.9em">await</code> is the "waiting for a reply" part.</p>
+      </div>
+    </div>
+
+    <!-- ─── S4: fetch() code ─── -->
+    <div class="slide" data-notes="Here is the actual code. The simplest possible fetch. We call fetch() with a URL string — just a web address. That one line sends the HTTP request. Underneath, step by step: line 1, we declare an async function — that word async is required when we use await. Line 2, await fetch(url) — send the request and wait for the response. res is the response object. Line 3, await res.json() — the response body is text, so we parse it as JSON. We need another await because parsing is also asynchronous. Line 4 and 5 — just normal DOM work we already know from Week 4.">
+      <div class="badge">THE CODE</div>
+      <div class="slide-title" style="font-size:clamp(1.4rem,3vw,2rem)">fetch() — the complete pattern</div>
+      <div class="code-box">
+        <pre><span class="code-line" id="cl0" data-delay="300"><span class="hl-kw">async function</span> <span class="hl-fn">loadJoke</span>() {</span>
+<span class="code-line" id="cl1" data-delay="800">  <span class="hl-kw">const</span> res  <span class="hl-kw">=</span> <span class="hl-kw2">await</span> <span class="hl-fn">fetch</span>(<span class="hl-str">'https://official-joke-api.appspot.com/random_joke'</span>);</span>
+<span class="code-line" id="cl2" data-delay="1400">  <span class="hl-kw">const</span> data <span class="hl-kw">=</span> <span class="hl-kw2">await</span> res.<span class="hl-fn">json</span>();</span>
+<span class="code-line" id="cl3" data-delay="2000">  document.<span class="hl-fn">getElementById</span>(<span class="hl-str">'setup'</span>).textContent <span class="hl-kw">=</span> data.setup;</span>
+<span class="code-line" id="cl4" data-delay="2600">  document.<span class="hl-fn">getElementById</span>(<span class="hl-str">'punch'</span>).textContent <span class="hl-kw">=</span> data.punchline;</span>
+<span class="code-line" id="cl5" data-delay="3000">}</span></pre>
+      </div>
+      <div style="margin-top:16px;color:var(--muted);font-size:13.5px;text-align:center;max-width:680px">
+        5 lines. That is all you need to load data from the internet and display it.
+      </div>
+    </div>
+
+    <!-- ─── S5: Promise ─── -->
+    <div class="slide" data-notes="Now let's understand Promises. When you call fetch(), it does NOT return the data. It returns a Promise. What is a Promise? Think of ordering coffee. You order, the barista gives you a number — that number is the Promise. It has three possible states: Pending means it's being prepared. Fulfilled means the coffee is ready, here is your data. Rejected means something went wrong — they're out of coffee, or in our case, the server is down.">
+      <div class="badge">PROMISES</div>
+      <div class="slide-title" style="font-size:clamp(1.4rem,3vw,2rem)">fetch() returns a Promise 🎫</div>
+      <div class="analogy-card show" style="margin-bottom:20px">
+        <div class="anl">☕ Café analogy</div>
+        <p>Order coffee → get a paper cup with your name (Promise → Pending). 2 minutes later: coffee ready (Promise → Fulfilled) OR "Sorry, out of oat milk" (Promise → Rejected).</p>
+      </div>
+      <div class="states">
+        <div class="state s-pend" data-delay="300"><div class="s-icon">⏳</div><h4>Pending</h4><p>Request is in flight. Waiting for the server to respond.</p></div>
+        <div class="state s-full" data-delay="700"><div class="s-icon">✅</div><h4>Fulfilled</h4><p>Success! Server sent data. Your .then() or await runs now.</p></div>
+        <div class="state s-rej"  data-delay="1100"><div class="s-icon">❌</div><h4>Rejected</h4><p>Something failed. Your .catch() or try/catch runs.</p></div>
+      </div>
+    </div>
+
+    <!-- ─── S6: async/await keywords ─── -->
+    <div class="slide" data-notes="The two keywords you must always remember. Number one: async before the function. This tells JavaScript: this function uses the internet and is allowed to use await. Without this, await causes an error. Number two: await before every Promise. This tells JavaScript: stop here and wait for this result before continuing — but only pause THIS function, not the whole page. These two little words are all you need.">
+      <div class="badge">THE TWO KEYWORDS</div>
+      <div class="reveal-items" style="max-width:760px;margin-top:0">
+        <div class="ri show" style="background:rgba(247,223,30,.08);border:2px solid var(--yel)">
+          <div class="icon" style="font-size:2.5rem;min-width:80px;text-align:center"><code style="font-family:JetBrains Mono,monospace;color:var(--yel);font-size:1.5rem">async</code></div>
+          <div class="text">
+            <strong>Put this BEFORE the function name</strong><br>
+            <code style="font-family:JetBrains Mono,monospace;color:#c8daf8;font-size:13px">async function myFn() { ... }</code><br>
+            Meaning: "This function uses the internet. It can wait for Promises."
+          </div>
+        </div>
+        <div class="ri show" style="background:rgba(26,86,219,.12);border:2px solid var(--ac)">
+          <div class="icon" style="font-size:2.5rem;min-width:80px;text-align:center"><code style="font-family:JetBrains Mono,monospace;color:#82aaff;font-size:1.5rem">await</code></div>
+          <div class="text">
+            <strong>Put this BEFORE every Promise</strong><br>
+            <code style="font-family:JetBrains Mono,monospace;color:#c8daf8;font-size:13px">const res = await fetch(url);</code><br>
+            Meaning: "Wait here until this Promise resolves. But let the page keep running."
+          </div>
+        </div>
+        <div class="ri" data-delay="400" style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3)">
+          <div class="icon">📌</div>
+          <div class="text">
+            <strong>Rule:</strong> You can only use <code style="font-family:JetBrains Mono,monospace;color:var(--yel)">await</code> INSIDE an <code style="font-family:JetBrains Mono,monospace;color:var(--yel)">async</code> function. One requires the other.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── S7: .then vs async/await ─── -->
+    <div class="slide" data-notes="There are two styles for writing the same thing. The old style uses .then() chains. The new style uses async/await. Both do EXACTLY the same thing. Under the hood they are identical — just different syntax. The async/await style reads more like normal code from top to bottom, which is why most modern code uses it. You should know both, but prefer async/await for writing.">
+      <div class="badge">.then() vs async/await</div>
+      <div class="slide-title" style="font-size:clamp(1.2rem,2.5vw,1.7rem)">Two ways to write the same thing</div>
+      <div class="two-col">
+        <div class="panel">
+          <h3>Old style — .then() chains</h3>
+          <pre><span class="hl-fn">fetch</span>(<span class="hl-str">'/api/joke'</span>)
+  .<span class="hl-fn">then</span>(res <span class="hl-kw">=></span> res.<span class="hl-fn">json</span>())
+  .<span class="hl-fn">then</span>(data <span class="hl-kw">=></span> {
+    show(data);
+  })
+  .<span class="hl-fn">catch</span>(err <span class="hl-kw">=></span> {
+    error(err);
+  });</pre>
+        </div>
+        <div class="panel highlight">
+          <h3>✨ New style — async/await</h3>
+          <pre><span class="hl-kw">async function</span> <span class="hl-fn">getJoke</span>() {
+  <span class="hl-kw">const</span> res  <span class="hl-kw">=</span> <span class="hl-kw2">await</span> <span class="hl-fn">fetch</span>(<span class="hl-str">'/api/joke'</span>);
+  <span class="hl-kw">const</span> data <span class="hl-kw">=</span> <span class="hl-kw2">await</span> res.<span class="hl-fn">json</span>();
+  <span class="hl-fn">show</span>(data);
+}</pre>
+        </div>
+      </div>
+      <div style="margin-top:18px;background:rgba(247,223,30,.08);border-radius:10px;padding:12px 20px;max-width:880px;width:100%;font-size:14px;color:var(--light)">
+        💡 They are <strong style="color:var(--yel)">100% identical</strong> in behaviour. async/await is just easier to read — like reading a recipe from top to bottom instead of following a chain of instructions.
+      </div>
+    </div>
+
+    <!-- ─── S8: The gotcha ─── -->
+    <div class="slide" data-notes="Here is the most important thing to remember in this whole lecture — and the thing that confuses even experienced developers. fetch() only throws an error when there is NO internet at all. If the server says 404 Not Found, or 500 Server Error, fetch() does NOT throw. It STILL resolves successfully. So you must check res.ok yourself. res.ok is true for HTTP status codes 200 to 299. For anything else — 404, 500 — it is false, and you must throw your own error.">
+      <div class="badge">⚠️ IMPORTANT GOTCHA</div>
+      <div class="slide-title" style="font-size:clamp(1.4rem,3vw,2rem)">404 does NOT throw an error!</div>
+      <div class="gotcha show">
+        <h3>⚠️ The most common beginner mistake</h3>
+        <p>fetch() only REJECTS (throws) when your <strong>internet is completely down</strong>.<br>
+        If the server returns 404 or 500, fetch() still <strong style="color:#fca5a5">RESOLVES as success</strong>.<br>
+        You MUST check <code>response.ok</code> yourself and throw your own error.</p>
+      </div>
+      <div class="code-box" style="margin-top:16px">
+        <pre><span class="code-line show"><span class="hl-kw">const</span> res <span class="hl-kw">=</span> <span class="hl-kw2">await</span> <span class="hl-fn">fetch</span>(url);</span>
+<span class="code-line show" style="opacity:.4;transition:none"><span class="hl-cm">// ← Always add this check! Never skip it.</span></span>
+<span class="code-line show"><span class="hl-kw">if</span> (!res.ok) <span class="hl-kw">throw new</span> <span class="hl-fn">Error</span>(<span class="hl-str">`HTTP ${res.status}`</span>);
+<span class="hl-cm">          ↑ true for 200-299    ↑ e.g. "HTTP 404"</span></pre>
+      </div>
+    </div>
+
+    <!-- ─── S9: try/catch/finally ─── -->
+    <div class="slide" data-notes="Now let's put it all together with proper error handling. try — this is where you write the main code. catch — this runs if anything goes wrong inside try: network error, our !res.ok throw, JSON parsing error. finally — this ALWAYS runs, no matter what. Success or failure. This is perfect for hiding loading spinners.">
+      <div class="badge">ERROR HANDLING</div>
+      <div class="slide-title" style="font-size:clamp(1.3rem,2.8vw,1.8rem)">try / catch / finally</div>
+      <div class="code-box" style="max-width:780px">
+        <pre><span class="code-line" data-delay="200"><span class="hl-kw">async function</span> <span class="hl-fn">loadData</span>(url) {</span>
+<span class="code-line" data-delay="500">  <span class="hl-fn">showSpinner</span>();          <span class="hl-cm">// show loading first</span></span>
+<span class="code-line" data-delay="800">  <span class="hl-kw">try</span> {                     <span class="hl-cm">// attempt the main code</span></span>
+<span class="code-line" data-delay="1100">    <span class="hl-kw">const</span> res  <span class="hl-kw">=</span> <span class="hl-kw2">await</span> <span class="hl-fn">fetch</span>(url);</span>
+<span class="code-line" data-delay="1400">    <span class="hl-kw">if</span> (!res.ok) <span class="hl-kw">throw new</span> <span class="hl-fn">Error</span>(<span class="hl-str">`HTTP ${res.status}`</span>);</span>
+<span class="code-line" data-delay="1700">    <span class="hl-kw">const</span> data <span class="hl-kw">=</span> <span class="hl-kw2">await</span> res.<span class="hl-fn">json</span>();</span>
+<span class="code-line" data-delay="2000">    <span class="hl-fn">render</span>(data);           <span class="hl-cm">// success! show the data</span></span>
+<span class="code-line" data-delay="2300">  } <span class="hl-kw">catch</span> (err) {          <span class="hl-cm">// something went wrong</span></span>
+<span class="code-line" data-delay="2600">    <span class="hl-fn">showError</span>(err.message);</span>
+<span class="code-line" data-delay="2900">  } <span class="hl-kw">finally</span> {             <span class="hl-cm">// ALWAYS runs</span></span>
+<span class="code-line" data-delay="3200">    <span class="hl-fn">hideSpinner</span>();          <span class="hl-cm">// hide loading either way</span></span>
+<span class="code-line" data-delay="3500">  }</span>
+<span class="code-line" data-delay="3700">}</span></pre>
+      </div>
+    </div>
+
+    <!-- ─── S10: See it work ─── -->
+    <div class="slide" data-notes="Here is a live demonstration. Watch what happens when we click the button. First, 'Loading...' appears. Then the data arrives and we show the joke. If you tried the Study Guide earlier, you've already seen this running. This is exactly the code from the previous slide, running for real.">
+      <div class="badge">DEMO</div>
+      <div class="slide-title" style="font-size:clamp(1.4rem,3vw,2rem)">See it in action</div>
+      <div class="mockup" id="demoMockup">
+        <button class="mockup-btn" onclick="runLiveDemo()">Load a Joke</button>
+        <div class="mockup-status" id="demoStatus"></div>
+        <div class="mockup-output" id="demoOutput">
+          <div class="setup" id="demoSetup" style="color:var(--muted)">Click the button above to fetch a joke from the internet.</div>
+          <div class="punch" id="demoPunch"></div>
+        </div>
+      </div>
+      <div style="margin-top:20px;font-size:13.5px;color:var(--muted);text-align:center;max-width:500px">
+        The data comes from <code style="font-family:JetBrains Mono,monospace;color:#c8daf8;font-size:.9em">official-joke-api.appspot.com</code> — a real server on the internet.
+      </div>
+    </div>
+
+    <!-- ─── S11: Summary ─── -->
+    <div class="slide" data-notes="Let's summarize what we learned today. Six things to remember. First: fetch of url sends an HTTP GET request and returns a Promise. Second: await fetch(url) pauses the current function and waits for the response. Third: res.json() parses the response body — also needs await. Fourth: res.ok must be checked — fetch does not auto-throw on 404 or 500. Fifth: async before the function name is required to use await. Sixth: finally always runs — perfect for cleanup.">
+      <div class="badge">SUMMARY</div>
+      <div class="slide-title" style="font-size:clamp(1.4rem,3vw,2rem)">6 things to remember</div>
+      <ul class="cl">
+        <li data-delay="200"><code style="font-family:JetBrains Mono,monospace;color:var(--yel)">fetch(url)</code> — sends HTTP GET, returns a Promise immediately</li>
+        <li data-delay="500"><code style="font-family:JetBrains Mono,monospace;color:#82aaff">await</code> — pauses the function (NOT the page) until a Promise resolves</li>
+        <li data-delay="800"><code style="font-family:JetBrains Mono,monospace;color:#c3e88d">res.json()</code> — parses response body as JSON — also returns a Promise</li>
+        <li data-delay="1100"><code style="font-family:JetBrains Mono,monospace;color:#fca5a5">res.ok</code> — false for 404/500. You must check this — fetch() will NOT throw for you</li>
+        <li data-delay="1400"><code style="font-family:JetBrains Mono,monospace;color:#c792ea">async</code> — required before any function that uses await</li>
+        <li data-delay="1700"><code style="font-family:JetBrains Mono,monospace;color:#f59e0b">finally</code> — always runs after try or catch — use it to hide spinners</li>
+      </ul>
+    </div>
+
+    <!-- ─── S12: Assignment ─── -->
+    <div class="slide" data-notes="This week's assignment: build a Random Joke Fetcher. Here is what it needs. A button that loads a joke when clicked. Show 'Loading' while waiting. Display the setup and punchline separately in the DOM. Handle errors with a friendly message. Submit your GitHub Pages link. You already know everything you need. Good luck!">
+      <div class="badge">WEEK 6 ASSIGNMENT</div>
+      <div class="slide-title" style="font-size:clamp(1.4rem,3vw,2.2rem)">Build a Random Joke Fetcher</div>
+      <ul class="cl">
+        <li data-delay="200">A button that calls your <code style="font-family:JetBrains Mono,monospace;color:var(--yel)">loadJoke()</code> function when clicked</li>
+        <li data-delay="500">Show <strong>"Loading…"</strong> text while the request is in flight</li>
+        <li data-delay="800">Display the <strong>setup</strong> and <strong>punchline</strong> in separate elements</li>
+        <li data-delay="1100">Add <strong>error handling</strong> with a friendly error message</li>
+        <li data-delay="1400">Use the API: <code style="font-family:JetBrains Mono,monospace;color:#c8daf8;font-size:.9em">official-joke-api.appspot.com/random_joke</code></li>
+        <li data-delay="1700"><strong style="color:var(--ora)">Challenge:</strong> Add a loading spinner animation</li>
+        <li data-delay="2000"><strong style="color:var(--ora)">Extra credit:</strong> "Save Favourite" button with localStorage</li>
+      </ul>
+      <div style="margin-top:20px;background:rgba(247,223,30,.08);border-radius:10px;padding:12px 20px;font-size:14px;color:var(--light)">
+        Submit your GitHub Pages link via the Week 6 homework form.
+      </div>
+    </div>
+
+  </div><!-- /viewport -->
+
+  <!-- notes panel -->
+  <div id="notes-panel"></div>
+
+  <!-- controls -->
+  <div id="controls">
+    <button class="ctrl-btn" onclick="changeSlide(-1)">← Prev</button>
+    <button class="ctrl-btn play" id="playBtn" onclick="togglePlay()">▶ Play</button>
+    <button class="ctrl-btn" onclick="changeSlide(1)">Next →</button>
+    <span id="slide-counter">1 / 12</span>
+    <button class="notes-btn" onclick="toggleNotes()">📝 Notes</button>
+  </div>
+</div><!-- /player -->
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const progFill = document.getElementById('prog-fill');
+const counter  = document.getElementById('slide-counter');
+const playBtn  = document.getElementById('playBtn');
+const notesPanel = document.getElementById('notes-panel');
+let current = 0;
+let playing = false;
+let autoTimer = null;
+const SLIDE_DURATION = 9000; // ms per slide when auto-playing
+
+function activateSlide(idx) {
+  slides.forEach((s, i) => {
+    s.classList.remove('active', 'out');
+    if (i < idx) s.classList.add('out');
+  });
+  slides[idx].classList.add('active');
+  progFill.style.width = ((idx + 1) / slides.length * 100) + '%';
+  counter.textContent = (idx + 1) + ' / ' + slides.length;
+  notesPanel.textContent = slides[idx].dataset.notes || '';
+
+  // reveal animations
+  const slide = slides[idx];
+  slide.querySelectorAll('.ri[data-delay]').forEach(el => {
+    el.classList.remove('show');
+    setTimeout(() => el.classList.add('show'), parseInt(el.dataset.delay));
+  });
+  slide.querySelectorAll('.code-line[data-delay]').forEach(el => {
+    el.classList.remove('show');
+    setTimeout(() => el.classList.add('show'), parseInt(el.dataset.delay));
+  });
+  slide.querySelectorAll('.state[data-delay]').forEach(el => {
+    el.classList.remove('show');
+    setTimeout(() => el.classList.add('show'), parseInt(el.dataset.delay));
+  });
+  slide.querySelectorAll('.cl li[data-delay]').forEach(el => {
+    el.classList.remove('show');
+    setTimeout(() => el.classList.add('show'), parseInt(el.dataset.delay));
+  });
+
+  // journey animation (slide 3)
+  if (idx === 2) animateJourney();
+
+  // analogy3
+  const a3 = document.getElementById('analogy3');
+  if (a3) { a3.classList.remove('show'); setTimeout(() => a3.classList.add('show'), 2000); }
+}
+
+function animateJourney() {
+  const nodes = ['jn0','jn1','jn2','jn3'];
+  const arrows = ['ja1','ja2','ja3'];
+  nodes.forEach(id => { const el=document.getElementById(id); if(el){el.classList.remove('show');} });
+  arrows.forEach(id => { const el=document.getElementById(id); if(el){el.classList.remove('show','go','back');} });
+  const steps = [
+    () => document.getElementById('jn0').classList.add('show'),
+    () => { document.getElementById('ja1').classList.add('show'); setTimeout(()=>document.getElementById('ja1').classList.add('go'),50); document.getElementById('jn1').classList.add('show'); },
+    () => { document.getElementById('ja2').classList.add('show'); setTimeout(()=>document.getElementById('ja2').classList.add('go'),50); document.getElementById('jn2').classList.add('show'); },
+    () => { document.getElementById('ja3').classList.add('show'); setTimeout(()=>document.getElementById('ja3').classList.add('back'),50); document.getElementById('jn3').classList.add('show'); },
+  ];
+  steps.forEach((fn, i) => setTimeout(fn, 400 + i * 900));
+}
+
+function changeSlide(dir) {
+  const next = Math.max(0, Math.min(slides.length - 1, current + dir));
+  if (next === current) return;
+  current = next;
+  activateSlide(current);
+  if (playing) resetAutoTimer();
+}
+
+function togglePlay() {
+  playing = !playing;
+  playBtn.textContent = playing ? '⏸ Pause' : '▶ Play';
+  if (playing) { resetAutoTimer(); } else { clearTimeout(autoTimer); }
+}
+
+function resetAutoTimer() {
+  clearTimeout(autoTimer);
+  if (!playing) return;
+  autoTimer = setTimeout(() => {
+    if (current < slides.length - 1) { changeSlide(1); }
+    else { playing = false; playBtn.textContent = '▶ Play'; }
+  }, SLIDE_DURATION);
+}
+
+function toggleNotes() {
+  notesPanel.style.display = notesPanel.style.display === 'block' ? 'none' : 'block';
+}
+
+// keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); changeSlide(1); }
+  if (e.key === 'ArrowLeft') changeSlide(-1);
+  if (e.key === 'p' || e.key === 'P') togglePlay();
+  if (e.key === 'n' || e.key === 'N') toggleNotes();
+});
+
+// live demo on slide 10
+const FB_JOKE = { setup: "Why do programmers prefer dark mode?", punchline: "Because light attracts bugs! 🐛" };
+async function runLiveDemo() {
+  document.getElementById('demoStatus').textContent = 'Loading…';
+  document.getElementById('demoSetup').textContent = '';
+  document.getElementById('demoPunch').textContent = '';
+  try {
+    const res = await fetch('https://official-joke-api.appspot.com/random_joke');
+    const d = res.ok ? await res.json() : FB_JOKE;
+    document.getElementById('demoSetup').textContent = d.setup;
+    document.getElementById('demoPunch').textContent = d.punchline;
+    document.getElementById('demoStatus').textContent = '✓ Fetched from the internet!';
+  } catch(e) {
+    document.getElementById('demoSetup').textContent = FB_JOKE.setup;
+    document.getElementById('demoPunch').textContent = FB_JOKE.punchline;
+    document.getElementById('demoStatus').textContent = '(offline demo)';
+  }
+}
+
+// init
+activateSlide(0);
+</script>
+</body>
+</html>
