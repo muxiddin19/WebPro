@@ -16,7 +16,7 @@ same materials.
 
 **Practical tasks:**
 
-***Deployed page:**
+**Deployed page:**
 https://muxiddin19.github.io/web_pro/
 
 **Github link:**
