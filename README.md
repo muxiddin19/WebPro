@@ -16,10 +16,10 @@ same materials.
 
 **Practical tasks:**
 
-**Deployed page:**
+-- **Deployed page:**
 https://muxiddin19.github.io/web_pro/
 
-**Github link:**
+-- **Github link:**
 https://github.com/muxiddin19/web_pro/tree/main
 
 
