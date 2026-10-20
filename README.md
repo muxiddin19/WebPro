@@ -14,7 +14,16 @@ same materials.
 
 **Course page:** https://muxiddin19.github.io/WebPro/
 
+** Practical tasks:** 
+Deployed page:
+https://muxiddin19.github.io/web_pro/
+Github link:
+https://github.com/muxiddin19/web_pro/tree/main
+
+
 **Personal page:** https://muxiddin19.github.io/
+
+
 
 ---
 
