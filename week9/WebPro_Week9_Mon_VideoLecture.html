@@ -1,0 +1,680 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Git &amp; Version Control — Week 9 Video Lecture</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+:root {
+  --dark:#0f172a;--navy:#1e3a5f;--blue:#1a73e8;--teal:#0891b2;
+  --green:#16a34a;--red:#dc2626;--amber:#d97706;
+  --git:#f05032;--gitl:rgba(240,80,50,.15);
+  --jsyel:#f7df1e;--text:#f1f5f9;--sub:#94a3b8;--bdr:rgba(255,255,255,.12);
+  --code-bg:#0d1117;--code-txt:#e6edf3;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;font-family:Inter,sans-serif;background:#000}
+
+/* ── PLAYER SHELL ── */
+#player{display:flex;flex-direction:column;width:100%;height:100vh}
+#player.notes-open{flex-direction:row}
+#slide-area{flex:1;position:relative;overflow:hidden}
+#player.notes-open #slide-area{flex:0 0 65%}
+
+/* ── SLIDES ── */
+.slide{display:none;position:absolute;inset:0;padding:0}
+.slide.active{display:flex;flex-direction:column}
+
+/* Chapter tag */
+.chapter-tag{position:absolute;top:20px;right:24px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,.1);color:var(--sub)}
+
+/* Title slide */
+.s-title{background:var(--dark);align-items:center;justify-content:center;text-align:center}
+.s-title .big-badge{font-size:13px;font-weight:700;letter-spacing:.12em;background:var(--git);color:#fff;padding:6px 16px;border-radius:20px;margin-bottom:28px;text-transform:uppercase}
+.s-title h1{font-size:42px;font-weight:800;color:var(--text);line-height:1.15;margin-bottom:12px}
+.s-title .sub{font-size:20px;color:var(--sub);margin-bottom:40px}
+.s-title .meta{font-size:14px;color:#475569}
+
+/* Chapter divider */
+.s-chapter{justify-content:center;align-items:center;text-align:center}
+.s-chapter .ch-num{font-size:13px;font-weight:600;letter-spacing:.12em;color:var(--sub);margin-bottom:12px}
+.s-chapter h2{font-size:36px;font-weight:800;color:var(--text);line-height:1.2}
+.s-chapter p{font-size:16px;color:var(--sub);margin-top:12px}
+
+/* Content slides */
+.s-content{padding:40px 52px}
+.s-content.dark-bg{background:var(--dark);color:var(--text)}
+.s-content.navy-bg{background:var(--navy);color:var(--text)}
+.s-content.code-bg{background:#0a0e1a;color:var(--text)}
+.s-content .slide-title{font-size:26px;font-weight:700;margin-bottom:8px}
+.s-content .slide-sub{font-size:15px;color:var(--sub);margin-bottom:24px}
+
+/* Analogy card */
+.analogy{background:var(--gitl);border-left:4px solid var(--git);padding:14px 16px;border-radius:0 8px 8px 0;margin-bottom:20px;font-size:15px;line-height:1.6}
+.analogy strong{color:var(--git)}
+
+/* Code block */
+.code-box{background:var(--code-bg);border-radius:10px;padding:20px 22px;font-family:'Courier New',monospace;font-size:14px;line-height:1.8;color:var(--code-txt);overflow-x:auto;position:relative}
+.code-box .cm{color:#8b949e}
+.code-box .ck{color:#ff7b72}
+.code-box .cs{color:#a5d6ff}
+.code-box .cn{color:#79c0ff}
+.code-box .cf{color:#d2a8ff}
+.code-box .cv{color:#ffa657}
+.code-box .cnum{color:#f8c555}
+.code-box .cg{color:#4ade80}
+
+/* Step-reveal lines */
+.code-box .line{opacity:.15;transition:opacity .35s;display:block}
+.code-box .line.show{opacity:1}
+.code-box .line.hl{background:rgba(26,115,232,.18);border-radius:3px}
+
+/* Output box */
+.output-box{background:#1a2540;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:14px 18px;font-family:'Courier New',monospace;font-size:13px;color:#80ff90;margin-top:12px}
+.output-box .out-label{font-family:Inter,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#4ade80;margin-bottom:6px;font-weight:600}
+
+/* Columns */
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.cols3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+
+/* Info rows */
+.info-row{display:flex;align-items:flex-start;gap:14px;margin-bottom:16px}
+.info-dot{width:28px;height:28px;min-width:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.info-dot.blue{background:rgba(26,115,232,.25);color:#60a5fa}
+.info-dot.green{background:rgba(22,163,74,.25);color:#4ade80}
+.info-dot.red{background:rgba(220,38,38,.25);color:#f87171}
+.info-dot.amber{background:rgba(217,119,6,.25);color:#fbbf24}
+.info-dot.git{background:rgba(240,80,50,.25);color:#ff7b5e}
+.info-body{flex:1}
+.info-title{font-size:14px;font-weight:600;margin-bottom:2px}
+.info-desc{font-size:13px;color:var(--sub);line-height:1.5}
+
+/* Summary grid */
+.summary-item{background:rgba(255,255,255,.05);border:1px solid var(--bdr);border-radius:8px;padding:14px}
+.summary-item .s-icon{font-size:20px;margin-bottom:8px}
+.summary-item .s-title{font-size:13px;font-weight:700;color:var(--git);margin-bottom:4px;font-family:'Courier New',monospace}
+.summary-item .s-body{font-size:12px;color:var(--sub);line-height:1.5}
+
+/* State cards */
+.state-card{border-radius:10px;padding:16px;text-align:center}
+.state-card.working{background:rgba(22,163,74,.15);border:1px solid var(--green)}
+.state-card.broken{background:rgba(220,38,38,.15);border:1px solid var(--red)}
+.state-icon{font-size:26px;margin-bottom:8px}
+.state-name{font-size:15px;font-weight:700;margin-bottom:6px}
+.state-desc{font-size:12px;color:var(--sub);line-height:1.5}
+.state-card.working .state-name{color:#4ade80}
+.state-card.broken .state-name{color:#f87171}
+
+/* Area boxes for workflow diagram */
+.area-row{display:flex;align-items:center;justify-content:center;gap:0;margin:20px 0}
+.area-box{text-align:center;padding:14px 18px;border-radius:10px;border:2px solid;font-weight:600;font-size:13px;min-width:110px}
+.ab-work{background:rgba(124,58,237,.15);border-color:#a78bfa;color:#a78bfa}
+.ab-stage{background:rgba(217,119,6,.15);border-color:var(--amber);color:var(--amber)}
+.ab-repo{background:rgba(22,163,74,.15);border-color:var(--green);color:#4ade80}
+.ab-gh{background:var(--gitl);border-color:var(--git);color:#ff7b5e}
+.area-arrow{display:flex;flex-direction:column;align-items:center;padding:0 8px;margin-bottom:18px}
+.area-line{width:40px;height:2px;background:var(--bdr)}
+.area-cmd{font-family:'Courier New',monospace;font-size:10px;color:#60a5fa;margin-top:4px;white-space:nowrap}
+.area-label{font-size:11px;color:var(--sub);margin-top:4px}
+
+/* Branch diagram in code-bg style */
+.branch-box{background:#0d1117;border-radius:10px;padding:20px 24px;font-family:'Courier New',monospace;font-size:13px;line-height:2.2;color:var(--code-txt);overflow-x:auto}
+
+/* Warn box */
+.warn-box{background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.4);border-radius:8px;padding:14px 16px;font-size:14px;line-height:1.6}
+.warn-box .warn-head{font-weight:700;color:#f87171;margin-bottom:6px}
+
+/* Command grid (cheat sheet) */
+.cmd-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cmd-item{background:rgba(255,255,255,.05);border:1px solid var(--bdr);border-radius:8px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start}
+.cmd-name{font-family:'Courier New',monospace;font-size:13px;font-weight:700;color:var(--git);min-width:110px;margin-top:1px}
+.cmd-desc{font-size:12px;color:var(--sub);line-height:1.5}
+
+/* ── CONTROLS ── */
+.controls{background:#0a0a0a;border-top:1px solid #1e1e1e;padding:10px 20px;display:flex;align-items:center;gap:14px;flex-shrink:0}
+.btn-ctrl{background:#1e1e1e;border:none;color:#ccc;border-radius:6px;padding:7px 14px;font-size:13px;cursor:pointer;transition:background .15s}
+.btn-ctrl:hover{background:#2e2e2e}
+.btn-ctrl.active{background:var(--blue);color:#fff}
+.slide-counter{font-size:13px;color:#555;margin:0 4px}
+.progress-track{flex:1;height:6px;background:#222;border-radius:3px;cursor:pointer}
+.progress-fill{height:6px;background:var(--git);border-radius:3px;transition:width .4s}
+
+/* ── NOTES PANEL ── */
+#notes-panel{display:none;flex:1;background:#0e1219;border-left:1px solid #1e2432;overflow-y:auto;padding:32px 28px}
+#player.notes-open #notes-panel{display:block}
+#notes-panel h3{font-size:14px;font-weight:700;color:var(--sub);letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px}
+#notes-text{font-size:15px;color:#c9d1d9;line-height:1.8}
+#notes-text p{margin-bottom:12px}
+#notes-text strong{color:var(--text)}
+</style>
+</head>
+<body>
+
+<div id="player">
+  <div id="slide-area">
+
+    <!-- S1: Title -->
+    <div class="slide s-title active" style="background:linear-gradient(135deg,#0f172a 0%,#1a2040 60%,#2a1a10 100%)">
+      <div class="big-badge">Web Programming · Week 9 · Monday · Oct 27, 2026</div>
+      <h1>Git &amp; Version Control</h1>
+      <p class="sub">Track · Branch · Collaborate · Undo</p>
+      <p class="meta">Gachon University · K0126002 · Fall 2026</p>
+    </div>
+
+    <!-- S2: The Problem -->
+    <div class="slide s-content dark-bg">
+      <div class="chapter-tag">The Problem</div>
+      <div class="slide-title">Have you ever done this?</div>
+      <div class="slide-sub">Be honest — we all have</div>
+      <div class="code-box">
+        <span class="line cm">project.html</span>
+        <span class="line cm">project_v2.html</span>
+        <span class="line cm">project_FINAL.html</span>
+        <span class="line cm">project_FINAL_v2.html</span>
+        <span class="line cm">project_FINAL_USE_THIS.html</span>
+        <span class="line cm">project_FINAL_USE_THIS_fixed.html</span>
+        <span class="line cm">project_ACTUALLY_FINAL.html</span>
+      </div>
+      <div class="warn-box" style="margin-top:20px">
+        <div class="warn-head">The problems with this approach</div>
+        Which one is actually the latest? Who changed what? What if two people edit the same file? How do you undo a change you made three weeks ago?
+      </div>
+      <div class="info-row" style="margin-top:20px">
+        <div class="info-dot git">!</div>
+        <div class="info-body">
+          <div class="info-title">There is a better way</div>
+          <div class="info-desc">Version control solves all of these problems — and it's the first tool every professional developer learns.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S3: What is Version Control -->
+    <div class="slide s-content dark-bg">
+      <div class="chapter-tag">Ch.1 · What is VCS</div>
+      <div class="slide-title">What is Version Control?</div>
+      <div class="slide-sub">Your code's permanent memory</div>
+      <div class="info-row">
+        <div class="info-dot blue">1</div>
+        <div class="info-body">
+          <div class="info-title">Tracks every change</div>
+          <div class="info-desc">Who changed what, when, and why — recorded permanently. Even changes from months ago.</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-dot green">2</div>
+        <div class="info-body">
+          <div class="info-title">Who changed what &amp; when</div>
+          <div class="info-desc">Every change is tagged with the author's name and a timestamp. No more guessing.</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-dot amber">3</div>
+        <div class="info-body">
+          <div class="info-title">Roll back to any point in time</div>
+          <div class="info-desc">Made a mistake? Break something? Instantly revert to any earlier state of your project.</div>
+        </div>
+      </div>
+      <div class="analogy" style="margin-top:8px">
+        <strong>Analogy:</strong> Version control is like "Track Changes" in Microsoft Word, but for your entire project — every file, every change, forever.
+      </div>
+    </div>
+
+    <!-- S4: Git vs GitHub -->
+    <div class="slide s-content dark-bg">
+      <div class="chapter-tag">Ch.1 · Git vs GitHub</div>
+      <div class="slide-title">Git vs GitHub</div>
+      <div class="slide-sub">They are NOT the same thing</div>
+      <div class="cols2">
+        <div style="background:rgba(240,80,50,.1);border:2px solid var(--git);border-radius:12px;padding:24px">
+          <div style="font-size:32px;margin-bottom:12px">🛠️</div>
+          <div style="font-size:18px;font-weight:700;color:var(--git);margin-bottom:8px">Git</div>
+          <div style="font-size:14px;color:var(--sub);line-height:1.7">
+            ● A tool installed on your computer<br>
+            ● Works completely offline<br>
+            ● Records changes in <code style="color:#a5d6ff">.git/</code> folder<br>
+            ● Command-line software<br>
+            ● Created 2005 by Linus Torvalds
+          </div>
+        </div>
+        <div style="background:rgba(26,115,232,.1);border:2px solid var(--blue);border-radius:12px;padding:24px">
+          <div style="font-size:32px;margin-bottom:12px">☁️</div>
+          <div style="font-size:18px;font-weight:700;color:#60a5fa;margin-bottom:8px">GitHub</div>
+          <div style="font-size:14px;color:var(--sub);line-height:1.7">
+            ● A website: github.com<br>
+            ● Hosts your Git history online<br>
+            ● Share projects with the world<br>
+            ● Pull Requests, Issues, Actions<br>
+            ● Owned by Microsoft (2018)
+          </div>
+        </div>
+      </div>
+      <div class="analogy" style="margin-top:20px">
+        <strong>Word vs Google Drive:</strong> Git is like Microsoft Word (runs on your machine). GitHub is like Google Drive (cloud storage where you share the files).
+      </div>
+    </div>
+
+    <!-- S5: The 3 Areas -->
+    <div class="slide s-content dark-bg">
+      <div class="chapter-tag">Ch.2 · Workflow</div>
+      <div class="slide-title">The 3 Areas of Git</div>
+      <div class="slide-sub">Understanding these 3 areas is the key to understanding Git</div>
+      <div class="area-row">
+        <div style="text-align:center">
+          <div class="area-box ab-work">Working<br>Directory</div>
+          <div style="font-size:11px;color:var(--sub);margin-top:6px">Your files on disk<br>Untracked changes</div>
+        </div>
+        <div class="area-arrow">
+          <div style="display:flex;align-items:center"><div class="area-line"></div><span style="color:var(--sub);font-size:11px">▶</span></div>
+          <div class="area-cmd">git add</div>
+        </div>
+        <div style="text-align:center">
+          <div class="area-box ab-stage">Staging<br>Area</div>
+          <div style="font-size:11px;color:var(--sub);margin-top:6px">Selected changes<br>ready to commit</div>
+        </div>
+        <div class="area-arrow">
+          <div style="display:flex;align-items:center"><div class="area-line"></div><span style="color:var(--sub);font-size:11px">▶</span></div>
+          <div class="area-cmd">git commit</div>
+        </div>
+        <div style="text-align:center">
+          <div class="area-box ab-repo">Local<br>Repository</div>
+          <div style="font-size:11px;color:var(--sub);margin-top:6px">Saved snapshots<br>Commit history</div>
+        </div>
+        <div class="area-arrow">
+          <div style="display:flex;align-items:center"><div class="area-line"></div><span style="color:var(--sub);font-size:11px">▶</span></div>
+          <div class="area-cmd">git push</div>
+        </div>
+        <div style="text-align:center">
+          <div class="area-box ab-gh">GitHub</div>
+          <div style="font-size:11px;color:var(--sub);margin-top:6px">Cloud backup<br>Collaboration</div>
+        </div>
+      </div>
+      <div class="analogy">
+        <strong>Moving house:</strong> Working Directory = items in your room · Staging Area = packed boxes · Repository = sealed boxes in storage · GitHub = backup warehouse in another city
+      </div>
+    </div>
+
+    <!-- S6: git init & git status -->
+    <div class="slide s-content code-bg">
+      <div class="chapter-tag">Ch.3 · Core Commands</div>
+      <div class="slide-title">Starting a Repository</div>
+      <div class="slide-sub"><code style="font-size:20px;color:#60a5fa">git init</code> and <code style="font-size:20px;color:#60a5fa">git status</code></div>
+      <div class="code-box">
+        <span class="line"><span class="cm"># Navigate to your project folder</span></span>
+        <span class="line"><span class="cv">$</span> <span class="cg">cd</span> ~/Desktop/my-project</span>
+        <span class="line"></span>
+        <span class="line"><span class="cm"># Initialize a new Git repository</span></span>
+        <span class="line"><span class="cv">$</span> <span class="cg">git init</span></span>
+        <span class="line"><span class="cg">Initialized empty Git repository in .../my-project/.git/</span></span>
+        <span class="line"></span>
+        <span class="line"><span class="cm"># Check what Git sees (always safe to run)</span></span>
+        <span class="line"><span class="cv">$</span> <span class="cg">git status</span></span>
+        <span class="line"><span class="cg">On branch main</span></span>
+        <span class="line"><span class="cg">No commits yet</span></span>
+        <span class="line"><span class="cg">Untracked files:</span></span>
+        <span class="line"><span class="cg">  index.html</span></span>
+        <span class="line"><span class="cg">  style.css</span></span>
+      </div>
+    </div>
+
+    <!-- S7: git add & git commit -->
+    <div class="slide s-content code-bg">
+      <div class="chapter-tag">Ch.3 · Core Commands</div>
+      <div class="slide-title">Staging &amp; Committing</div>
+      <div class="slide-sub"><code style="font-size:20px;color:#60a5fa">git add</code> and <code style="font-size:20px;color:#60a5fa">git commit</code></div>
+      <div class="code-box">
+        <span class="line"><span class="cm"># Stage a specific file</span></span>
+        <span class="line"><span class="cv">$</span> <span class="cg">git add index.html</span></span>
+        <span class="line"></span>
+        <span class="line"><span class="cm"># Or stage ALL changed files at once</span></span>
+        <span class="line"><span class="cv">$</span> <span class="cg">git add .</span></span>
+        <span class="line"></span>
+        <span class="line"><span class="cm"># Commit staged files with a message</span></span>
+        <span class="line"><span class="cv">$</span> <span class="cg">git commit -m "Add navigation menu"</span></span>
+        <span class="line"><span class="cg">[main (root-commit) 4a1b2c3] Add navigation menu</span></span>
+        <span class="line"><span class="cg"> 1 file changed, 25 insertions(+)</span></span>
+      </div>
+      <div class="analogy" style="margin-top:16px">
+        <strong>Packing analogy:</strong> <code style="color:#a5d6ff">git add</code> = put items in a box · <code style="color:#a5d6ff">git commit</code> = seal the box and label it · The <strong>commit message</strong> is the label — make it descriptive!
+      </div>
+    </div>
+
+    <!-- S8: git log & git diff -->
+    <div class="slide s-content code-bg">
+      <div class="chapter-tag">Ch.3 · History</div>
+      <div class="slide-title">Viewing History</div>
+      <div class="slide-sub"><code style="font-size:20px;color:#60a5fa">git log</code> and <code style="font-size:20px;color:#60a5fa">git diff</code></div>
+      <div class="cols2">
+        <div>
+          <div style="font-size:12px;color:var(--sub);font-weight:600;margin-bottom:8px;letter-spacing:.06em">GIT LOG —ONELINE</div>
+          <div class="code-box" style="font-size:12px">
+            <span class="line"><span class="cf">a3f1c2d</span> Add contact form</span>
+            <span class="line"><span class="cf">7b2e9a1</span> Add stylesheet</span>
+            <span class="line"><span class="cf">4a1b2c3</span> Initial commit</span>
+          </div>
+          <div class="output-box" style="margin-top:10px">
+            <div class="out-label">What each field means</div>
+            <span style="color:#cf9fff">a3f1c2d</span> = commit hash (unique ID)<br>
+            <span style="color:#a5d6ff">Add contact form</span> = your message
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;color:var(--sub);font-weight:600;margin-bottom:8px;letter-spacing:.06em">GIT DIFF</div>
+          <div class="code-box" style="font-size:12px">
+            <span class="line">--- a/index.html</span>
+            <span class="line">+++ b/index.html</span>
+            <span class="line"><span style="color:#f87171">- &lt;a href="/home"&gt;</span></span>
+            <span class="line"><span style="color:#4ade80">+ &lt;a href="index.html"&gt;</span></span>
+          </div>
+          <div class="output-box" style="margin-top:10px">
+            <div class="out-label">Reading the diff</div>
+            <span style="color:#f87171">Red - lines</span> = removed<br>
+            <span style="color:#4ade80">Green + lines</span> = added
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S9: Branching concept -->
+    <div class="slide s-content dark-bg">
+      <div class="chapter-tag">Ch.4 · Branching</div>
+      <div class="slide-title">Branching — Working in Parallel</div>
+      <div class="slide-sub">A branch is a separate, isolated line of development</div>
+      <div class="branch-box" style="margin-bottom:20px">
+<span style="color:#60a5fa">main</span>    ●────────●──────────────────────────────●  ← merge
+         │                                      ▲
+         │  git checkout -b feature              │  git merge feature
+<span style="color:#4ade80">feature</span>  └───●─────●─────●────────────────────┘
+              <span style="color:#f7df1e">C1</span>    <span style="color:#f7df1e">C2</span>    <span style="color:#f7df1e">C3</span></div>
+      <div class="info-row">
+        <div class="info-dot blue">!</div>
+        <div class="info-body">
+          <div class="info-title">main branch = your stable, working code</div>
+          <div class="info-desc">Never commit broken code directly to main. Keep it deployable at all times.</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-dot green">!</div>
+        <div class="info-body">
+          <div class="info-title">feature branch = your experiment</div>
+          <div class="info-desc">Create a branch, work freely, break things if needed. Merge back when done.</div>
+        </div>
+      </div>
+      <div class="analogy">
+        <strong>Analogy:</strong> Branching is like making a photocopy of a document to draft edits on — the original is unchanged until you decide to incorporate your changes.
+      </div>
+    </div>
+
+    <!-- S10: git checkout -b & git merge -->
+    <div class="slide s-content code-bg">
+      <div class="chapter-tag">Ch.4 · Branching</div>
+      <div class="slide-title">Branch Commands</div>
+      <div class="slide-sub"><code style="font-size:18px;color:#60a5fa">git checkout -b</code> and <code style="font-size:18px;color:#60a5fa">git merge</code></div>
+      <div class="code-box">
+        <span class="line"><span class="cm"># Create AND switch to a new branch</span></span>
+        <span class="line"><span class="cv">$</span> <span class="cg">git checkout -b feature-navbar</span></span>
+        <span class="line"><span class="cg">Switched to a new branch 'feature-navbar'</span></span>
+        <span class="line"></span>
+        <span class="line"><span class="cm"># Make changes, add, commit as usual...</span></span>
+        <span class="line"><span class="cv">$</span> <span class="cg">git add . &amp;&amp; git commit -m "Add responsive navbar"</span></span>
+        <span class="line"></span>
+        <span class="line"><span class="cm"># Switch back to main</span></span>
+        <span class="line"><span class="cv">$</span> <span class="cg">git checkout main</span></span>
+        <span class="line"><span class="cg">Switched to branch 'main'</span></span>
+        <span class="line"></span>
+        <span class="line"><span class="cm"># Merge the feature branch into main</span></span>
+        <span class="line"><span class="cv">$</span> <span class="cg">git merge feature-navbar</span></span>
+        <span class="line"><span class="cg">Updating 7b2e9a1..a3f1c2d</span></span>
+        <span class="line"><span class="cg">Fast-forward: index.html | 8 ++++</span></span>
+      </div>
+    </div>
+
+    <!-- S11: Connecting to GitHub -->
+    <div class="slide s-content dark-bg">
+      <div class="chapter-tag">Ch.5 · GitHub</div>
+      <div class="slide-title">Connecting to GitHub</div>
+      <div class="slide-sub">Sync your local repository with the cloud</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:0;padding:16px 0;margin-bottom:20px;flex-wrap:wrap">
+        <div style="text-align:center;padding:0 8px">
+          <div style="background:rgba(247,223,30,.15);border:1px solid #b8a900;border-radius:8px;padding:12px 18px;font-size:13px;font-weight:600;color:#f7df1e;margin-bottom:6px">Local Repo</div>
+          <div style="font-size:11px;color:var(--sub)">your computer</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;padding:0 12px;margin-bottom:18px">
+          <div style="width:80px;height:2px;background:linear-gradient(90deg,var(--git),#60a5fa);position:relative">
+            <span style="position:absolute;right:-8px;top:-8px;font-size:12px;color:#60a5fa">▶</span>
+          </div>
+          <div style="font-family:'Courier New',monospace;font-size:11px;color:var(--sub);margin-top:6px;white-space:nowrap">git push</div>
+        </div>
+        <div style="text-align:center;padding:0 8px">
+          <div style="background:var(--gitl);border:1px solid var(--git);border-radius:8px;padding:12px 18px;font-size:13px;font-weight:600;color:#ff7b5e;margin-bottom:6px">GitHub</div>
+          <div style="font-size:11px;color:var(--sub)">cloud</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;padding:0 12px;margin-bottom:18px">
+          <div style="width:80px;height:2px;background:linear-gradient(90deg,#60a5fa,var(--git));position:relative">
+            <span style="position:absolute;right:-8px;top:-8px;font-size:12px;color:var(--git)">▶</span>
+          </div>
+          <div style="font-family:'Courier New',monospace;font-size:11px;color:var(--sub);margin-top:6px;white-space:nowrap">collaborator pull</div>
+        </div>
+        <div style="text-align:center;padding:0 8px">
+          <div style="background:rgba(22,163,74,.15);border:1px solid var(--green);border-radius:8px;padding:12px 18px;font-size:13px;font-weight:600;color:#4ade80;margin-bottom:6px">Team's Repo</div>
+          <div style="font-size:11px;color:var(--sub)">their computer</div>
+        </div>
+      </div>
+      <div class="info-row"><div class="info-dot git">1</div><div class="info-body"><div class="info-title"><code>git remote add origin &lt;url&gt;</code></div><div class="info-desc">Link your local repo to GitHub. "origin" is the standard nickname. Do this once per project.</div></div></div>
+      <div class="info-row"><div class="info-dot blue">2</div><div class="info-body"><div class="info-title"><code>git push -u origin main</code></div><div class="info-desc">Upload your commits. After <code>-u</code>, future pushes are just <code>git push</code>.</div></div></div>
+      <div class="info-row"><div class="info-dot green">3</div><div class="info-body"><div class="info-title"><code>git pull</code></div><div class="info-desc">Download teammates' latest commits. Always pull before starting work.</div></div></div>
+    </div>
+
+    <!-- S12: The Full Workflow -->
+    <div class="slide s-content dark-bg">
+      <div class="chapter-tag">Ch.5 · Full Workflow</div>
+      <div class="slide-title">The Complete Daily Workflow</div>
+      <div class="slide-sub">This is what you will do every day as a developer</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin:8px 0">
+        <div style="display:flex;align-items:center;gap:16px;background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:8px;padding:12px 16px">
+          <div style="font-family:'Courier New',monospace;font-size:13px;color:var(--git);min-width:80px">1. Edit</div>
+          <div style="font-size:13px;color:var(--sub)">Make changes to your HTML, CSS, JS files in VS Code</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:8px;padding:12px 16px">
+          <div style="font-family:'Courier New',monospace;font-size:13px;color:var(--amber);min-width:80px">2. git add</div>
+          <div style="font-size:13px;color:var(--sub)">Stage the files you want in this commit</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:8px;padding:12px 16px">
+          <div style="font-family:'Courier New',monospace;font-size:13px;color:#4ade80;min-width:80px">3. git commit</div>
+          <div style="font-size:13px;color:var(--sub)">Save the snapshot with a descriptive message</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:8px;padding:12px 16px">
+          <div style="font-family:'Courier New',monospace;font-size:13px;color:#60a5fa;min-width:80px">4. git push</div>
+          <div style="font-size:13px;color:var(--sub)">Upload to GitHub — backs up your work, shares with team</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:8px;padding:12px 16px">
+          <div style="font-family:'Courier New',monospace;font-size:13px;color:#c084fc;min-width:80px">5. git pull</div>
+          <div style="font-size:13px;color:var(--sub)">Next day: pull first to get teammates' changes before you start</div>
+        </div>
+      </div>
+      <div class="analogy" style="margin-top:8px">
+        <strong>Repeat this loop every session.</strong> Small, frequent commits with good messages are the mark of a professional developer.
+      </div>
+    </div>
+
+    <!-- S13: Common Mistakes -->
+    <div class="slide s-content dark-bg">
+      <div class="chapter-tag">Ch.6 · Common Mistakes</div>
+      <div class="slide-title">Common Mistakes &amp; Fixes</div>
+      <div class="slide-sub">Everyone makes these — knowing them saves hours of frustration</div>
+      <div class="info-row">
+        <div class="info-dot red">✗</div>
+        <div class="info-body">
+          <div class="info-title">Forgot to <code>git add</code> before committing</div>
+          <div class="info-desc">Symptom: commit runs but your changed files aren't in it. Fix: always run <code>git status</code> before committing to see what's staged.</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-dot red">✗</div>
+        <div class="info-body">
+          <div class="info-title">Vague commit messages</div>
+          <div class="info-desc">Message like "update" or "fix" are useless in 3 weeks. Fix: describe what changed AND why. <code>"Fix broken image path in about.html"</code></div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-dot red">✗</div>
+        <div class="info-body">
+          <div class="info-title">Committing directly to main instead of a branch</div>
+          <div class="info-desc">Breaks team workflow and can push broken code to production. Fix: always <code>git checkout -b feature-name</code> before starting new work.</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-dot red">✗</div>
+        <div class="info-body">
+          <div class="info-title">Forgetting to <code>git pull</code> before starting work</div>
+          <div class="info-desc">You edit old code while your teammate's changes sit unmerged. Fix: <em>always</em> <code>git pull</code> first thing every session.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S14: Summary Cheat Sheet -->
+    <div class="slide s-content dark-bg">
+      <div class="slide-title">Git Cheat Sheet</div>
+      <div class="slide-sub">All the essential commands in one view</div>
+      <div class="cmd-grid">
+        <div class="cmd-item"><div class="cmd-name">git init</div><div class="cmd-desc">Create a new repository in the current folder</div></div>
+        <div class="cmd-item"><div class="cmd-name">git status</div><div class="cmd-desc">Show changed, staged, and untracked files</div></div>
+        <div class="cmd-item"><div class="cmd-name">git add .</div><div class="cmd-desc">Stage all changed files for the next commit</div></div>
+        <div class="cmd-item"><div class="cmd-name">git commit -m</div><div class="cmd-desc">Save a snapshot of staged files with a message</div></div>
+        <div class="cmd-item"><div class="cmd-name">git log --oneline</div><div class="cmd-desc">View commit history, one line per commit</div></div>
+        <div class="cmd-item"><div class="cmd-name">git diff</div><div class="cmd-desc">Show exact line-by-line changes not yet staged</div></div>
+        <div class="cmd-item"><div class="cmd-name">git branch</div><div class="cmd-desc">List all branches (* = current)</div></div>
+        <div class="cmd-item"><div class="cmd-name">git checkout -b</div><div class="cmd-desc">Create and switch to a new branch</div></div>
+        <div class="cmd-item"><div class="cmd-name">git merge</div><div class="cmd-desc">Merge a branch into the current branch</div></div>
+        <div class="cmd-item"><div class="cmd-name">git push</div><div class="cmd-desc">Upload local commits to GitHub</div></div>
+        <div class="cmd-item"><div class="cmd-name">git pull</div><div class="cmd-desc">Download and merge remote commits</div></div>
+        <div class="cmd-item"><div class="cmd-name">git clone</div><div class="cmd-desc">Download a GitHub repo to your computer</div></div>
+      </div>
+    </div>
+
+  </div><!-- end slide-area -->
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="btn-ctrl" onclick="prevSlide()">← Prev</button>
+    <button class="btn-ctrl" onclick="nextStep()">Next / Reveal →</button>
+    <span class="slide-counter" id="counter">1 / 14</span>
+    <div class="progress-track" id="track" onclick="jumpTo(event)">
+      <div class="progress-fill" id="pfill" style="width:7.14%"></div>
+    </div>
+    <button class="btn-ctrl" id="btn-notes" onclick="toggleNotes()">📝 Notes</button>
+    <button class="btn-ctrl" onclick="goFullscreen()">⛶</button>
+  </div>
+
+  <!-- Notes panel -->
+  <div id="notes-panel">
+    <h3>Teaching Notes</h3>
+    <div id="notes-text"></div>
+  </div>
+</div>
+
+<script>
+const NOTES = [
+  `<p>Welcome to Week 9! Today we cover Git and Version Control — one of the most important skills you'll learn this semester. By the end, you'll be able to track your work, create branches, and collaborate on GitHub like a professional. Let's start with the problem that version control solves.</p>`,
+  `<p>Ask students: "How many of you have named a file project_FINAL_v2?" — everyone has. Walk through the slide. The pain is universal. Emphasize that this becomes catastrophic in a team: if two people edit the same file and just share via email, work gets overwritten. Version control fixes ALL of this.</p>`,
+  `<p>Version control gives you three superpowers. Reveal them one by one: (1) Track history — click to show. (2) See who did what when — click. (3) Undo anything — click. Stress the "undo" superpower most — students love knowing they can always go back. Compare to Track Changes in Word, but for entire projects.</p>`,
+  `<p>This is the most common point of confusion. Spend 2-3 minutes here. Git is the tool — it lives on their laptop. GitHub is the website. You CAN use Git without GitHub (purely local). GitHub just makes it easy to share and back up. Other platforms: GitLab (popular in companies), Bitbucket (common in enterprise). The Word vs Google Drive analogy works very well for international students.</p>`,
+  `<p>The 3 areas are the conceptual core of Git. Reveal each area as you explain it. Many students get confused because they expect git add to save the file — explain that it only moves changes to the staging area, and git commit is what actually records the snapshot. Walk through the moving house analogy slowly.</p>`,
+  `<p>Live demo time! Open a terminal and type exactly these commands. Run git init first, show the .git/ folder that appears. Run git status — show the "Untracked files" output. Explain that red = not tracked, green = staged. Ask students to do this on their own computers simultaneously.</p>`,
+  `<p>Continue the live demo: git add . and git commit -m. Emphasize the commit message quality. Bad example: "update". Good example: "Add contact form validation — fixes #12". The packing analogy: add = put in box, commit = seal and label the box. After the commit, run git log --oneline to see the result.</p>`,
+  `<p>Git log and git diff — the "read" commands. Students need to see what diff output looks like. The + and - lines are color-coded in most terminals. Walk through reading the diff: which lines were removed, which were added. git log --oneline is what they'll use 90% of the time. Mention git show &lt;hash&gt; to inspect a specific commit.</p>`,
+  `<p>Branching concept — use the diagram. Walk through it step by step: main is the stable trunk. checkout -b creates a copy. Commits on the feature branch don't affect main. Merge brings them back together. The document photocopy analogy works well: the original is safe while you draft on the copy.</p>`,
+  `<p>Live demo part 2! Run git checkout -b feature-style on the demo repo. Create a new file. Commit it. Then git checkout main and show that the new file DISAPPEARS — this is always a "wow" moment for students. Then git merge feature-style and the file comes back. See the magic of branches!</p>`,
+  `<p>GitHub connection — the three key commands. First: git remote add origin (the link between local and cloud). Emphasize "origin" is just a nickname — they could call it anything, but "origin" is universal convention. Second: git push -u origin main — the -u flag is "set upstream" so future pushes are just "git push". Third: git pull — always do this first every day.</p>`,
+  `<p>The complete daily workflow. This is the loop students will repeat for the rest of their careers. Edit → add → commit → push → pull tomorrow. Emphasize: small frequent commits are better than one giant commit at the end. Compare to saving your Word document every paragraph vs only at the end (but better, because each save has a description).</p>`,
+  `<p>Common mistakes — these are the top 4 support questions you'll get all semester. Walk through each one. "Forgot to git add" is #1 — tell students to always check git status before committing. Vague commit messages make the history useless in 3 weeks. Branching discipline takes practice — enforce it in team projects. Always pull first — merge conflicts are 10x worse if you don't.</p>`,
+  `<p>This is the cheat sheet they can keep! Encourage students to screenshot this slide or bookmark the study guide. Run through each command name quickly — they've seen all of these today. Remind them: the exercises in the study guide will have them run all of these commands today. If they finish early, encourage them to try the GitHub push exercise (E3).</p>`
+];
+
+const slides = document.querySelectorAll('.slide');
+let cur = 0;
+
+// For each slide, get its .line elements (for code reveals)
+function getLines(slideEl) { return slideEl.querySelectorAll('.code-box .line'); }
+
+// Show all lines in a slide instantly (when navigating directly)
+function revealAll(slideEl) {
+  getLines(slideEl).forEach(l => l.classList.add('show'));
+}
+
+// Track per-slide reveal progress
+const revealed = new Array(slides.length).fill(0);
+
+function showSlide(n, instant) {
+  slides[cur].classList.remove('active');
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slides[cur].classList.add('active');
+  document.getElementById('counter').textContent = `${cur+1} / ${slides.length}`;
+  document.getElementById('pfill').style.width = ((cur+1)/slides.length*100) + '%';
+  document.getElementById('notes-text').innerHTML = NOTES[cur] || '';
+  if (instant) revealAll(slides[cur]);
+}
+
+function nextStep() {
+  const slide = slides[cur];
+  const lines = getLines(slide);
+  if (lines.length === 0) {
+    // No code lines — advance to next slide
+    if (cur < slides.length - 1) showSlide(cur + 1, false);
+    return;
+  }
+  // Reveal next hidden line
+  let r = revealed[cur];
+  if (r < lines.length) {
+    lines[r].classList.add('show');
+    revealed[cur]++;
+  } else {
+    // All revealed — go to next slide
+    if (cur < slides.length - 1) showSlide(cur + 1, false);
+  }
+}
+
+function prevSlide() {
+  if (cur > 0) {
+    revealed[cur] = 0;
+    getLines(slides[cur]).forEach(l => l.classList.remove('show'));
+    showSlide(cur - 1, true);
+  }
+}
+
+function toggleNotes() {
+  const p = document.getElementById('player');
+  const btn = document.getElementById('btn-notes');
+  p.classList.toggle('notes-open');
+  btn.classList.toggle('active');
+}
+
+function goFullscreen() { document.documentElement.requestFullscreen?.(); }
+
+function jumpTo(e) {
+  const rect = document.getElementById('track').getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  const n = Math.round(pct * (slides.length - 1));
+  revealed[cur] = 0;
+  getLines(slides[cur]).forEach(l => l.classList.remove('show'));
+  showSlide(n, true);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') nextStep();
+  else if (e.key === 'ArrowLeft') prevSlide();
+  else if (e.key === ' ') { e.preventDefault(); nextStep(); }
+  else if (e.key === 'n' || e.key === 'N') toggleNotes();
+});
+
+// Click slide area to advance
+document.getElementById('slide-area').addEventListener('click', e => {
+  if (!e.target.closest('.controls') && !e.target.closest('#notes-panel')) nextStep();
+});
+
+// Init — show first slide with all non-code content visible
+showSlide(0, false);
+// Title slide has no lines, so nothing to reveal
+</script>
+</body>
+</html>
