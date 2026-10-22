@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web Performance Optimization — Week 7 Friday</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f0f4ff;--surf:#fff;--surf2:#e8eefa;--brd:#c8d4f0;
+  --tx:#1a2340;--mu:#5a6a8a;
+  --ac:#1a56db;--acl:#e0eaff;--ac2:#1240b0;
+  --brand:#e85d04;--brandl:#fff7ed;--branddk:#fff;
+  --lime:#16a34a;--limel:#dcfce7;
+  --cor:#dc2626;--corl:#fee2e2;
+  --warn:#d97706;--warnl:#fef3c7;
+  --cb:#1a2540;--ct:#c8daf8;
+  --cyan:#0891b2;--cyanl:#e0f2fe;
+  --purple:#7c3aed;--purplel:#ede9fe;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --bg:#060d16;--surf:#0d1b2a;--surf2:#122236;--brd:#1e3256;
+  --tx:#dbeafe;--mu:#6080b0;
+  --ac:#60a5fa;--acl:#0a1830;--ac2:#93c5fd;
+  --brand:#fb923c;--brandl:#431407;--branddk:#000;
+  --lime:#4ade80;--limel:#052e16;
+  --cor:#f87171;--corl:#450a0a;
+  --warn:#fbbf24;--warnl:#1a1000;
+  --cb:#060d16;--ct:#bfdbfe;
+  --cyan:#22d3ee;--cyanl:#042f2e;
+  --purple:#a78bfa;--purplel:#2e1065;
+}}
+:root[data-theme=dark]{
+  --bg:#060d16;--surf:#0d1b2a;--surf2:#122236;--brd:#1e3256;
+  --tx:#dbeafe;--mu:#6080b0;
+  --ac:#60a5fa;--acl:#0a1830;--ac2:#93c5fd;
+  --brand:#fb923c;--brandl:#431407;--branddk:#000;
+  --lime:#4ade80;--limel:#052e16;
+  --cor:#f87171;--corl:#450a0a;
+  --warn:#fbbf24;--warnl:#1a1000;
+  --cb:#060d16;--ct:#bfdbfe;
+  --cyan:#22d3ee;--cyanl:#042f2e;
+  --purple:#a78bfa;--purplel:#2e1065;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',system-ui,sans-serif;font-size:16px;line-height:1.7}
+a{color:var(--ac);text-decoration:none}
+a:hover{text-decoration:underline}
+kbd{background:var(--surf2);border:1px solid var(--brd);border-radius:4px;padding:1px 6px;font-size:12px;font-family:'JetBrains Mono',monospace}
+code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--surf2);padding:1px 5px;border-radius:3px;color:var(--ac2)}
+
+/* ── Header ── */
+#site-header{
+  position:sticky;top:0;z-index:100;
+  background:var(--surf);border-bottom:2px solid var(--brand);
+  display:flex;align-items:center;justify-content:space-between;padding:10px 20px;gap:12px;
+}
+.hdr-left{display:flex;align-items:center;gap:14px}
+.brand-badge{background:var(--brand);color:var(--branddk);font-family:'Space Grotesk',sans-serif;
+  font-weight:700;font-size:16px;padding:4px 10px;border-radius:6px;letter-spacing:.02em}
+.hdr-info{display:flex;flex-direction:column;gap:1px}
+.hdr-course{font-size:11px;color:var(--mu);font-weight:500;letter-spacing:.05em;text-transform:uppercase}
+.hdr-title{font-size:15px;font-weight:700;color:var(--tx);font-family:'Space Grotesk',sans-serif}
+.theme-btn{background:var(--surf2);border:1px solid var(--brd);color:var(--tx);
+  padding:5px 14px;border-radius:20px;cursor:pointer;font-size:13px;white-space:nowrap}
+.theme-btn:hover{border-color:var(--brand);color:var(--brand)}
+
+/* ── Layout ── */
+#layout{display:flex;min-height:calc(100vh - 53px)}
+
+/* ── Sidebar ── */
+#sidebar{
+  width:240px;flex-shrink:0;background:var(--surf);border-right:1px solid var(--brd);
+  position:sticky;top:53px;height:calc(100vh - 53px);overflow-y:auto;padding:12px 0;
+}
+#sidebar nav a{
+  display:flex;align-items:center;gap:8px;padding:5px 14px;
+  font-size:13px;color:var(--mu);border-left:3px solid transparent;transition:all .15s;
+}
+#sidebar nav a:hover{color:var(--tx);background:var(--surf2);text-decoration:none}
+#sidebar nav a.active{color:var(--brand);border-left-color:var(--brand);background:var(--brandl);font-weight:600}
+.nav-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--brand);min-width:26px;font-weight:700}
+.nav-num.ex{color:var(--warn)}
+.nav-label{font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.07em;text-transform:uppercase;
+  padding:12px 14px 4px}
+
+/* ── Main ── */
+#main{flex:1;padding:36px 44px;max-width:920px}
+
+/* ── Topic Sections ── */
+.topic{margin-bottom:56px;padding-bottom:44px;border-bottom:1px solid var(--brd)}
+.topic:last-child{border-bottom:none}
+.topic-hdr{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.t-num{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;
+  color:var(--branddk);background:var(--brand);padding:2px 10px;border-radius:5px}
+.topic-hdr h2{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:var(--tx)}
+.difficulty{font-size:11px;font-weight:700;padding:2px 9px;border-radius:10px}
+.diff-easy{background:var(--limel);color:var(--lime)}
+.diff-med{background:var(--warnl);color:var(--warn)}
+.diff-hard{background:var(--corl);color:var(--cor)}
+
+.theory{margin-bottom:18px;color:var(--tx)}
+.theory p{margin-bottom:10px}
+
+/* ── Code blocks ── */
+.code-wrap{margin:16px 0;border-radius:10px;overflow:hidden;border:1px solid var(--brd)}
+.code-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--surf2);padding:6px 14px;border-bottom:1px solid var(--brd);
+}
+.code-lang{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--brand);font-weight:700}
+.copy-btn{background:transparent;border:1px solid var(--brd);color:var(--mu);
+  padding:2px 10px;border-radius:4px;font-size:11px;cursor:pointer;transition:all .15s}
+.copy-btn:hover{color:var(--brand);border-color:var(--brand)}
+.code-block{background:var(--cb);padding:18px 20px;overflow-x:auto;margin:0}
+.code-block code{font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.75;
+  color:var(--ct);white-space:pre;background:none;padding:0;border-radius:0}
+.sk{color:#c084fc}.sf{color:#f7df1e}.ss{color:#86efac}
+.sc{color:#64748b;font-style:italic}.sn{color:#fb923c}.sp{color:#60a5fa}
+.stag{color:#f7df1e}.sattr{color:#86efac}.sval{color:#fb923c}
+
+/* ── Key Points ── */
+.keypoints{background:var(--brandl);border-left:4px solid var(--brand);
+  border-radius:0 8px 8px 0;padding:14px 18px;margin-top:14px}
+.keypoints h4{font-size:11px;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+.keypoints ul{padding-left:18px}
+.keypoints li{font-size:14px;margin-bottom:4px}
+
+/* ── Alert boxes ── */
+.alert{display:flex;gap:12px;padding:14px 16px;border-radius:8px;margin:14px 0;font-size:14px}
+.alert-warn{background:var(--warnl);border-left:4px solid var(--warn)}
+.alert-danger{background:var(--corl);border-left:4px solid var(--cor)}
+.alert-info{background:var(--cyanl);border-left:4px solid var(--cyan)}
+.alert-ok{background:var(--limel);border-left:4px solid var(--lime)}
+.alert-brand{background:var(--brandl);border-left:4px solid var(--brand)}
+.alert-icon{font-size:20px;flex-shrink:0;line-height:1.4}
+.alert strong{display:block;margin-bottom:3px}
+
+/* ── Demo boxes ── */
+.demo-box{
+  background:var(--surf2);border:1px solid var(--brd);border-radius:10px;
+  padding:20px;margin:16px 0;
+}
+.demo-box h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--mu);margin-bottom:14px}
+.demo-label{font-size:11px;color:var(--mu);font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+
+/* ── Metric cards ── */
+.metric-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:14px 0}
+.metric-card{background:var(--surf);border:1px solid var(--brd);border-radius:10px;padding:14px;text-align:center}
+.metric-val{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:800;margin-bottom:4px}
+.metric-name{font-size:12px;font-weight:700;color:var(--mu);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+.metric-desc{font-size:11px;color:var(--mu);line-height:1.4}
+
+/* ── Waterfall visual ── */
+.waterfall{background:var(--cb);border-radius:8px;padding:16px;margin:12px 0}
+.wf-row{display:flex;align-items:center;margin-bottom:8px;font-size:12px}
+.wf-label{color:#94a3b8;width:100px;flex-shrink:0}
+.wf-bar-wrap{flex:1;background:#1e2a40;border-radius:2px;height:16px;position:relative}
+.wf-bar{height:16px;border-radius:2px;position:absolute;top:0}
+.wf-time{color:#94a3b8;font-size:11px;margin-left:8px;white-space:nowrap}
+
+/* ── Comparison table ── */
+.cmp-table{width:100%;border-collapse:collapse;font-size:13px}
+.cmp-table th{padding:8px 12px;text-align:left;border-bottom:2px solid var(--brd);font-size:12px;color:var(--mu);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.cmp-table td{padding:8px 12px;border-bottom:1px solid var(--brd);vertical-align:top;line-height:1.5}
+.cmp-table td:first-child{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--brand)}
+.badge-red{background:var(--corl);color:var(--cor);border-radius:4px;padding:1px 6px;font-size:11px}
+.badge-green{background:var(--limel);color:var(--lime);border-radius:4px;padding:1px 6px;font-size:11px}
+.badge-warn{background:var(--warnl);color:var(--warn);border-radius:4px;padding:1px 6px;font-size:11px}
+
+/* ── Quick wins checklist ── */
+.wins-list{list-style:none;padding:0}
+.wins-item{display:flex;align-items:flex-start;gap:12px;padding:10px 14px;border-bottom:1px solid var(--brd);font-size:14px}
+.wins-item:last-child{border-bottom:none}
+.win-cb{width:18px;height:18px;border:2px solid var(--brand);border-radius:3px;flex-shrink:0;margin-top:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .15s}
+.win-cb.checked{background:var(--brand);color:var(--branddk)}
+.win-impact{font-size:10px;font-weight:700;padding:2px 6px;border-radius:8px;margin-left:auto;white-space:nowrap;flex-shrink:0}
+.impact-high{background:var(--limel);color:var(--lime)}
+.impact-med{background:var(--warnl);color:var(--warn)}
+
+/* ── defer/async diagram ── */
+.script-diagram{background:var(--cb);border-radius:8px;padding:16px;margin:12px 0;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:2}
+.sd-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.sd-label{color:#94a3b8;width:80px;flex-shrink:0;font-size:11px}
+.sd-parse{background:#2563eb;height:12px;border-radius:2px;display:inline-block}
+.sd-pause{background:#374151;height:12px;border-radius:2px;display:inline-block;border:1px dashed #6b7280}
+.sd-fetch{background:#d97706;height:12px;border-radius:2px;display:inline-block}
+.sd-exec{background:#dc2626;height:12px;border-radius:2px;display:inline-block}
+.sd-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:#94a3b8;margin-top:8px}
+.sd-dot{width:12px;height:12px;border-radius:2px;display:inline-block;margin-right:4px}
+
+/* ── Exercise section ── */
+#exercises h1{font-family:'Space Grotesk',sans-serif;font-size:30px;font-weight:800;margin-bottom:8px}
+.ex-intro{color:var(--mu);margin-bottom:32px;font-size:15px}
+.exercise{background:var(--surf);border:1px solid var(--brd);border-radius:12px;margin-bottom:32px;overflow:hidden}
+.ex-header{display:flex;align-items:center;gap:12px;padding:14px 20px;background:var(--surf2);border-bottom:1px solid var(--brd)}
+.ex-num{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--warn);
+  background:var(--warnl);padding:2px 8px;border-radius:4px}
+.ex-header h3{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;flex:1}
+.ex-body{padding:20px}
+.task-box{background:var(--surf2);border:1px solid var(--brd);border-radius:6px;padding:14px 16px;margin-bottom:16px;font-size:15px}
+.task-box ul{padding-left:18px;margin-top:6px}
+.task-box li{margin-bottom:4px}
+.editor-row{display:flex;gap:0;border:1px solid var(--brd);border-radius:8px;overflow:hidden;margin-top:12px}
+.editor-row textarea{flex:1;min-height:200px;background:var(--cb);color:var(--ct);font-family:'JetBrains Mono',monospace;font-size:12.5px;padding:14px;border:none;resize:vertical;line-height:1.65;outline:none}
+.editor-row iframe{flex:1;border:none;border-left:1px solid var(--brd);background:#fff;min-height:200px}
+.ex-btns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.btn-run{background:var(--brand);color:var(--branddk);border:none;padding:7px 18px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer}
+.btn-hint{background:var(--surf2);color:var(--tx);border:1px solid var(--brd);padding:7px 16px;border-radius:6px;font-size:13px;cursor:pointer}
+.btn-hint:hover{border-color:var(--brand);color:var(--brand)}
+.btn-sol{background:var(--surf2);color:var(--tx);border:1px solid var(--brd);padding:7px 16px;border-radius:6px;font-size:13px;cursor:pointer}
+.btn-sol:hover{border-color:var(--lime);color:var(--lime)}
+.hint-box{margin-top:10px;padding:12px 16px;background:var(--acl);border-left:3px solid var(--ac);border-radius:0 6px 6px 0;font-size:14px;display:none}
+.sol-box{margin-top:10px;display:none}
+
+/* ── Footer ── */
+#site-footer{text-align:center;padding:24px;color:var(--mu);font-size:13px;border-top:1px solid var(--brd);margin-top:40px}
+
+/* ── Mobile ── */
+@media(max-width:768px){
+  #sidebar{display:none;position:fixed;top:53px;left:0;height:calc(100vh - 53px);z-index:90;box-shadow:4px 0 20px rgba(0,0,0,.3)}
+  #sidebar.open{display:block}
+  #main{padding:20px 16px}
+  .sandwich{display:block!important}
+  .editor-row{flex-direction:column}
+}
+.sandwich{display:none;background:var(--surf2);border:1px solid var(--brd);color:var(--tx);
+  padding:5px 12px;border-radius:6px;cursor:pointer;font-size:18px}
+
+/* ── Progress bar ── */
+#progress-bar{position:fixed;top:53px;left:0;height:3px;background:var(--brand);width:0%;z-index:101;transition:width .1s}
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<header id="site-header">
+  <div class="hdr-left">
+    <button class="sandwich" onclick="toggleSidebar()">☰</button>
+    <span class="brand-badge">⚡ Perf</span>
+    <div class="hdr-info">
+      <span class="hdr-course">K0126002 · Web Programming · Week 7 Friday</span>
+      <span class="hdr-title">Web Performance Optimization — Study Guide</span>
+    </div>
+  </div>
+  <button class="theme-btn" id="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+</header>
+
+<div id="layout">
+<aside id="sidebar">
+  <nav>
+    <div class="nav-label">Why & Measure</div>
+    <a href="#t01"><span class="nav-num">01</span>Why Performance Matters</a>
+    <a href="#t02"><span class="nav-num">02</span>Measuring Performance</a>
+    <a href="#t03"><span class="nav-num">03</span>The Network Tab</a>
+    <div class="nav-label">Assets</div>
+    <a href="#t04"><span class="nav-num">04</span>Image Optimization</a>
+    <a href="#t05"><span class="nav-num">05</span>Lazy Loading</a>
+    <a href="#t06"><span class="nav-num">06</span>Minification</a>
+    <div class="nav-label">Loading Strategy</div>
+    <a href="#t07"><span class="nav-num">07</span>JS Loading Strategy</a>
+    <a href="#t08"><span class="nav-num">08</span>Caching</a>
+    <a href="#t09"><span class="nav-num">09</span>CDN</a>
+    <a href="#t10"><span class="nav-num">10</span>Quick Wins Checklist</a>
+    <div class="nav-label">Practice</div>
+    <a href="#ex1"><span class="nav-num ex">E1</span>Run Lighthouse</a>
+    <a href="#ex2"><span class="nav-num ex">E2</span>Image → WebP</a>
+    <a href="#ex3"><span class="nav-num ex">E3</span>Add defer</a>
+    <a href="#homework"><span class="nav-num ex">HW</span>Homework</a>
+  </nav>
+</aside>
+
+<main id="main">
+
+<!-- ── Intro ── -->
+<section style="margin-bottom:44px">
+  <h1 style="font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:800;margin-bottom:8px">Web Performance Optimization</h1>
+  <p style="color:var(--mu);font-size:15px;margin-bottom:16px">10 topics · 3 exercises · making your site fast for every user on every network</p>
+  <div class="alert alert-brand">
+    <span class="alert-icon">⚡</span>
+    <div><strong>Speed = Users = Revenue</strong>
+    A 1-second delay in page load time results in 7% fewer conversions. 53% of mobile users abandon a site that takes more than 3 seconds to load. Performance is not optional — it directly affects whether users stay.</div>
+  </div>
+</section>
+
+<!-- ════════ TOPIC 01 ════════ -->
+<section class="topic" id="t01">
+  <div class="topic-hdr">
+    <span class="t-num">01</span>
+    <h2>Why Performance Matters</h2>
+    <span class="difficulty diff-easy">Why &amp; Measure</span>
+  </div>
+  <div class="theory">
+    <p>Web performance is not just about user experience — it directly impacts business outcomes. Studies from Google, Amazon, and Walmart consistently show that slow sites lose users and money.</p>
+  </div>
+
+  <div class="metric-cards">
+    <div class="metric-card">
+      <div class="metric-val" style="color:var(--cor)">53%</div>
+      <div class="metric-name">Mobile Abandonment</div>
+      <div class="metric-desc">of users leave if a page takes more than 3 seconds to load (Google, 2018)</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-val" style="color:var(--warn)">7%</div>
+      <div class="metric-name">Conversion Drop</div>
+      <div class="metric-desc">per 1-second delay in response time (Amazon internal study)</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-val" style="color:var(--brand)">1.5s</div>
+      <div class="metric-name">Avg Mobile Load</div>
+      <div class="metric-desc">target for time to interactive on mobile 4G networks (2026 benchmark)</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-val" style="color:var(--lime)">+2%</div>
+      <div class="metric-name">Revenue / 100ms</div>
+      <div class="metric-desc">Walmart found 1% more revenue for every 100ms improvement (2012)</div>
+    </div>
+  </div>
+
+  <div class="demo-box">
+    <h4>Performance also affects SEO</h4>
+    <div style="font-size:14px;line-height:1.6">
+      <p>Since 2021, Google's <strong>Core Web Vitals</strong> are ranking signals. Slow pages rank lower in search results. The three Core Web Vitals measure:</p>
+      <ul style="padding-left:18px;margin-top:8px">
+        <li><strong>LCP</strong> (Largest Contentful Paint) — how fast is the biggest element visible?</li>
+        <li><strong>CLS</strong> (Cumulative Layout Shift) — does the page jump around while loading?</li>
+        <li><strong>INP</strong> (Interaction to Next Paint) — how fast does the page respond to clicks?</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li>53% of users abandon sites that take 3+ seconds to load.</li>
+      <li>Every 1-second delay = ~7% conversion rate drop.</li>
+      <li>Performance affects SEO — Core Web Vitals are Google ranking factors since 2021.</li>
+      <li>Slower networks (4G, 3G) and slower devices disproportionately affect users in developing markets.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════ TOPIC 02 ════════ -->
+<section class="topic" id="t02">
+  <div class="topic-hdr">
+    <span class="t-num">02</span>
+    <h2>Measuring Performance</h2>
+    <span class="difficulty diff-easy">Why &amp; Measure</span>
+  </div>
+  <div class="theory">
+    <p>You can't optimize what you don't measure. Lighthouse provides an overall score (0–100) and measures five key metrics. Each metric has "Good", "Needs Improvement", and "Poor" thresholds.</p>
+  </div>
+
+  <div class="demo-box">
+    <h4>Core Web Vitals &amp; Lighthouse Metrics</h4>
+    <table class="cmp-table">
+      <thead><tr><th>Metric</th><th>Full Name</th><th>Good</th><th>Poor</th><th>What it measures</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>FCP</td>
+          <td>First Contentful Paint</td>
+          <td><span class="badge-green">&lt; 1.8s</span></td>
+          <td><span class="badge-red">&gt; 3s</span></td>
+          <td>Time until any content appears (text or image)</td>
+        </tr>
+        <tr>
+          <td>LCP</td>
+          <td>Largest Contentful Paint</td>
+          <td><span class="badge-green">&lt; 2.5s</span></td>
+          <td><span class="badge-red">&gt; 4s</span></td>
+          <td>Time until biggest image/text block is visible</td>
+        </tr>
+        <tr>
+          <td>CLS</td>
+          <td>Cumulative Layout Shift</td>
+          <td><span class="badge-green">&lt; 0.1</span></td>
+          <td><span class="badge-red">&gt; 0.25</span></td>
+          <td>How much the layout shifts unexpectedly (0 = no shift)</td>
+        </tr>
+        <tr>
+          <td>TBT</td>
+          <td>Total Blocking Time</td>
+          <td><span class="badge-green">&lt; 200ms</span></td>
+          <td><span class="badge-red">&gt; 600ms</span></td>
+          <td>Time main thread is blocked by heavy JS</td>
+        </tr>
+        <tr>
+          <td>SI</td>
+          <td>Speed Index</td>
+          <td><span class="badge-green">&lt; 3.4s</span></td>
+          <td><span class="badge-red">&gt; 5.8s</span></td>
+          <td>How fast the visible content is displayed overall</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="alert alert-info">
+    <span class="alert-icon">💡</span>
+    <div><strong>Run Lighthouse in Chrome:</strong> DevTools (<kbd>F12</kbd>) → Lighthouse tab → Check "Performance" → Analyze page load. Run it in Incognito mode to avoid extension interference. Run it multiple times and average the results — scores vary slightly each run.</div>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li>Lighthouse scores 0–100. Aim for 90+ (green) for each category.</li>
+      <li><strong>LCP &lt; 2.5s</strong> and <strong>CLS &lt; 0.1</strong> are the most impactful for user experience.</li>
+      <li>Run Lighthouse in Incognito mode to prevent browser extensions from skewing results.</li>
+      <li>Real-world users (different devices, networks) often see slower times than Lighthouse lab tests.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════ TOPIC 03 ════════ -->
+<section class="topic" id="t03">
+  <div class="topic-hdr">
+    <span class="t-num">03</span>
+    <h2>The Network Tab</h2>
+    <span class="difficulty diff-med">Why &amp; Measure</span>
+  </div>
+  <div class="theory">
+    <p>Chrome DevTools Network tab shows every resource your page loads — HTML, CSS, JavaScript, images, fonts, API calls — as a <strong>waterfall chart</strong>. Each row shows the timing breakdown for one request. This is your primary tool for diagnosing slow pages.</p>
+  </div>
+
+  <div class="demo-box">
+    <h4>Reading the Waterfall — Request Timing</h4>
+    <div class="waterfall">
+      <div style="color:#94a3b8;font-size:11px;margin-bottom:10px;letter-spacing:.05em">REQUEST TIMING PHASES</div>
+      <div class="wf-row">
+        <span class="wf-label">Queueing</span>
+        <div class="wf-bar-wrap">
+          <div class="wf-bar" style="background:#6b7280;left:0;width:5%"></div>
+        </div>
+        <span class="wf-time">Waiting for connection slot</span>
+      </div>
+      <div class="wf-row">
+        <span class="wf-label">DNS Lookup</span>
+        <div class="wf-bar-wrap">
+          <div class="wf-bar" style="background:#8b5cf6;left:5%;width:8%"></div>
+        </div>
+        <span class="wf-time">Resolving domain to IP address</span>
+      </div>
+      <div class="wf-row">
+        <span class="wf-label">Connect + SSL</span>
+        <div class="wf-bar-wrap">
+          <div class="wf-bar" style="background:#f59e0b;left:13%;width:12%"></div>
+        </div>
+        <span class="wf-time">TCP handshake + TLS negotiation</span>
+      </div>
+      <div class="wf-row">
+        <span class="wf-label">TTFB</span>
+        <div class="wf-bar-wrap">
+          <div class="wf-bar" style="background:#10b981;left:25%;width:20%"></div>
+        </div>
+        <span class="wf-time">Server processing + first byte</span>
+      </div>
+      <div class="wf-row">
+        <span class="wf-label">Download</span>
+        <div class="wf-bar-wrap">
+          <div class="wf-bar" style="background:#3b82f6;left:45%;width:55%"></div>
+        </div>
+        <span class="wf-time">Transfer the content bytes</span>
+      </div>
+    </div>
+    <div style="margin-top:12px;font-size:13px;color:var(--mu)">
+      <strong>TTFB (Time to First Byte)</strong> — the gap between sending a request and receiving the first byte of the response. High TTFB (green bar, &gt;600ms) means the server is slow. Long download (blue bar) means the file is too big.
+    </div>
+  </div>
+
+  <div class="demo-box">
+    <h4>Network Tab Tips</h4>
+    <ul style="padding-left:18px;font-size:14px;line-height:1.8">
+      <li><strong>Throttle the network</strong> — choose "Slow 4G" or "3G" to simulate mobile users.</li>
+      <li><strong>Sort by Size</strong> — find the biggest files dragging down your page.</li>
+      <li><strong>Filter by type</strong> — Img, JS, CSS to focus on one resource category.</li>
+      <li><strong>Check "Disable cache"</strong> — tests cold load (what new visitors experience).</li>
+      <li><strong>Look for red (4xx/5xx)</strong> — failed requests waste user time and may break features.</li>
+    </ul>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li>The waterfall shows: DNS → Connect → TTFB → Download for every resource.</li>
+      <li>High TTFB = slow server; large download = oversized file.</li>
+      <li>Sort by "Size" to find the biggest resources to optimize first.</li>
+      <li>Use Network throttling to simulate slow mobile connections.</li>
+      <li>Check "Disable cache" to test what a first-time visitor experiences.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════ TOPIC 04 ════════ -->
+<section class="topic" id="t04">
+  <div class="topic-hdr">
+    <span class="t-num">04</span>
+    <h2>Image Optimization</h2>
+    <span class="difficulty diff-easy">Assets</span>
+  </div>
+  <div class="theory">
+    <p>Images are typically the largest files on any web page — often 60–80% of total page weight. Optimizing images has the highest impact on performance of any single change you can make.</p>
+  </div>
+
+  <div class="demo-box">
+    <h4>Image Format Comparison</h4>
+    <table class="cmp-table">
+      <thead><tr><th>Format</th><th>Best For</th><th>Typical Size</th><th>Browser Support</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>JPEG / JPG</td>
+          <td>Photos, complex imagery</td>
+          <td>~200–500 KB</td>
+          <td><span class="badge-green">Universal</span></td>
+        </tr>
+        <tr>
+          <td>PNG</td>
+          <td>Transparency, simple graphics, logos</td>
+          <td>~50–300 KB</td>
+          <td><span class="badge-green">Universal</span></td>
+        </tr>
+        <tr>
+          <td>WebP</td>
+          <td>Photos &amp; graphics — replaces JPEG &amp; PNG</td>
+          <td>~30–60% smaller than JPEG</td>
+          <td><span class="badge-green">95%+ (all modern)</span></td>
+        </tr>
+        <tr>
+          <td>AVIF</td>
+          <td>Next-gen — best compression</td>
+          <td>~50% smaller than WebP</td>
+          <td><span class="badge-warn">Good (90%+)</span></td>
+        </tr>
+        <tr>
+          <td>SVG</td>
+          <td>Icons, logos, illustrations (scalable)</td>
+          <td>Very small (text-based)</td>
+          <td><span class="badge-green">Universal</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-bar"><span class="code-lang">HTML — Responsive images with srcset</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <div class="code-block"><code><span class="sc">&lt;!-- Basic WebP with JPEG fallback --&gt;</span>
+&lt;picture&gt;
+  &lt;source srcset="hero.webp" type="image/webp"&gt;
+  &lt;img src="hero.jpg" alt="Campus at sunrise" width="1200" height="600"&gt;
+&lt;/picture&gt;
+
+<span class="sc">&lt;!-- Responsive srcset: browser picks the right size --&gt;</span>
+&lt;img
+  src="photo-800.jpg"
+  srcset="photo-400.jpg 400w,
+          photo-800.jpg 800w,
+          photo-1200.jpg 1200w"
+  sizes="(max-width:600px) 100vw, 800px"
+  alt="Description of image"
+  width="800" height="400"&gt;
+
+<span class="sc">&lt;!-- Always specify width and height to prevent CLS --&gt;</span>
+&lt;img src="photo.jpg" alt="..." width="800" height="400"&gt;</code></div>
+  </div>
+
+  <div class="alert alert-info">
+    <span class="alert-icon">🔧</span>
+    <div><strong>Free Image Optimization Tools</strong><br>
+    <strong>Squoosh</strong> (squoosh.app) — browser-based, convert to WebP/AVIF and compare quality visually. <strong>TinyPNG</strong> (tinypng.com) — drag and drop, excellent compression. <strong>ImageOptim</strong> (Mac app) — batch processing. In VS Code: "Minify Images" or "WebP Converter" extensions.</div>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li>Images are usually 60–80% of page weight — optimize these first.</li>
+      <li><strong>WebP</strong> is the best choice for most web images — 25–34% smaller than JPEG, works in all modern browsers.</li>
+      <li>Use <code>srcset</code> and <code>sizes</code> to serve the right image size for each screen.</li>
+      <li>Always add <code>width</code> and <code>height</code> attributes on <code>&lt;img&gt;</code> to prevent CLS (layout shift).</li>
+      <li>Use <code>&lt;picture&gt;</code> with a WebP source and JPEG fallback for maximum compatibility.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════ TOPIC 05 ════════ -->
+<section class="topic" id="t05">
+  <div class="topic-hdr">
+    <span class="t-num">05</span>
+    <h2>Lazy Loading</h2>
+    <span class="difficulty diff-easy">Assets</span>
+  </div>
+  <div class="theory">
+    <p><strong>Lazy loading</strong> delays loading resources (images, iframes) until they are about to enter the viewport. Images below the fold don't load immediately — the browser loads them only as the user scrolls toward them. This dramatically reduces initial page weight.</p>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-bar"><span class="code-lang">HTML — Native lazy loading</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <div class="code-block"><code><span class="sc">&lt;!-- Native lazy loading — one attribute! --&gt;</span>
+&lt;img src="photo.webp" alt="Gallery photo"
+     loading="lazy" width="600" height="400"&gt;
+
+<span class="sc">&lt;!-- Also works for iframes --&gt;</span>
+&lt;iframe src="https://www.youtube.com/embed/xyz"
+        loading="lazy" title="Tutorial video"&gt;&lt;/iframe&gt;
+
+<span class="sc">&lt;!-- ❌ NEVER lazy-load the hero/above-fold image! --&gt;</span>
+&lt;!-- This delays your LCP and hurts your Lighthouse score --&gt;
+&lt;img src="hero.webp" alt="Hero" loading="lazy"&gt; &lt;!-- WRONG --&gt;
+
+<span class="sc">&lt;!-- ✅ Hero image: use eager (default) or fetchpriority --&gt;</span>
+&lt;img src="hero.webp" alt="Hero"
+     fetchpriority="high" width="1200" height="600"&gt;</code></div>
+  </div>
+
+  <div class="demo-box">
+    <h4>When to Lazy Load and When NOT to</h4>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;font-size:14px">
+      <div style="background:var(--limel);border:2px solid var(--lime);border-radius:8px;padding:14px">
+        <div style="font-weight:700;color:var(--lime);margin-bottom:8px">✅ Good to lazy load</div>
+        <ul style="padding-left:16px;line-height:1.8">
+          <li>Image galleries below the fold</li>
+          <li>Long blog post images</li>
+          <li>Product images in a long list</li>
+          <li>Embedded YouTube iframes</li>
+          <li>Map embeds lower on page</li>
+        </ul>
+      </div>
+      <div style="background:var(--corl);border:2px solid var(--cor);border-radius:8px;padding:14px">
+        <div style="font-weight:700;color:var(--cor);margin-bottom:8px">❌ Do NOT lazy load</div>
+        <ul style="padding-left:16px;line-height:1.8">
+          <li>Hero / banner image (above fold)</li>
+          <li>Logo in the header</li>
+          <li>Any image visible on load</li>
+          <li>Critical background images</li>
+          <li>First slide in a carousel</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li><code>loading="lazy"</code> on <code>&lt;img&gt;</code> and <code>&lt;iframe&gt;</code> — supported by all modern browsers.</li>
+      <li>Lazy loading defers off-screen resources until user scrolls near them.</li>
+      <li><strong>Never</strong> lazy load the hero image or any above-the-fold content — it delays LCP.</li>
+      <li>Use <code>fetchpriority="high"</code> on your most important above-fold image to prioritize it.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════ TOPIC 06 ════════ -->
+<section class="topic" id="t06">
+  <div class="topic-hdr">
+    <span class="t-num">06</span>
+    <h2>Minification</h2>
+    <span class="difficulty diff-easy">Assets</span>
+  </div>
+  <div class="theory">
+    <p><strong>Minification</strong> removes all whitespace, comments, and unnecessary characters from CSS and JavaScript files without changing how they work. The result is a smaller file that loads and parses faster.</p>
+  </div>
+
+  <div class="demo-box">
+    <h4>Before and After Minification</h4>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div>
+        <div class="demo-label">Before (readable, 287 bytes)</div>
+        <div class="code-block" style="border-radius:8px;font-size:11.5px"><code><span class="sc">/* Navigation styles */</span>
+<span class="stag">.nav</span> {
+  <span class="sattr">display</span>: <span class="sval">flex</span>;
+  <span class="sattr">align-items</span>: <span class="sval">center</span>;
+  <span class="sattr">background-color</span>: <span class="sval">#1a2340</span>;
+  <span class="sattr">padding</span>: <span class="sval">12px 24px</span>;
+}
+
+<span class="stag">.nav a</span> {
+  <span class="sattr">color</span>: <span class="sval">#ffffff</span>;
+  <span class="sattr">text-decoration</span>: <span class="sval">none</span>;
+  <span class="sattr">font-weight</span>: <span class="sval">600</span>;
+}</code></div>
+      </div>
+      <div>
+        <div class="demo-label">After minification (108 bytes, 62% smaller)</div>
+        <div class="code-block" style="border-radius:8px;font-size:11.5px"><code>.nav{display:flex;align-items:center;background-color:#1a2340;padding:12px 24px}.nav a{color:#fff;text-decoration:none;font-weight:600}</code></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-box">
+    <h4>Minification Tools &amp; Workflow</h4>
+    <table class="cmp-table">
+      <thead><tr><th>Tool / Method</th><th>Type</th><th>How to use</th></tr></thead>
+      <tbody>
+        <tr><td>cssnano</td><td>CSS (Node)</td><td><code>npm install cssnano</code> — integrates with PostCSS, webpack, Parcel</td></tr>
+        <tr><td>Terser</td><td>JS (Node)</td><td><code>npx terser input.js -o output.min.js</code></td></tr>
+        <tr><td>npm run build</td><td>Vite/React</td><td>Built-in minification — runs on every production build</td></tr>
+        <tr><td>CSS Minifier</td><td>CSS (online)</td><td>cssnano.co or cssminifier.com — paste and get minified output</td></tr>
+        <tr><td>VS Code Extension</td><td>Both</td><td>"JS &amp; CSS Minifier (Minify)" — right-click to minify</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="alert alert-info">
+    <span class="alert-icon">💡</span>
+    <div><strong>Modern frameworks do this for you</strong><br>
+    If you use Vite, Create React App, or Next.js — running <code>npm run build</code> automatically minifies all CSS and JS. You write readable code; the build tool creates optimized files for production. Always link the minified files in your deployed site, not the development files.</div>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li>Minification removes whitespace, comments, and shortens code — typically 40–70% smaller.</li>
+      <li>Use <code>file.min.css</code> and <code>file.min.js</code> naming convention for minified files.</li>
+      <li>Build tools (Vite, webpack, Parcel) minify automatically in production mode.</li>
+      <li>Combined with gzip/Brotli compression from the server, files can be 80–90% smaller than the original.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════ TOPIC 07 ════════ -->
+<section class="topic" id="t07">
+  <div class="topic-hdr">
+    <span class="t-num">07</span>
+    <h2>JavaScript Loading Strategy</h2>
+    <span class="difficulty diff-med">Loading Strategy</span>
+  </div>
+  <div class="theory">
+    <p>By default, when the browser encounters a <code>&lt;script&gt;</code> tag, it <strong>stops parsing HTML</strong>, downloads the script, executes it, then continues. This "render-blocking" behavior is the most common cause of slow page loads. Two attributes fix this: <code>defer</code> and <code>async</code>.</p>
+  </div>
+
+  <div class="demo-box">
+    <h4>defer vs async vs none — Execution Order Diagram</h4>
+    <div class="script-diagram">
+      <div class="sd-row">
+        <span class="sd-label">No attr:</span>
+        <span class="sd-parse" style="width:120px"></span>
+        <span style="color:#374151;font-size:10px"> PAUSE </span>
+        <span class="sd-fetch" style="width:60px"></span>
+        <span class="sd-exec" style="width:40px"></span>
+        <span class="sd-parse" style="width:80px;margin-left:4px"></span>
+      </div>
+      <div style="font-size:11px;color:#6b7280;margin-bottom:8px;padding-left:80px">
+        HTML parsing stops → fetch → execute → parsing resumes (SLOW)
+      </div>
+      <div class="sd-row">
+        <span class="sd-label">async:</span>
+        <span class="sd-parse" style="width:60px"></span>
+        <span class="sd-fetch" style="width:50px;position:relative;top:0;margin:0 4px"></span>
+        <span class="sd-parse" style="width:60px"></span>
+        <span style="color:#374151;font-size:10px"> PAUSE </span>
+        <span class="sd-exec" style="width:40px"></span>
+        <span class="sd-parse" style="width:40px;margin-left:4px"></span>
+      </div>
+      <div style="font-size:11px;color:#6b7280;margin-bottom:8px;padding-left:80px">
+        Fetch while parsing → execute when ready (unpredictable order)
+      </div>
+      <div class="sd-row">
+        <span class="sd-label">defer:</span>
+        <span class="sd-parse" style="width:200px"></span>
+        <span class="sd-exec" style="width:40px;margin-left:4px"></span>
+      </div>
+      <div style="font-size:11px;color:#6b7280;padding-left:80px">
+        Fetch in background → execute AFTER full HTML parse (BEST for most scripts)
+      </div>
+    </div>
+    <div class="sd-legend">
+      <span><span class="sd-dot" style="background:#2563eb"></span>HTML Parsing</span>
+      <span><span class="sd-dot" style="background:#d97706"></span>Script Fetch</span>
+      <span><span class="sd-dot" style="background:#dc2626"></span>Script Execute</span>
+      <span><span class="sd-dot" style="background:#374151;border:1px dashed #6b7280"></span>Blocked/Paused</span>
+    </div>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-bar"><span class="code-lang">HTML — Script loading attributes</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <div class="code-block"><code><span class="sc">&lt;!-- ❌ Default — blocks HTML parsing (render-blocking) --&gt;</span>
+&lt;script src="app.js"&gt;&lt;/script&gt;
+
+<span class="sc">&lt;!-- ✅ defer — fetches in background, runs AFTER HTML is fully parsed --&gt;</span>
+<span class="sc">&lt;!-- Preserves order: script1 runs before script2 --&gt;</span>
+<span class="sc">&lt;!-- Best choice for most scripts that need the DOM --&gt;</span>
+&lt;script src="app.js" defer&gt;&lt;/script&gt;
+
+<span class="sc">&lt;!-- async — fetches in background, runs as soon as downloaded --&gt;</span>
+<span class="sc">&lt;!-- Order NOT guaranteed — good for independent scripts (analytics) --&gt;</span>
+&lt;script src="analytics.js" async&gt;&lt;/script&gt;
+
+<span class="sc">&lt;!-- Always put scripts in &lt;head&gt; when using defer/async --&gt;</span>
+&lt;head&gt;
+  &lt;script src="app.js" defer&gt;&lt;/script&gt;
+  &lt;script src="analytics.js" async&gt;&lt;/script&gt;
+&lt;/head&gt;</code></div>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li>Default <code>&lt;script&gt;</code> in <code>&lt;head&gt;</code> blocks HTML parsing — major performance problem.</li>
+      <li><strong>defer</strong> — downloads in background, executes after DOM is ready, preserves order. Best for most scripts.</li>
+      <li><strong>async</strong> — downloads in background, executes as soon as ready, order not guaranteed. Good for analytics/ads.</li>
+      <li>Both <code>defer</code> and <code>async</code> are only meaningful for external scripts (with <code>src</code>).</li>
+      <li>Use <code>defer</code> as default. Use <code>async</code> only for scripts that don't depend on other scripts or the DOM.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════ TOPIC 08 ════════ -->
+<section class="topic" id="t08">
+  <div class="topic-hdr">
+    <span class="t-num">08</span>
+    <h2>Caching</h2>
+    <span class="difficulty diff-med">Loading Strategy</span>
+  </div>
+  <div class="theory">
+    <p>Browser caching stores a copy of resources (CSS, JS, images) locally. When a user revisits your site, the browser loads those resources from the local cache instead of downloading them again. This makes repeat visits dramatically faster — often instantaneous.</p>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-bar"><span class="code-lang">HTTP Headers — Cache-Control</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <div class="code-block"><code><span class="sc">/* Server response headers — set by your server (Apache/Nginx/Node) */</span>
+
+<span class="sc">// Cache for 1 year — for versioned files (CSS/JS with hash in filename)</span>
+Cache-Control: public, max-age=31536000, immutable
+
+<span class="sc">// Cache for 1 hour — for frequently updated content</span>
+Cache-Control: public, max-age=3600
+
+<span class="sc">// No cache — for HTML pages that must always be fresh</span>
+Cache-Control: no-store
+
+<span class="sc">/* Cache Busting — add version hash to filenames */</span>
+<span class="sc">/* When you update the file, the hash changes → new URL → browser downloads fresh */</span>
+&lt;link rel="stylesheet" href="styles.a3f9c2b1.css"&gt;
+&lt;script src="app.d8e4f2a9.js" defer&gt;&lt;/script&gt;
+
+<span class="sc">/* Build tools (Vite, webpack) add these hashes automatically */</span></code></div>
+  </div>
+
+  <div class="demo-box">
+    <h4>Caching Strategy by Resource Type</h4>
+    <table class="cmp-table">
+      <thead><tr><th>Resource</th><th>Cache Duration</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>HTML pages</td><td>No cache / short</td><td>Content changes; users need fresh HTML to get updated assets</td></tr>
+        <tr><td>CSS &amp; JS (versioned)</td><td>1 year (immutable)</td><td>Filename includes hash; changed file = new URL = fresh download</td></tr>
+        <tr><td>Images</td><td>1 month – 1 year</td><td>Images rarely change; long cache saves bandwidth</td></tr>
+        <tr><td>Fonts</td><td>1 year</td><td>Web fonts never change once deployed</td></tr>
+        <tr><td>API responses</td><td>Varies</td><td>Depends on data freshness requirements</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li>Browser caching stores resources locally — repeat visits load instantly from cache.</li>
+      <li><code>Cache-Control: max-age=31536000</code> — cache for 1 year (31,536,000 seconds).</li>
+      <li><strong>Cache busting</strong> — embed a hash in filenames (e.g., <code>app.d8e4f2.js</code>). Changed file = new URL = no stale cache.</li>
+      <li>Cache HTML with a short duration or no-cache — you want users to always get the latest HTML.</li>
+      <li>Build tools (Vite, webpack) handle cache busting automatically in production builds.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════ TOPIC 09 ════════ -->
+<section class="topic" id="t09">
+  <div class="topic-hdr">
+    <span class="t-num">09</span>
+    <h2>CDN (Content Delivery Network)</h2>
+    <span class="difficulty diff-med">Loading Strategy</span>
+  </div>
+  <div class="theory">
+    <p>A <strong>CDN</strong> is a network of servers distributed around the world. Instead of serving all users from one server (e.g., in Seoul), a CDN serves each user from the <em>nearest</em> server (called an "edge node"). This reduces latency by shortening the physical distance data must travel.</p>
+  </div>
+
+  <div class="demo-box">
+    <h4>Latency vs Distance — Without and With CDN</h4>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div style="background:var(--corl);border:1px solid var(--cor);border-radius:8px;padding:14px;font-size:13px">
+        <div style="font-weight:700;color:var(--cor);margin-bottom:8px">❌ Without CDN</div>
+        <div>User in New York → Seoul server<br>Distance: ~11,000 km<br>Round-trip latency: ~200–300ms<br>Multiple requests × 200ms = very slow</div>
+      </div>
+      <div style="background:var(--limel);border:1px solid var(--lime);border-radius:8px;padding:14px;font-size:13px">
+        <div style="font-weight:700;color:var(--lime);margin-bottom:8px">✅ With CDN</div>
+        <div>User in New York → CDN edge in New York<br>Distance: ~5 km<br>Round-trip latency: ~2–5ms<br>Same content, dramatically faster</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo-box">
+    <h4>Common CDNs You Already Use</h4>
+    <table class="cmp-table">
+      <thead><tr><th>CDN</th><th>Use Case</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td>Cloudflare</td><td>Full site CDN, DDoS protection, free tier available</td><td>cloudflare.com — point your domain DNS to Cloudflare</td></tr>
+        <tr><td>jsDelivr</td><td>Open-source libraries (npm packages)</td><td><code>cdn.jsdelivr.net/npm/bootstrap@5.3.0/</code></td></tr>
+        <tr><td>cdnjs</td><td>Popular JS libraries (jQuery, etc.)</td><td><code>cdnjs.cloudflare.com/ajax/libs/...</code></td></tr>
+        <tr><td>Google Fonts</td><td>Web fonts served globally</td><td>fonts.googleapis.com — already a CDN</td></tr>
+        <tr><td>AWS CloudFront</td><td>Professional site CDN (integrates with S3)</td><td>cloudfront.net — used by many production sites</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li>CDN = global network of servers that serve content from the nearest location to each user.</li>
+      <li>Reduces latency by shortening physical distance between server and user.</li>
+      <li>You already use CDNs when you load Bootstrap or jQuery from jsDelivr or cdnjs.</li>
+      <li>Cloudflare offers a free CDN tier — you just point your domain's DNS to them.</li>
+      <li>CDNs also provide automatic gzip/Brotli compression and additional caching.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════ TOPIC 10 ════════ -->
+<section class="topic" id="t10">
+  <div class="topic-hdr">
+    <span class="t-num">10</span>
+    <h2>Quick Wins Checklist</h2>
+    <span class="difficulty diff-easy">Loading Strategy</span>
+  </div>
+  <div class="theory">
+    <p>Apply these 10 optimizations to any web project for immediate performance gains. Prioritize by impact — the top items give the most improvement with the least effort. Click the checkboxes to track your progress.</p>
+  </div>
+
+  <div class="demo-box">
+    <h4>10 Performance Quick Wins — Click to check off</h4>
+    <ul class="wins-list" id="wins-list">
+      <li class="wins-item">
+        <div class="win-cb" onclick="toggleWin(this)"></div>
+        <div><strong>Convert images to WebP</strong> — use Squoosh or TinyPNG to convert all JPEG/PNG images to WebP. Saves 25–34% file size instantly.</div>
+        <span class="win-impact impact-high">HIGH</span>
+      </li>
+      <li class="wins-item">
+        <div class="win-cb" onclick="toggleWin(this)"></div>
+        <div><strong>Add loading="lazy" to below-fold images</strong> — one attribute defers images users haven't scrolled to yet.</div>
+        <span class="win-impact impact-high">HIGH</span>
+      </li>
+      <li class="wins-item">
+        <div class="win-cb" onclick="toggleWin(this)"></div>
+        <div><strong>Add defer to all &lt;script&gt; tags</strong> — prevents JavaScript from blocking HTML parsing. Huge impact on FCP.</div>
+        <span class="win-impact impact-high">HIGH</span>
+      </li>
+      <li class="wins-item">
+        <div class="win-cb" onclick="toggleWin(this)"></div>
+        <div><strong>Specify width and height on all images</strong> — prevents CLS (layout shift). Adds two attributes per image.</div>
+        <span class="win-impact impact-high">HIGH</span>
+      </li>
+      <li class="wins-item">
+        <div class="win-cb" onclick="toggleWin(this)"></div>
+        <div><strong>Minify CSS and JS</strong> — run your CSS/JS through a minifier before deploying. 40–70% smaller files.</div>
+        <span class="win-impact impact-med">MED</span>
+      </li>
+      <li class="wins-item">
+        <div class="win-cb" onclick="toggleWin(this)"></div>
+        <div><strong>Load external libraries from a CDN</strong> — jsDelivr or cdnjs serve popular libraries from global edge nodes.</div>
+        <span class="win-impact impact-med">MED</span>
+      </li>
+      <li class="wins-item">
+        <div class="win-cb" onclick="toggleWin(this)"></div>
+        <div><strong>Use Google Fonts display=swap</strong> — add <code>&amp;display=swap</code> to your Fonts URL to prevent invisible text during load.</div>
+        <span class="win-impact impact-med">MED</span>
+      </li>
+      <li class="wins-item">
+        <div class="win-cb" onclick="toggleWin(this)"></div>
+        <div><strong>Remove unused CSS</strong> — tools like PurgeCSS or the Chrome Coverage tab show unused rules. Large frameworks often ship 90% unused CSS.</div>
+        <span class="win-impact impact-med">MED</span>
+      </li>
+      <li class="wins-item">
+        <div class="win-cb" onclick="toggleWin(this)"></div>
+        <div><strong>Preload key resources</strong> — add <code>&lt;link rel="preload"&gt;</code> for your hero image and main font to start downloading them immediately.</div>
+        <span class="win-impact impact-med">MED</span>
+      </li>
+      <li class="wins-item">
+        <div class="win-cb" onclick="toggleWin(this)"></div>
+        <div><strong>Enable server compression (gzip/Brotli)</strong> — most web hosts support this via a one-line config. Text files compress 70–90%.</div>
+        <span class="win-impact impact-high">HIGH</span>
+      </li>
+    </ul>
+    <div style="margin-top:10px;font-size:13px;color:var(--mu)" id="wins-count">0 / 10 completed</div>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li>Images + JS loading + defer attributes = the three highest-impact quick wins.</li>
+      <li>Most optimizations are one-line changes to HTML or one tool to run on assets.</li>
+      <li>Measure before and after with Lighthouse to quantify your improvement.</li>
+      <li>Target: Lighthouse Performance score ≥ 80 for student projects, ≥ 90 for production sites.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════ EXERCISES ════════ -->
+<section id="exercises">
+  <h1>Practice Exercises</h1>
+  <p class="ex-intro">Write code in the left panel. Click <strong>Run</strong> to see the result live. Use hints if stuck.</p>
+
+  <!-- E1 -->
+  <div class="exercise" id="ex1">
+    <div class="ex-header">
+      <span class="ex-num">E1</span>
+      <h3>Run Lighthouse &amp; Read the Results</h3>
+      <span class="difficulty diff-easy">Beginner</span>
+    </div>
+    <div class="ex-body">
+      <div class="task-box">
+        <strong>Task:</strong> Run a Lighthouse Performance audit on this practice page, then answer the questions below.
+        <ul>
+          <li>Open Chrome DevTools → Lighthouse tab</li>
+          <li>Check only "Performance" (uncheck others for speed)</li>
+          <li>Run the audit and note your score</li>
+          <li>Find the metric with the worst (highest) value and identify what is causing it</li>
+          <li>In the editor, build a simple HTML page and optimize it to score higher</li>
+        </ul>
+      </div>
+      <div class="editor-row">
+        <textarea id="ex1-editor" spellcheck="false">&lt;!DOCTYPE html&gt;
+&lt;html&gt;&lt;head&gt;
+&lt;meta charset="UTF-8"&gt;
+&lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+&lt;title&gt;Performance Practice Page&lt;/title&gt;
+
+&lt;!-- PROBLEM 1: render-blocking script in &lt;head&gt; --&gt;
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"&gt;&lt;/script&gt;
+
+&lt;style&gt;
+  body { font-family: system-ui; padding: 24px; max-width: 600px; margin: auto; }
+  img { width: 100%; border-radius: 8px; margin: 12px 0; }
+  h2 { color: #e85d04; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Performance Test Page&lt;/h1&gt;
+  &lt;p&gt;This page has performance issues. Fix them!&lt;/p&gt;
+
+  &lt;!-- PROBLEM 2: Large image with no dimensions and no lazy loading --&gt;
+  &lt;img src="https://picsum.photos/1200/800" alt="Random photo from Lorem Picsum"&gt;
+  &lt;img src="https://picsum.photos/1200/801" alt="Random photo 2"&gt;
+  &lt;img src="https://picsum.photos/1200/802" alt="Random photo 3"&gt;
+
+  &lt;h2&gt;YOUR FIXES:&lt;/h2&gt;
+  &lt;p&gt;Add defer to the script, add loading="lazy" to below-fold images, add width/height attributes.&lt;/p&gt;
+&lt;/body&gt;&lt;/html&gt;</textarea>
+        <iframe id="ex1-frame"></iframe>
+      </div>
+      <div class="ex-btns">
+        <button class="btn-run" onclick="runEx('ex1')">▶ Run</button>
+        <button class="btn-hint" onclick="toggleHint('ex1')">💡 Hint</button>
+        <button class="btn-sol" onclick="toggleSol('ex1')">✅ Solution</button>
+      </div>
+      <div class="hint-box" id="ex1-hint">
+        <strong>Hint:</strong> Add <code>defer</code> to the script tag. Add <code>loading="lazy"</code> to the 2nd and 3rd images (not the first!). Add <code>width="1200" height="800"</code> to all images to prevent layout shift.
+      </div>
+      <div class="sol-box" id="ex1-sol">
+        <div class="code-wrap"><div class="code-bar"><span class="code-lang">Solution — key fixes</span></div>
+        <div class="code-block"><code><span class="sc">&lt;!-- Fix 1: Add defer to script --&gt;</span>
+&lt;script src="...jquery.min.js" defer&gt;&lt;/script&gt;
+
+<span class="sc">&lt;!-- Fix 2: First image — no lazy (above fold), add dimensions --&gt;</span>
+&lt;img src="https://picsum.photos/1200/800"
+     alt="Random photo" width="1200" height="800"&gt;
+
+<span class="sc">&lt;!-- Fix 3: Below-fold images — add lazy + dimensions --&gt;</span>
+&lt;img src="https://picsum.photos/1200/801"
+     alt="Random photo 2" loading="lazy"
+     width="1200" height="800"&gt;
+&lt;img src="https://picsum.photos/1200/802"
+     alt="Random photo 3" loading="lazy"
+     width="1200" height="800"&gt;</code></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- E2 -->
+  <div class="exercise" id="ex2">
+    <div class="ex-header">
+      <span class="ex-num">E2</span>
+      <h3>Compare Image Formats (WebP vs JPEG)</h3>
+      <span class="difficulty diff-easy">Beginner</span>
+    </div>
+    <div class="ex-body">
+      <div class="task-box">
+        <strong>Task:</strong> Use the <code>&lt;picture&gt;</code> element to serve WebP with a JPEG fallback, and use <code>srcset</code> for responsive images.
+        <ul>
+          <li>Wrap an image in <code>&lt;picture&gt;</code> with a WebP <code>&lt;source&gt;</code></li>
+          <li>Add a JPEG <code>&lt;img&gt;</code> as the fallback</li>
+          <li>Add <code>srcset</code> with two sizes (400w and 800w)</li>
+          <li>Add <code>width</code>, <code>height</code>, and a descriptive <code>alt</code></li>
+          <li>Bonus: add <code>fetchpriority="high"</code> if this is the hero image</li>
+        </ul>
+      </div>
+      <div class="editor-row">
+        <textarea id="ex2-editor" spellcheck="false">&lt;!DOCTYPE html&gt;
+&lt;html&gt;&lt;body style="font-family:system-ui;padding:24px;max-width:500px;margin:auto"&gt;
+  &lt;h2&gt;Image Format Practice&lt;/h2&gt;
+
+  &lt;!-- TASK: Replace this simple &lt;img&gt; with a proper &lt;picture&gt; element --&gt;
+  &lt;!-- Use: WebP source + JPEG fallback + srcset + alt + width + height --&gt;
+  &lt;img src="https://picsum.photos/800/400" alt="Photo"&gt;
+
+  &lt;!-- The &lt;picture&gt; element structure:
+  &lt;picture&gt;
+    &lt;source srcset="image.webp" type="image/webp"&gt;
+    &lt;img src="image.jpg" alt="..." width="800" height="400"&gt;
+  &lt;/picture&gt;
+  --&gt;
+
+  &lt;!-- For the srcset version:
+  &lt;img
+    src="photo-800.jpg"
+    srcset="photo-400.jpg 400w, photo-800.jpg 800w"
+    sizes="(max-width: 480px) 400px, 800px"
+    alt="Descriptive text"
+    width="800" height="400"
+  &gt;
+  --&gt;
+
+  &lt;p style="margin-top:12px;font-size:13px;color:#666"&gt;
+    Open Network tab, reload, and check the image size. With real WebP files,
+    you'd see 25-34% smaller file sizes vs JPEG.
+  &lt;/p&gt;
+&lt;/body&gt;&lt;/html&gt;</textarea>
+        <iframe id="ex2-frame"></iframe>
+      </div>
+      <div class="ex-btns">
+        <button class="btn-run" onclick="runEx('ex2')">▶ Run</button>
+        <button class="btn-hint" onclick="toggleHint('ex2')">💡 Hint</button>
+        <button class="btn-sol" onclick="toggleSol('ex2')">✅ Solution</button>
+      </div>
+      <div class="hint-box" id="ex2-hint">
+        <strong>Hint:</strong> Wrap the image in <code>&lt;picture&gt;</code>. Inside, add <code>&lt;source srcset="image.webp" type="image/webp"&gt;</code> before the <code>&lt;img&gt;</code> tag. The browser picks the source it supports — WebP first, JPEG as fallback.
+      </div>
+      <div class="sol-box" id="ex2-sol">
+        <div class="code-wrap"><div class="code-bar"><span class="code-lang">Solution</span></div>
+        <div class="code-block"><code>&lt;picture&gt;
+  &lt;source
+    srcset="photo-400.webp 400w, photo-800.webp 800w"
+    sizes="(max-width: 480px) 400px, 800px"
+    type="image/webp"&gt;
+  &lt;img
+    src="https://picsum.photos/800/400"
+    srcset="https://picsum.photos/400/200 400w,
+            https://picsum.photos/800/400 800w"
+    sizes="(max-width: 480px) 400px, 800px"
+    alt="Scenic landscape photo — practice example"
+    width="800" height="400"
+    fetchpriority="high"&gt;
+&lt;/picture&gt;</code></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- E3 -->
+  <div class="exercise" id="ex3">
+    <div class="ex-header">
+      <span class="ex-num">E3</span>
+      <h3>Add defer to Scripts — Before &amp; After</h3>
+      <span class="difficulty diff-easy">Beginner</span>
+    </div>
+    <div class="ex-body">
+      <div class="task-box">
+        <strong>Task:</strong> Fix the script loading order in the HTML below. The page loads two scripts that block rendering.
+        <ul>
+          <li>Add <code>defer</code> to the main app script (it uses the DOM)</li>
+          <li>Add <code>async</code> to the analytics script (independent, no DOM needed)</li>
+          <li>Move both scripts to <code>&lt;head&gt;</code> — with defer/async, this is the right place</li>
+          <li>Verify the page still works — defer runs scripts after DOM is parsed</li>
+        </ul>
+      </div>
+      <div class="editor-row">
+        <textarea id="ex3-editor" spellcheck="false">&lt;!DOCTYPE html&gt;
+&lt;html&gt;&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title&gt;Script Loading Demo&lt;/title&gt;
+  &lt;style&gt;
+    body { font-family:system-ui; padding:20px; }
+    #status { padding:12px; border-radius:8px; margin-top:12px; font-size:14px; }
+    .ok { background:#dcfce7; color:#16a34a; }
+    .pending { background:#fef3c7; color:#d97706; }
+  &lt;/style&gt;
+
+  &lt;!-- PROBLEM: These scripts block HTML rendering --&gt;
+  &lt;!-- FIX: Add defer to app-script, async to analytics --&gt;
+  &lt;script&gt;
+    // Simulate a heavy script (blocks for 200ms)
+    const start = Date.now();
+    while(Date.now() - start &lt; 50) {} // simulated blocking
+    console.log('Main script loaded (should be deferred)');
+  &lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h2&gt;Script Loading Test&lt;/h2&gt;
+  &lt;p&gt;With defer, the DOM is ready when scripts run. Without defer, scripts block the page.&lt;/p&gt;
+  &lt;div id="status" class="pending"&gt;Waiting for script...&lt;/div&gt;
+
+  &lt;!-- MOVE this script to &lt;head&gt; with defer when you fix it --&gt;
+  &lt;script&gt;
+    // This script modifies the DOM — needs defer
+    document.getElementById('status').textContent =
+      '✅ DOM was ready when this script ran (add defer to verify)';
+    document.getElementById('status').className = 'status ok';
+  &lt;/script&gt;
+&lt;/body&gt;&lt;/html&gt;</textarea>
+        <iframe id="ex3-frame"></iframe>
+      </div>
+      <div class="ex-btns">
+        <button class="btn-run" onclick="runEx('ex3')">▶ Run</button>
+        <button class="btn-hint" onclick="toggleHint('ex3')">💡 Hint</button>
+        <button class="btn-sol" onclick="toggleSol('ex3')">✅ Solution</button>
+      </div>
+      <div class="hint-box" id="ex3-hint">
+        <strong>Hint:</strong> Move the inline scripts to external <code>.js</code> files to use <code>defer</code>. For inline scripts, the workaround is to use <code>DOMContentLoaded</code> event: <code>document.addEventListener('DOMContentLoaded', () =&gt; { ... })</code>. This fires after the DOM is ready, similar to what <code>defer</code> does for external scripts.
+      </div>
+      <div class="sol-box" id="ex3-sol">
+        <div class="code-wrap"><div class="code-bar"><span class="code-lang">Solution — defer + DOMContentLoaded</span></div>
+        <div class="code-block"><code>&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title&gt;Script Loading Demo&lt;/title&gt;
+  &lt;!-- External scripts: use defer/async --&gt;
+  &lt;script src="app.js" defer&gt;&lt;/script&gt;
+  &lt;script src="analytics.js" async&gt;&lt;/script&gt;
+
+  &lt;!-- Inline scripts: use DOMContentLoaded --&gt;
+  &lt;script&gt;
+    document.addEventListener('DOMContentLoaded', () =&gt; {
+      document.getElementById('status').textContent =
+        '✅ DOM ready — script ran after parse!';
+      document.getElementById('status').className = 'status ok';
+    });
+  &lt;/script&gt;
+&lt;/head&gt;</code></div></div>
+      </div>
+    </div>
+  </div>
+
+</section><!-- /exercises -->
+
+<!-- ════════ HOMEWORK ════════ -->
+<section id="homework" style="margin-top:56px;padding-top:44px;border-top:1px solid var(--brd)">
+  <div class="topic-hdr">
+    <span class="t-num" style="background:var(--warn);color:#fff">HW</span>
+    <h2>Homework Assignment</h2>
+  </div>
+  <div class="task-box" style="margin-bottom:20px">
+    <strong>Goal:</strong> Optimize your team project to achieve a Lighthouse Performance score of 80 or higher. Document 5 specific changes you made.
+    <ul style="margin-top:10px">
+      <li><strong>Step 1:</strong> Run Lighthouse Performance on your current project. Screenshot the score and the metric breakdown.</li>
+      <li><strong>Step 2:</strong> Identify the 5 biggest issues. The Lighthouse report lists "Opportunities" (resource savings) — start there.</li>
+      <li><strong>Step 3:</strong> Apply at least 5 optimizations from today's topics. Suggested: image WebP conversion, lazy loading, defer on scripts, minify CSS, add image dimensions.</li>
+      <li><strong>Step 4:</strong> Run Lighthouse again. Screenshot the improved score.</li>
+      <li><strong>Step 5:</strong> Submit a report (PDF/Google Doc) with:<br>
+        — Before screenshot (score + biggest issues)<br>
+        — List of 5 changes made (with code snippets)<br>
+        — After screenshot (improved score)<br>
+        — Reflection: which change had the most impact and why?</li>
+    </ul>
+  </div>
+  <div class="alert alert-brand">
+    <span class="alert-icon">🎯</span>
+    <div><strong>Target:</strong> Lighthouse Performance score ≥ 80. Bonus: reach 90+. Due before next Monday. If your project is already fast, achieve it and explain what was already done right.</div>
+  </div>
+</section>
+
+<footer id="site-footer">
+  <p>K0126002 · Web Programming · Gachon University · Week 7 Friday</p>
+  <p style="margin-top:4px">Web Performance Optimization — Study Guide</p>
+</footer>
+
+</main>
+</div><!-- /layout -->
+
+<script>
+/* ─── Theme ─── */
+function toggleTheme() {
+  const r = document.documentElement;
+  const isDark = r.dataset.theme === 'dark';
+  r.dataset.theme = isDark ? 'light' : 'dark';
+  document.getElementById('theme-toggle').textContent = isDark ? '🌙 Dark' : '☀️ Light';
+  try { localStorage.setItem('w7fri-theme', r.dataset.theme); } catch(e){}
+}
+try {
+  const s = localStorage.getItem('w7fri-theme');
+  if (s) {
+    document.documentElement.dataset.theme = s;
+    document.getElementById('theme-toggle').textContent = s === 'dark' ? '☀️ Light' : '🌙 Dark';
+  }
+} catch(e){}
+
+/* ─── Sidebar ─── */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+/* ─── Progress bar ─── */
+window.addEventListener('scroll', () => {
+  const d = document.documentElement;
+  const pct = d.scrollTop / (d.scrollHeight - d.clientHeight) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+});
+
+/* ─── Active nav link ─── */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      document.querySelectorAll('#sidebar nav a').forEach(a => a.classList.remove('active'));
+      const id = e.target.id;
+      const link = document.querySelector(`#sidebar nav a[href="#${id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+document.querySelectorAll('.topic, .exercise, #exercises, #homework').forEach(s => observer.observe(s));
+
+/* ─── Copy code ─── */
+function copyCode(btn) {
+  const code = btn.closest('.code-wrap').querySelector('code').innerText;
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+/* ─── Quick wins checkboxes ─── */
+function toggleWin(el) {
+  el.classList.toggle('checked');
+  el.textContent = el.classList.contains('checked') ? '✓' : '';
+  const total = document.querySelectorAll('.win-cb').length;
+  const done = document.querySelectorAll('.win-cb.checked').length;
+  document.getElementById('wins-count').textContent = `${done} / ${total} completed`;
+}
+
+/* ─── Exercise runner ─── */
+function runEx(id) {
+  const src = document.getElementById(id + '-editor').value;
+  document.getElementById(id + '-frame').srcdoc = src;
+}
+function toggleHint(id) {
+  const h = document.getElementById(id + '-hint');
+  h.style.display = h.style.display === 'block' ? 'none' : 'block';
+}
+function toggleSol(id) {
+  const s = document.getElementById(id + '-sol');
+  s.style.display = s.style.display === 'block' ? 'none' : 'block';
+}
+</script>
+</body>
+</html>

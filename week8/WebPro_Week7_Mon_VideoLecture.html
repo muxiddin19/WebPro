@@ -1,0 +1,936 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Web Accessibility (A11y) — Video Lecture</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+:root {
+  --dark: #0f172a; --navy: #1e3a5f; --green: #1a7f5a; --teal: #0891b2;
+  --lime: #16a34a; --red: #dc2626; --amber: #d97706;
+  --jsyel: #f7df1e; --text: #f1f5f9; --sub: #94a3b8; --bdr: rgba(255,255,255,.12);
+  --code-bg: #0d1117; --code-txt: #e6edf3;
+  --a11y: #1a7f5a; --a11ybr: rgba(26,127,90,.25); --a11ylt: #34d399;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; font-family: Inter, sans-serif; background: #000; }
+
+/* ── PLAYER SHELL ─── */
+#player { display: flex; flex-direction: column; width: 100%; height: 100vh; }
+#player.notes-open { flex-direction: row; }
+
+#slide-area { flex: 1; position: relative; overflow: hidden; }
+#player.notes-open #slide-area { flex: 0 0 65%; }
+
+/* ── SLIDES ─── */
+.slide { display: none; position: absolute; inset: 0; padding: 0; }
+.slide.active { display: flex; flex-direction: column; }
+
+/* Chapter badge */
+.chapter-tag { position: absolute; top: 20px; right: 24px; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: rgba(255,255,255,.1); color: var(--sub); }
+
+/* Title slide */
+.s-title { background: var(--dark); align-items: center; justify-content: center; text-align: center; }
+.s-title .big-badge { font-size: 13px; font-weight: 700; letter-spacing: .12em; background: var(--a11y); color: #fff; padding: 6px 16px; border-radius: 20px; margin-bottom: 28px; text-transform: uppercase; }
+.s-title h1 { font-size: 42px; font-weight: 800; color: var(--text); line-height: 1.15; margin-bottom: 12px; }
+.s-title .sub { font-size: 20px; color: var(--sub); margin-bottom: 40px; }
+.s-title .meta { font-size: 14px; color: #475569; }
+
+/* Chapter divider */
+.s-chapter { justify-content: center; align-items: center; text-align: center; }
+.s-chapter .ch-num { font-size: 13px; font-weight: 600; letter-spacing: .12em; color: var(--sub); margin-bottom: 12px; }
+.s-chapter h2 { font-size: 36px; font-weight: 800; color: var(--text); line-height: 1.2; }
+.s-chapter p { font-size: 16px; color: var(--sub); margin-top: 12px; }
+
+/* Content slides */
+.s-content { padding: 40px 52px; }
+.s-content.dark-bg { background: var(--dark); color: var(--text); }
+.s-content.navy-bg { background: var(--navy); color: var(--text); }
+.s-content.code-bg { background: #0a0e1a; color: var(--text); }
+.s-content.green-bg { background: linear-gradient(135deg, #052e16, #064e3b); color: var(--text); }
+.s-content .slide-title { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+.s-content .slide-sub { font-size: 15px; color: var(--sub); margin-bottom: 28px; }
+
+/* Analogy card */
+.analogy { background: var(--a11ybr); border-left: 4px solid var(--a11y); padding: 14px 16px; border-radius: 0 8px 8px 0; margin-bottom: 20px; font-size: 15px; line-height: 1.6; }
+.analogy strong { color: var(--a11ylt); }
+
+/* Code block */
+.code-box { background: var(--code-bg); border-radius: 10px; padding: 20px 22px; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.8; color: var(--code-txt); overflow-x: auto; position: relative; }
+.code-box .cm { color: #8b949e; }
+.code-box .ck { color: #ff7b72; }
+.code-box .cs { color: #a5d6ff; }
+.code-box .cn { color: #79c0ff; }
+.code-box .cf { color: #d2a8ff; }
+.code-box .cv { color: #ffa657; }
+.code-box .ctag { color: #7ee787; }
+.code-box .cattr { color: #79c0ff; }
+.code-box .cval { color: #a5d6ff; }
+
+/* Step-reveal lines */
+.code-box .line { opacity: .18; transition: opacity .4s; }
+.code-box .line.show { opacity: 1; }
+.code-box .line.hl { background: rgba(26,127,90,.18); border-radius: 3px; }
+
+/* Output box */
+.output-box { background: #1a2540; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: 14px 18px; font-family: 'Courier New', monospace; font-size: 13px; color: #80ff90; margin-top: 12px; }
+.output-box .out-label { font-family: Inter, sans-serif; font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: #4ade80; margin-bottom: 6px; font-weight: 600; }
+
+/* Two/Three column layouts */
+.cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.cols3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+/* WCAG level cards */
+.wcag-card { border-radius: 10px; padding: 20px; text-align: center; }
+.wcag-card.level-a { background: rgba(220,38,38,.15); border: 1px solid #dc2626; }
+.wcag-card.level-aa { background: rgba(217,119,6,.15); border: 1px solid var(--amber); }
+.wcag-card.level-aaa { background: rgba(22,163,74,.15); border: 1px solid var(--lime); }
+.wcag-level-num { font-size: 36px; font-weight: 800; margin-bottom: 8px; }
+.wcag-card.level-a .wcag-level-num { color: #f87171; }
+.wcag-card.level-aa .wcag-level-num { color: #fbbf24; }
+.wcag-card.level-aaa .wcag-level-num { color: #4ade80; }
+.wcag-level-name { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+.wcag-level-desc { font-size: 12px; color: var(--sub); line-height: 1.5; }
+
+/* Info rows */
+.info-row { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 16px; }
+.info-dot { width: 28px; height: 28px; min-width: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+.info-dot.green { background: rgba(26,127,90,.25); color: var(--a11ylt); }
+.info-dot.blue { background: rgba(14,165,233,.25); color: #38bdf8; }
+.info-dot.red { background: rgba(220,38,38,.25); color: #f87171; }
+.info-dot.amber { background: rgba(217,119,6,.25); color: #fbbf24; }
+.info-body { flex: 1; }
+.info-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.info-desc { font-size: 13px; color: var(--sub); line-height: 1.5; }
+
+/* Warning box */
+.warn-box { background: rgba(220,38,38,.12); border: 1px solid rgba(220,38,38,.4); border-radius: 8px; padding: 14px 16px; font-size: 14px; line-height: 1.6; }
+.warn-box .warn-head { font-weight: 700; color: #f87171; margin-bottom: 6px; }
+
+/* Good box */
+.good-box { background: rgba(26,127,90,.12); border: 1px solid rgba(26,127,90,.4); border-radius: 8px; padding: 14px 16px; font-size: 14px; line-height: 1.6; }
+.good-box .good-head { font-weight: 700; color: var(--a11ylt); margin-bottom: 6px; }
+
+/* Reveal items */
+.reveal-list { list-style: none; padding: 0; }
+.reveal-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; border-radius: 8px; margin-bottom: 8px; background: rgba(255,255,255,.04); border: 1px solid var(--bdr); opacity: 0; transform: translateY(10px); transition: opacity .4s, transform .4s; }
+.reveal-item.show { opacity: 1; transform: translateY(0); }
+.reveal-icon { font-size: 20px; flex-shrink: 0; }
+.reveal-text { flex: 1; }
+.reveal-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.reveal-desc { font-size: 13px; color: var(--sub); line-height: 1.5; }
+
+/* Stat display */
+.big-stat { text-align: center; padding: 24px; }
+.big-num { font-size: 80px; font-weight: 800; line-height: 1; color: var(--a11ylt); }
+.big-label { font-size: 20px; color: var(--sub); margin-top: 8px; }
+
+/* Comparison table */
+.cmp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.cmp-table th { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--bdr); font-size: 11px; color: var(--sub); text-transform: uppercase; letter-spacing: .07em; }
+.cmp-table td { padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,.06); vertical-align: top; line-height: 1.5; font-size: 13px; }
+.cmp-table td:first-child { font-weight: 600; color: #f1f5f9; }
+.badge-red { background: rgba(220,38,38,.2); color: #f87171; border-radius: 4px; padding: 1px 6px; font-size: 11px; }
+.badge-green { background: rgba(26,127,90,.25); color: #4ade80; border-radius: 4px; padding: 1px 6px; font-size: 11px; }
+
+/* Contrast demo */
+.contrast-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 12px 0; }
+.contrast-chip { padding: 10px 18px; border-radius: 8px; font-size: 14px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.chip-ratio { font-size: 11px; font-weight: 700; margin-top: 4px; }
+.chip-verdict { font-size: 10px; letter-spacing: .05em; text-transform: uppercase; }
+
+/* Summary grid */
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sg-bad { background: rgba(220,38,38,.1); border: 1px solid rgba(220,38,38,.3); border-radius: 8px; padding: 14px; }
+.sg-good { background: rgba(26,127,90,.1); border: 1px solid rgba(26,127,90,.3); border-radius: 8px; padding: 14px; }
+.sg-head { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px; }
+.sg-bad .sg-head { color: #f87171; }
+.sg-good .sg-head { color: #4ade80; }
+.sg-item { font-size: 13px; color: var(--sub); padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,.06); line-height: 1.4; }
+.sg-item:last-child { border-bottom: none; }
+
+/* Checklist steps */
+.steps { list-style: none; padding: 0; }
+.step { display: flex; align-items: flex-start; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--bdr); }
+.step-num { width: 28px; height: 28px; min-width: 28px; border-radius: 50%; background: var(--a11ybr); border: 1px solid var(--a11y); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--a11ylt); }
+.step-body { flex: 1; font-size: 14px; line-height: 1.5; }
+.step-body strong { color: var(--text); display: block; margin-bottom: 2px; }
+.step-body span { color: var(--sub); font-size: 13px; }
+
+/* ── CONTROLS ─── */
+.controls { background: #0a0a0a; border-top: 1px solid #1e1e1e; padding: 10px 20px; display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+.btn-ctrl { background: #1e1e1e; border: none; color: #ccc; border-radius: 6px; padding: 7px 14px; font-size: 13px; cursor: pointer; transition: background .15s; }
+.btn-ctrl:hover { background: #2e2e2e; }
+.btn-ctrl.active { background: var(--a11y); color: #fff; }
+.slide-counter { font-size: 13px; color: #555; margin: 0 4px; }
+.progress-track { flex: 1; height: 4px; background: #222; border-radius: 2px; cursor: pointer; }
+.progress-fill { height: 4px; background: var(--a11y); border-radius: 2px; transition: width .5s; }
+.timer-bar { height: 3px; background: #333; border-radius: 1px; margin-top: 2px; }
+.timer-fill { height: 3px; background: var(--a11ylt); border-radius: 1px; transition: width .1s linear; }
+
+/* ── NOTES PANEL ─── */
+#notes-panel { display: none; flex: 1; background: #0e1219; border-left: 1px solid #1e2432; overflow-y: auto; padding: 32px 28px; }
+#player.notes-open #notes-panel { display: block; }
+#notes-panel h3 { font-size: 14px; font-weight: 700; color: var(--sub); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 16px; }
+#notes-text { font-size: 15px; color: #c9d1d9; line-height: 1.8; }
+#notes-text p { margin-bottom: 12px; }
+#notes-text strong { color: var(--text); }
+</style>
+</head>
+<body>
+
+<div id="player">
+  <div id="slide-area">
+
+    <!-- S1: Title -->
+    <div class="slide s-title active" style="background: linear-gradient(135deg, #0f172a 0%, #052e16 60%, #064e3b 100%);">
+      <div class="big-badge">Web Programming · Week 7 · Monday</div>
+      <h1>Web Accessibility<br><span style="color:var(--a11ylt)">(A11y)</span></h1>
+      <p class="sub">Building an Inclusive Web for Everyone</p>
+      <p class="meta">Gachon University · K0126002 · Fall 2026</p>
+    </div>
+
+    <!-- S2: Who uses the web? -->
+    <div class="slide s-content dark-bg">
+      <div class="slide-title">Who Uses the Web?</div>
+      <div class="slide-sub">More people than you might think — in more ways than you might imagine</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+        <ul class="reveal-list">
+          <li class="reveal-item" id="r2-1">
+            <span class="reveal-icon">👁️</span>
+            <div class="reveal-text">
+              <div class="reveal-title">Visual impairment</div>
+              <div class="reveal-desc">Screen readers, magnification, high contrast mode. Cannot rely on visual layout.</div>
+            </div>
+          </li>
+          <li class="reveal-item" id="r2-2">
+            <span class="reveal-icon">🤝</span>
+            <div class="reveal-text">
+              <div class="reveal-title">Motor disability</div>
+              <div class="reveal-desc">Keyboard only, switch access, voice control. Cannot use a mouse reliably.</div>
+            </div>
+          </li>
+        </ul>
+        <ul class="reveal-list">
+          <li class="reveal-item" id="r2-3">
+            <span class="reveal-icon">🧠</span>
+            <div class="reveal-text">
+              <div class="reveal-title">Cognitive differences</div>
+              <div class="reveal-desc">Dyslexia, ADHD, autism. Need clear structure, plain language, no flashing.</div>
+            </div>
+          </li>
+          <li class="reveal-item" id="r2-4">
+            <span class="reveal-icon">👂</span>
+            <div class="reveal-text">
+              <div class="reveal-title">Hearing impairment</div>
+              <div class="reveal-desc">Need captions on video, visual alerts instead of audio cues.</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div class="big-stat" id="r2-5" style="opacity:0;transition:opacity .5s;background:rgba(26,127,90,.1);border:1px solid rgba(26,127,90,.3);border-radius:10px;padding:16px">
+          <div class="big-num" style="font-size:44px">1B+</div>
+          <div class="big-label" style="font-size:13px">people with disabilities worldwide</div>
+        </div>
+        <div class="big-stat" id="r2-6" style="opacity:0;transition:opacity .5s;background:rgba(217,119,6,.1);border:1px solid rgba(217,119,6,.3);border-radius:10px;padding:16px">
+          <div class="big-num" style="font-size:44px;color:#fbbf24">15%</div>
+          <div class="big-label" style="font-size:13px">of the world's population</div>
+        </div>
+        <div class="big-stat" id="r2-7" style="opacity:0;transition:opacity .5s;background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.3);border-radius:10px;padding:16px">
+          <div class="big-num" style="font-size:44px;color:#f87171">Legal</div>
+          <div class="big-label" style="font-size:13px">requirement in many countries</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S3: What screen readers do -->
+    <div class="slide s-content navy-bg">
+      <div class="slide-title">What Screen Readers Do</div>
+      <div class="slide-sub">Audio-only web browsing — navigating by keyboard and listening</div>
+
+      <div class="analogy"><strong>The challenge:</strong> Imagine browsing the web with your monitor turned off. You hear only what the screen reader reads aloud. You navigate with the Tab key, jumping between links and buttons. If an element isn't keyboard-focusable, or if an image has no alt text, it simply doesn't exist for you.</div>
+
+      <div class="cols2" style="margin-top:16px">
+        <div>
+          <div style="font-size:12px;color:var(--sub);font-weight:600;letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px">What the screen reader ANNOUNCES</div>
+          <div class="output-box">
+            <div class="out-label">Screen Reader Audio</div>
+            "Main navigation, navigation landmark"<br>
+            "Home, link"<br>
+            "About us, link"<br>
+            "Search, button"<br>
+            "Main content, main landmark"<br>
+            "Welcome to Gachon University, heading level 1"<br>
+            "Image: Students studying on campus"
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;color:var(--sub);font-weight:600;letter-spacing:.07em;text-transform:uppercase;margin-bottom:10px">What breaks it</div>
+          <ul style="list-style:none;padding:0">
+            <li style="padding:8px 0;border-bottom:1px solid var(--bdr);font-size:13px"><span style="color:#f87171">✗</span> &lt;div&gt; buttons — not focusable, no role announced</li>
+            <li style="padding:8px 0;border-bottom:1px solid var(--bdr);font-size:13px"><span style="color:#f87171">✗</span> Images without alt — skipped silently</li>
+            <li style="padding:8px 0;border-bottom:1px solid var(--bdr);font-size:13px"><span style="color:#f87171">✗</span> Icon-only buttons — announced as blank</li>
+            <li style="padding:8px 0;border-bottom:1px solid var(--bdr);font-size:13px"><span style="color:#f87171">✗</span> Form inputs with no labels — "edit text"</li>
+            <li style="padding:8px 0;font-size:13px"><span style="color:#f87171">✗</span> &lt;div&gt; soup — no structure, no landmarks</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="good-box" style="margin-top:16px">
+        <div class="good-head">Common screen readers: NVDA (Windows, free), VoiceOver (Mac/iPhone, built-in), TalkBack (Android), JAWS (Windows, professional)</div>
+      </div>
+    </div>
+
+    <!-- S4: WCAG Levels -->
+    <div class="slide s-content dark-bg">
+      <div class="slide-title">WCAG — The Accessibility Standard</div>
+      <div class="slide-sub">Web Content Accessibility Guidelines — three levels of conformance</div>
+
+      <div class="cols3" style="margin-bottom:20px">
+        <div class="wcag-card level-a" id="r4-1" style="opacity:0;transition:opacity .5s">
+          <div class="wcag-level-num">A</div>
+          <div class="wcag-level-name">Minimum</div>
+          <div class="wcag-level-desc">Required baseline. Without this, some users cannot use the site at all. Example: images must have alt text. All functions keyboard accessible.</div>
+        </div>
+        <div class="wcag-card level-aa" id="r4-2" style="opacity:0;transition:opacity .5s">
+          <div class="wcag-level-num">AA</div>
+          <div class="wcag-level-name">Standard Target</div>
+          <div class="wcag-level-desc">Expected by most laws and regulations. Includes 4.5:1 color contrast, focus indicators, text resizable to 200% without losing content.</div>
+        </div>
+        <div class="wcag-card level-aaa" id="r4-3" style="opacity:0;transition:opacity .5s">
+          <div class="wcag-level-num">AAA</div>
+          <div class="wcag-level-name">Enhanced</div>
+          <div class="wcag-level-desc">Gold standard — not required for all content, but excellent to aim for. Includes 7:1 contrast ratio, sign language videos, simplified reading level.</div>
+        </div>
+      </div>
+
+      <div id="r4-4" style="opacity:0;transition:opacity .5s">
+        <div style="font-size:13px;color:var(--sub);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em">WCAG is organized around 4 principles — POUR</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+          <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:12px;text-align:center">
+            <div style="font-size:22px;margin-bottom:6px">👀</div>
+            <div style="font-size:13px;font-weight:700">Perceivable</div>
+            <div style="font-size:12px;color:var(--sub);margin-top:4px">Info presented in ways everyone can sense</div>
+          </div>
+          <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:12px;text-align:center">
+            <div style="font-size:22px;margin-bottom:6px">⌨️</div>
+            <div style="font-size:13px;font-weight:700">Operable</div>
+            <div style="font-size:12px;color:var(--sub);margin-top:4px">All UI usable by keyboard, not just mouse</div>
+          </div>
+          <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:12px;text-align:center">
+            <div style="font-size:22px;margin-bottom:6px">🧩</div>
+            <div style="font-size:13px;font-weight:700">Understandable</div>
+            <div style="font-size:12px;color:var(--sub);margin-top:4px">Clear language, predictable behavior</div>
+          </div>
+          <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:12px;text-align:center">
+            <div style="font-size:22px;margin-bottom:6px">🔧</div>
+            <div style="font-size:13px;font-weight:700">Robust</div>
+            <div style="font-size:12px;color:var(--sub);margin-top:4px">Works with current and future assistive tech</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S5: Semantic HTML vs div soup -->
+    <div class="slide s-content code-bg">
+      <div class="slide-title">Semantic HTML vs Div Soup</div>
+      <div class="slide-sub">Same visual output — completely different screen reader experience</div>
+
+      <div class="cols2">
+        <div>
+          <div style="font-size:12px;font-weight:600;color:#f87171;letter-spacing:.08em;margin-bottom:8px">❌ DIV SOUP — no meaning</div>
+          <div class="code-box" style="font-size:12px">
+<span class="cm">&lt;!-- Screen reader: just a bunch of divs --&gt;</span><br>
+<span class="ck">&lt;div</span> <span class="cattr">id</span>=<span class="cval">"header"</span><span class="ck">&gt;</span><br>
+&nbsp;&nbsp;<span class="ck">&lt;div</span> <span class="cattr">id</span>=<span class="cval">"nav"</span><span class="ck">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ck">&lt;div</span> <span class="cattr">class</span>=<span class="cval">"link"</span><span class="ck">&gt;</span>Home<span class="ck">&lt;/div&gt;</span><br>
+&nbsp;&nbsp;<span class="ck">&lt;/div&gt;</span><br>
+<span class="ck">&lt;/div&gt;</span><br>
+<span class="ck">&lt;div</span> <span class="cattr">id</span>=<span class="cval">"content"</span><span class="ck">&gt;</span><br>
+&nbsp;&nbsp;<span class="ck">&lt;div</span> <span class="cattr">class</span>=<span class="cval">"title"</span><span class="ck">&gt;</span>Hello<span class="ck">&lt;/div&gt;</span><br>
+&nbsp;&nbsp;<span class="ck">&lt;div</span> <span class="cattr">class</span>=<span class="cval">"text"</span><span class="ck">&gt;</span>World<span class="ck">&lt;/div&gt;</span><br>
+<span class="ck">&lt;/div&gt;</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:600;color:#4ade80;letter-spacing:.08em;margin-bottom:8px">✓ SEMANTIC HTML — meaningful</div>
+          <div class="code-box" style="font-size:12px">
+<span class="cm">&lt;!-- Screen reader: navigation, main, heading --&gt;</span><br>
+<span class="ctag">&lt;header&gt;</span><br>
+&nbsp;&nbsp;<span class="ctag">&lt;nav</span> <span class="cattr">aria-label</span>=<span class="cval">"Main"</span><span class="ctag">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="ctag">&lt;a</span> <span class="cattr">href</span>=<span class="cval">"/"</span><span class="ctag">&gt;</span>Home<span class="ctag">&lt;/a&gt;</span><br>
+&nbsp;&nbsp;<span class="ctag">&lt;/nav&gt;</span><br>
+<span class="ctag">&lt;/header&gt;</span><br>
+<span class="ctag">&lt;main&gt;</span><br>
+&nbsp;&nbsp;<span class="ctag">&lt;h1&gt;</span>Hello<span class="ctag">&lt;/h1&gt;</span><br>
+&nbsp;&nbsp;<span class="ctag">&lt;p&gt;</span>World<span class="ctag">&lt;/p&gt;</span><br>
+<span class="ctag">&lt;/main&gt;</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        <div style="background:rgba(255,255,255,.05);border-radius:6px;padding:10px;text-align:center;font-size:12px">
+          <div style="font-family:'Courier New';color:#7ee787;font-size:14px;font-weight:700">&lt;header&gt;</div>
+          <div style="color:var(--sub);margin-top:4px">banner landmark</div>
+        </div>
+        <div style="background:rgba(255,255,255,.05);border-radius:6px;padding:10px;text-align:center;font-size:12px">
+          <div style="font-family:'Courier New';color:#7ee787;font-size:14px;font-weight:700">&lt;nav&gt;</div>
+          <div style="color:var(--sub);margin-top:4px">navigation landmark</div>
+        </div>
+        <div style="background:rgba(255,255,255,.05);border-radius:6px;padding:10px;text-align:center;font-size:12px">
+          <div style="font-family:'Courier New';color:#7ee787;font-size:14px;font-weight:700">&lt;main&gt;</div>
+          <div style="color:var(--sub);margin-top:4px">main landmark</div>
+        </div>
+        <div style="background:rgba(255,255,255,.05);border-radius:6px;padding:10px;text-align:center;font-size:12px">
+          <div style="font-family:'Courier New';color:#7ee787;font-size:14px;font-weight:700">&lt;footer&gt;</div>
+          <div style="color:var(--sub);margin-top:4px">contentinfo landmark</div>
+        </div>
+      </div>
+
+      <div class="analogy" style="margin-top:14px"><strong>Key idea:</strong> Screen reader users navigate by landmarks and headings — like a table of contents for the page. Div soup has no table of contents.</div>
+    </div>
+
+    <!-- S6: button vs div -->
+    <div class="slide s-content code-bg">
+      <div class="slide-title">The &lt;button&gt; vs &lt;div&gt; Problem</div>
+      <div class="slide-sub">The most common accessibility mistake in modern web development</div>
+
+      <div class="cols2">
+        <div>
+          <div style="font-size:12px;font-weight:600;color:#f87171;letter-spacing:.08em;margin-bottom:8px">❌ div as button — broken for keyboard users</div>
+          <div class="code-box" style="font-size:12.5px">
+<span class="cm">&lt;!-- WRONG: keyboard users can't reach it --&gt;</span><br>
+<span class="ck">&lt;div</span> <span class="cattr">class</span>=<span class="cval">"btn"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cattr">onclick</span>=<span class="cval">"submit()"</span><span class="ck">&gt;</span><br>
+&nbsp;&nbsp;Submit<br>
+<span class="ck">&lt;/div&gt;</span><br>
+<br>
+<span class="cm">// Problems:</span><br>
+<span class="cm">// - NOT focusable by Tab key</span><br>
+<span class="cm">// - No "button" role announced</span><br>
+<span class="cm">// - No Enter/Space activation</span><br>
+<span class="cm">// - No disabled state</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:600;color:#4ade80;letter-spacing:.08em;margin-bottom:8px">✓ &lt;button&gt; — everything for free</div>
+          <div class="code-box" style="font-size:12.5px">
+<span class="cm">&lt;!-- RIGHT: works for everyone --&gt;</span><br>
+<span class="ctag">&lt;button</span> <span class="cattr">type</span>=<span class="cval">"button"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cattr">onclick</span>=<span class="cval">"submit()"</span><span class="ctag">&gt;</span><br>
+&nbsp;&nbsp;Submit<br>
+<span class="ctag">&lt;/button&gt;</span><br>
+<br>
+<span class="cm">// Gets for FREE:</span><br>
+<span class="cm">// ✓ Tab focusable</span><br>
+<span class="cm">// ✓ "Submit, button" announced</span><br>
+<span class="cm">// ✓ Enter and Space activate it</span><br>
+<span class="cm">// ✓ disabled attribute works</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px">
+        <div class="info-row">
+          <div class="info-dot amber">!</div>
+          <div class="info-body">
+            <div class="info-title">Same CSS rule: use &lt;button&gt; for actions, &lt;a href&gt; for navigation links</div>
+            <div class="info-desc">If it goes somewhere = link. If it does something = button. Never swap them.</div>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-dot green">✓</div>
+          <div class="info-body">
+            <div class="info-title">If you MUST use a non-semantic element, add: role="button" + tabindex="0" + keydown handler</div>
+            <div class="info-desc">But ask first: why not use <code style="font-size:12px;color:#7ee787">&lt;button&gt;</code>? The answer is almost always "we can."</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S7: alt text -->
+    <div class="slide s-content dark-bg">
+      <div class="slide-title">alt Text — Getting It Right</div>
+      <div class="slide-sub">Describe the purpose — not just what you see</div>
+
+      <div style="margin-bottom:16px">
+        <table class="cmp-table">
+          <thead><tr><th>Situation</th><th>alt attribute</th><th>Why</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Missing alt</td>
+              <td><code style="color:#f87171">&lt;img src="photo.jpg"&gt;</code></td>
+              <td><span class="badge-red">FAIL</span> Screen reader reads the filename — "photo dot jpg"</td>
+            </tr>
+            <tr>
+              <td>Generic alt</td>
+              <td><code style="color:#fbbf24">alt="image"</code></td>
+              <td><span class="badge-red">FAIL</span> Useless — screen reader says "image image"</td>
+            </tr>
+            <tr>
+              <td>Decorative image</td>
+              <td><code style="color:#4ade80">alt=""</code></td>
+              <td><span class="badge-green">PASS</span> Screen reader skips it completely — correct!</td>
+            </tr>
+            <tr>
+              <td>Profile photo</td>
+              <td><code style="color:#4ade80">alt="Kim Jisoo, Web student"</code></td>
+              <td><span class="badge-green">PASS</span> Describes who is in the photo</td>
+            </tr>
+            <tr>
+              <td>Linked image</td>
+              <td><code style="color:#4ade80">alt="Go to homepage"</code></td>
+              <td><span class="badge-green">PASS</span> Describes the link destination, not the image</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-box" style="font-size:13px">
+<span class="cm">&lt;!-- Rule: describe the PURPOSE, not the appearance --&gt;</span><br>
+<span class="cm">&lt;!-- Bad: "photo of chart" — Good: "Revenue up 23% from Q1 to Q2" --&gt;</span><br><br>
+<span class="cm">&lt;!-- Complex chart: use figcaption for long descriptions --&gt;</span><br>
+<span class="ctag">&lt;figure&gt;</span><br>
+&nbsp;&nbsp;<span class="ctag">&lt;img</span> <span class="cattr">src</span>=<span class="cval">"chart.png"</span> <span class="cattr">alt</span>=<span class="cval">"Enrollment chart — see caption"</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cattr">aria-describedby</span>=<span class="cval">"chart-desc"</span><span class="ctag">&gt;</span><br>
+&nbsp;&nbsp;<span class="ctag">&lt;figcaption</span> <span class="cattr">id</span>=<span class="cval">"chart-desc"</span><span class="ctag">&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;Bar chart: 2024: 1,200 students; 2025: 1,400; 2026: 1,476.<br>
+&nbsp;&nbsp;<span class="ctag">&lt;/figcaption&gt;</span><br>
+<span class="ctag">&lt;/figure&gt;</span>
+      </div>
+    </div>
+
+    <!-- S8: ARIA -->
+    <div class="slide s-content code-bg">
+      <div class="slide-title">ARIA — When HTML Isn't Enough</div>
+      <div class="slide-sub">aria-label, aria-describedby, aria-hidden — the three you'll use most</div>
+
+      <div class="analogy"><strong>First rule of ARIA:</strong> Don't use ARIA if a native HTML element already does the job. <code style="color:#7ee787">&lt;button&gt;</code> beats <code style="color:#f87171">&lt;div role="button"&gt;</code>. ARIA is for widgets that have no semantic HTML equivalent.</div>
+
+      <div class="code-box" style="margin-top:14px;font-size:12.5px">
+<span class="cm">&lt;!-- aria-label: provides a text label when no visible text exists --&gt;</span><br>
+<span class="ctag">&lt;button</span> <span class="cattr">aria-label</span>=<span class="cval">"Search"</span><span class="ctag">&gt;</span><br>
+&nbsp;&nbsp;<span class="ctag">&lt;svg</span> <span class="cattr">aria-hidden</span>=<span class="cval">"true"</span><span class="ctag">&gt;</span>...search icon...<span class="ctag">&lt;/svg&gt;</span><br>
+<span class="ctag">&lt;/button&gt;</span><br>
+<span class="cm">&lt;!-- Screen reader: "Search, button" (not "graphic, button") --&gt;</span><br><br>
+<span class="cm">&lt;!-- aria-describedby: links to extra description text --&gt;</span><br>
+<span class="ctag">&lt;label</span> <span class="cattr">for</span>=<span class="cval">"pw"</span><span class="ctag">&gt;</span>Password<span class="ctag">&lt;/label&gt;</span><br>
+<span class="ctag">&lt;input</span> <span class="cattr">type</span>=<span class="cval">"password"</span> <span class="cattr">id</span>=<span class="cval">"pw"</span> <span class="cattr">aria-describedby</span>=<span class="cval">"pw-hint"</span><span class="ctag">&gt;</span><br>
+<span class="ctag">&lt;p</span> <span class="cattr">id</span>=<span class="cval">"pw-hint"</span><span class="ctag">&gt;</span>Minimum 8 characters, one number.<span class="ctag">&lt;/p&gt;</span><br>
+<span class="cm">&lt;!-- Screen reader: "Password, edit text: Minimum 8 characters, one number" --&gt;</span><br><br>
+<span class="cm">&lt;!-- aria-hidden: hide decorative elements from screen readers --&gt;</span><br>
+<span class="ctag">&lt;span</span> <span class="cattr">aria-hidden</span>=<span class="cval">"true"</span><span class="ctag">&gt;</span>🏠<span class="ctag">&lt;/span&gt;</span> Home<br>
+<span class="cm">&lt;!-- Screen reader only reads "Home", not "house emoji, Home" --&gt;</span>
+      </div>
+    </div>
+
+    <!-- S9: Keyboard navigation -->
+    <div class="slide s-content dark-bg">
+      <div class="slide-title">Keyboard Navigation</div>
+      <div class="slide-sub">Tab, Shift+Tab, Enter, Space — the complete keyboard toolkit</div>
+
+      <div class="cols2" style="margin-bottom:16px">
+        <div>
+          <div style="font-size:12px;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Keys &amp; their roles</div>
+          <ul class="steps">
+            <li class="step"><div class="step-num">Tab</div><div class="step-body"><strong>Move focus forward</strong><span>Next interactive element: links, buttons, inputs, selects</span></div></li>
+            <li class="step"><div class="step-num" style="font-size:10px">⇧Tab</div><div class="step-body"><strong>Move focus backward</strong><span>Previous interactive element</span></div></li>
+            <li class="step"><div class="step-num">↵</div><div class="step-body"><strong>Enter</strong><span>Activate links and buttons</span></div></li>
+            <li class="step"><div class="step-num">⎵</div><div class="step-body"><strong>Space</strong><span>Activate buttons, toggle checkboxes</span></div></li>
+            <li class="step"><div class="step-num">↑↓</div><div class="step-body"><strong>Arrow keys</strong><span>Move within a component (radio group, menu, tab list)</span></div></li>
+          </ul>
+        </div>
+        <div>
+          <div style="font-size:12px;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Critical CSS rules</div>
+          <div class="code-box" style="font-size:12.5px">
+<span class="cm">/* ✓ Use :focus-visible — keyboard only */</span><br>
+<span class="cv">:focus-visible</span> {<br>
+&nbsp;&nbsp;<span class="ck">outline</span>: <span class="cs">3px solid #1a7f5a</span>;<br>
+&nbsp;&nbsp;<span class="ck">outline-offset</span>: <span class="cs">3px</span>;<br>
+}<br><br>
+<span class="cm">/* ✗ NEVER do this! */</span><br>
+<span class="cv">*:focus</span> { <span class="ck">outline</span>: <span class="cs">none</span>; }<br><br>
+<span class="cm">&lt;!-- Skip link: jump past navigation --&gt;</span><br>
+<span class="ctag">&lt;a</span> <span class="cattr">href</span>=<span class="cval">"#main"</span> <span class="cattr">class</span>=<span class="cval">"skip-link"</span><span class="ctag">&gt;</span><br>
+&nbsp;&nbsp;Skip to main content<br>
+<span class="ctag">&lt;/a&gt;</span>
+          </div>
+          <div class="warn-box" style="margin-top:10px;padding:10px 12px">
+            <div class="warn-head" style="font-size:12px">Never remove focus styles</div>
+            <div style="font-size:12px">Removing outline: none makes keyboard navigation invisible — WCAG AA failure (2.4.7)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S10: Color Contrast -->
+    <div class="slide s-content dark-bg">
+      <div class="slide-title">Color Contrast</div>
+      <div class="slide-sub">4.5:1 for normal text · 3:1 for large text · WCAG AA minimum</div>
+
+      <div class="analogy"><strong>Who needs good contrast?</strong> People with low vision, color blindness, cataracts — and anyone using their phone in sunlight. About 8% of men have some form of color blindness. Good contrast helps everyone.</div>
+
+      <div style="margin:16px 0">
+        <div style="font-size:12px;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Visual Examples — Fail and Pass</div>
+        <div class="contrast-row">
+          <div class="contrast-chip" style="background:#ffffff;color:#ff9999;border:2px solid #eee">
+            <span>Pink text on white</span>
+            <span class="chip-ratio" style="color:#dc2626">1.4:1</span>
+            <span class="chip-verdict" style="color:#dc2626">❌ FAIL</span>
+          </div>
+          <div class="contrast-chip" style="background:#ffffff;color:#ff6600;border:2px solid #eee">
+            <span>Orange on white</span>
+            <span class="chip-ratio" style="color:#dc2626">2.9:1</span>
+            <span class="chip-verdict" style="color:#dc2626">❌ FAIL AA</span>
+          </div>
+          <div class="contrast-chip" style="background:#ffffff;color:#767676;border:2px solid #eee">
+            <span>Gray #767676</span>
+            <span class="chip-ratio" style="color:#16a34a">4.5:1</span>
+            <span class="chip-verdict" style="color:#16a34a">✓ PASS AA</span>
+          </div>
+          <div class="contrast-chip" style="background:#1a7f5a;color:#ffffff">
+            <span>White on green</span>
+            <span class="chip-ratio" style="color:#86efac">5.8:1</span>
+            <span class="chip-verdict" style="color:#86efac">✓ PASS AA</span>
+          </div>
+          <div class="contrast-chip" style="background:#1a2340;color:#ffffff">
+            <span>White on dark blue</span>
+            <span class="chip-ratio" style="color:#86efac">14.5:1</span>
+            <span class="chip-verdict" style="color:#86efac">✓ PASS AAA</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cols2">
+        <div class="info-row">
+          <div class="info-dot green">AA</div>
+          <div class="info-body">
+            <div class="info-title">WCAG AA — the standard</div>
+            <div class="info-desc">Normal text: <strong>4.5:1</strong> minimum ratio. Large text (18pt+ or 14pt+ bold): <strong>3:1</strong> minimum.</div>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-dot amber">🔍</div>
+          <div class="info-body">
+            <div class="info-title">Check with tools</div>
+            <div class="info-desc">Chrome DevTools inspector shows ratio. WebAIM Contrast Checker (webaim.org). Lighthouse accessibility audit flags failures.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S11: aria-live -->
+    <div class="slide s-content code-bg">
+      <div class="slide-title">aria-live — Dynamic Content</div>
+      <div class="slide-sub">How screen readers hear updates that happen without page reload</div>
+
+      <div class="analogy"><strong>The problem:</strong> When JavaScript updates content on the page (a cart total, a form error, a search result count), the screen reader user doesn't know. They're focused on a button — the update happened somewhere else. <strong>aria-live</strong> tells the screen reader: "watch this region, announce any changes."</div>
+
+      <div class="code-box" style="margin-top:14px;font-size:13px">
+<span class="cm">&lt;!-- aria-live="polite" — announces when user finishes current action --&gt;</span><br>
+<span class="ctag">&lt;div</span> <span class="cattr">aria-live</span>=<span class="cval">"polite"</span> <span class="cattr">aria-atomic</span>=<span class="cval">"true"</span> <span class="cattr">id</span>=<span class="cval">"status"</span><span class="ctag">&gt;</span><br>
+&nbsp;&nbsp;<span class="cm">&lt;!-- JS updates this — screen reader announces the new content --&gt;</span><br>
+<span class="ctag">&lt;/div&gt;</span><br><br>
+<span class="cm">&lt;!-- aria-live="assertive" — interrupts immediately (for errors only) --&gt;</span><br>
+<span class="ctag">&lt;div</span> <span class="cattr">aria-live</span>=<span class="cval">"assertive"</span> <span class="cattr">role</span>=<span class="cval">"alert"</span> <span class="cattr">id</span>=<span class="cval">"error"</span><span class="ctag">&gt;</span><br>
+&nbsp;&nbsp;<span class="cm">&lt;!-- Errors go here — announced immediately --&gt;</span><br>
+<span class="ctag">&lt;/div&gt;</span><br><br>
+<span class="cm">// JavaScript: update the live region</span><br>
+<span class="cn">document</span>.<span class="cf">getElementById</span>(<span class="cs">'status'</span>).<span class="cv">textContent</span> =<br>
+&nbsp;&nbsp;<span class="cs">'5 results found for "accessibility"'</span>;
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px">
+        <div style="background:rgba(26,127,90,.1);border:1px solid rgba(26,127,90,.3);border-radius:8px;padding:12px">
+          <div style="font-size:12px;font-weight:700;color:#4ade80;margin-bottom:8px">aria-live="polite" — use for</div>
+          <div style="font-size:13px;color:var(--sub);line-height:1.6">Search result counts · Cart updates · Status messages · Auto-saved confirmations</div>
+        </div>
+        <div style="background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.3);border-radius:8px;padding:12px">
+          <div style="font-size:12px;font-weight:700;color:#f87171;margin-bottom:8px">aria-live="assertive" — use for</div>
+          <div style="font-size:13px;color:var(--sub);line-height:1.6">Form validation errors · Critical alerts · Session timeout warnings</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S12: Lighthouse audit -->
+    <div class="slide s-content dark-bg">
+      <div class="slide-title">Lighthouse Accessibility Audit</div>
+      <div class="slide-sub">Free, built-in Chrome DevTools — your first accessibility check</div>
+
+      <div class="cols2">
+        <div>
+          <div style="font-size:12px;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">How to run it — step by step</div>
+          <ul class="steps">
+            <li class="step"><div class="step-num">1</div><div class="step-body"><strong>Open Chrome DevTools</strong><span>Right-click → Inspect, or press F12</span></div></li>
+            <li class="step"><div class="step-num">2</div><div class="step-body"><strong>Click "Lighthouse" tab</strong><span>May be under the ">>" overflow arrow</span></div></li>
+            <li class="step"><div class="step-num">3</div><div class="step-body"><strong>Check "Accessibility" only</strong><span>Uncheck others — faster run</span></div></li>
+            <li class="step"><div class="step-num">4</div><div class="step-body"><strong>Click "Analyze page load"</strong><span>Wait 10–20 seconds</span></div></li>
+            <li class="step"><div class="step-num">5</div><div class="step-body"><strong>Read the score (0–100)</strong><span>Expand each issue to see which element and how to fix it</span></div></li>
+          </ul>
+        </div>
+        <div>
+          <div style="font-size:12px;color:var(--sub);font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Reading the score</div>
+          <div style="background:rgba(22,163,74,.15);border:1px solid var(--lime);border-radius:8px;padding:12px;margin-bottom:8px">
+            <div style="font-weight:700;color:#4ade80;font-size:14px">90–100 🟢</div>
+            <div style="font-size:13px;color:var(--sub);margin-top:4px">Excellent automated result. Still test manually with keyboard and screen reader.</div>
+          </div>
+          <div style="background:rgba(217,119,6,.15);border:1px solid var(--amber);border-radius:8px;padding:12px;margin-bottom:8px">
+            <div style="font-weight:700;color:#fbbf24;font-size:14px">50–89 🟡</div>
+            <div style="font-size:13px;color:var(--sub);margin-top:4px">Needs improvement. Common quick fixes: missing alt, low contrast, no form labels.</div>
+          </div>
+          <div style="background:rgba(220,38,38,.15);border:1px solid var(--red);border-radius:8px;padding:12px">
+            <div style="font-weight:700;color:#f87171;font-size:14px">0–49 🔴</div>
+            <div style="font-size:13px;color:var(--sub);margin-top:4px">Critical failures. Some users cannot use the site at all.</div>
+          </div>
+
+          <div class="warn-box" style="margin-top:12px;padding:10px 12px">
+            <div class="warn-head" style="font-size:12px">⚠ Score 100 ≠ fully accessible</div>
+            <div style="font-size:12px">Lighthouse catches ~30–40% of real issues. Always test with a real screen reader.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S13: Common mistakes -->
+    <div class="slide s-content dark-bg">
+      <div class="slide-title">5 Most Common Mistakes</div>
+      <div class="slide-sub">What breaks accessibility — and how each one affects real users</div>
+
+      <ul class="reveal-list">
+        <li class="reveal-item" id="r13-1">
+          <span class="reveal-icon">🖼️</span>
+          <div class="reveal-text">
+            <div class="reveal-title">Missing or bad alt text on images</div>
+            <div class="reveal-desc">Screen reader says "image image" or reads a filename. <strong>Fix:</strong> add descriptive alt to informational images, alt="" to decorative ones.</div>
+          </div>
+        </li>
+        <li class="reveal-item" id="r13-2">
+          <span class="reveal-icon">🖱️</span>
+          <div class="reveal-text">
+            <div class="reveal-title">&lt;div&gt; and &lt;span&gt; buttons</div>
+            <div class="reveal-desc">Not reachable by keyboard, not announced by screen readers. <strong>Fix:</strong> use <code style="font-size:12px;color:#7ee787">&lt;button&gt;</code> for actions, <code style="font-size:12px;color:#7ee787">&lt;a href&gt;</code> for links.</div>
+          </div>
+        </li>
+        <li class="reveal-item" id="r13-3">
+          <span class="reveal-icon">🎨</span>
+          <div class="reveal-text">
+            <div class="reveal-title">Insufficient color contrast</div>
+            <div class="reveal-desc">Light gray text on white, or orange on light background. <strong>Fix:</strong> check with WebAIM Contrast Checker — minimum 4.5:1 for normal text.</div>
+          </div>
+        </li>
+        <li class="reveal-item" id="r13-4">
+          <span class="reveal-icon">📝</span>
+          <div class="reveal-text">
+            <div class="reveal-title">Form inputs without &lt;label&gt; elements</div>
+            <div class="reveal-desc">Screen reader says "edit text" with no context. <strong>Fix:</strong> always add <code style="font-size:12px;color:#7ee787">&lt;label for="id"&gt;</code> or aria-label to every input.</div>
+          </div>
+        </li>
+        <li class="reveal-item" id="r13-5">
+          <span class="reveal-icon">⌨️</span>
+          <div class="reveal-text">
+            <div class="reveal-title">No skip navigation link</div>
+            <div class="reveal-desc">Keyboard users must Tab through 30+ nav links on every page load. <strong>Fix:</strong> add a "Skip to main content" link as the first element in &lt;body&gt;.</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- S14: Summary cheat sheet -->
+    <div class="slide s-content green-bg">
+      <div class="slide-title" style="margin-bottom:6px">Summary Cheat Sheet</div>
+      <div class="slide-sub">A11y in two columns — what breaks it vs what fixes it</div>
+
+      <div class="summary-grid">
+        <div class="sg-bad">
+          <div class="sg-head">❌ What breaks accessibility</div>
+          <div class="sg-item">&lt;div&gt; and &lt;span&gt; as buttons / links</div>
+          <div class="sg-item">Images with missing alt attribute</div>
+          <div class="sg-item">alt="image" or alt="photo" — meaningless</div>
+          <div class="sg-item">Color contrast below 4.5:1 for normal text</div>
+          <div class="sg-item">Inputs without &lt;label&gt; elements</div>
+          <div class="sg-item">outline: none — removing focus rings</div>
+          <div class="sg-item">No &lt;h1&gt; or skipping heading levels</div>
+          <div class="sg-item">Icon buttons with no aria-label</div>
+          <div class="sg-item">Dynamic content updates not in aria-live</div>
+          <div class="sg-item">No skip navigation link for keyboard users</div>
+        </div>
+        <div class="sg-good">
+          <div class="sg-head">✓ What fixes accessibility</div>
+          <div class="sg-item">&lt;button&gt; for actions, &lt;a href&gt; for navigation</div>
+          <div class="sg-item">Descriptive alt text on all informational images</div>
+          <div class="sg-item">alt="" (empty) for purely decorative images</div>
+          <div class="sg-item">4.5:1+ contrast — check with WebAIM or DevTools</div>
+          <div class="sg-item">&lt;label for="id"&gt; or aria-label on all form inputs</div>
+          <div class="sg-item">:focus-visible with clear 3px outline style</div>
+          <div class="sg-item">Logical heading hierarchy h1 → h2 → h3</div>
+          <div class="sg-item">aria-label="Descriptive text" on icon-only buttons</div>
+          <div class="sg-item">aria-live="polite" region for status messages</div>
+          <div class="sg-item">Skip link as first element in &lt;body&gt;</div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;background:rgba(255,255,255,.08);border-radius:8px;padding:12px;text-align:center;font-size:14px;color:var(--sub)">
+        <strong style="color:var(--text)">Target for your project:</strong> Lighthouse Accessibility score ≥ 85 · Test with keyboard · Add skip link · All images have alt text
+      </div>
+    </div>
+
+  </div><!-- end slide-area -->
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="btn-ctrl" id="btn-play" onclick="togglePlay()">⏸ Pause</button>
+    <button class="btn-ctrl" onclick="prevSlide()">← Prev</button>
+    <button class="btn-ctrl" onclick="nextSlide()">Next →</button>
+    <span class="slide-counter" id="counter">1 / 14</span>
+    <div class="progress-track" id="track" onclick="jumpTo(event)">
+      <div class="progress-fill" id="pfill"></div>
+      <div class="timer-fill" id="tfill"></div>
+    </div>
+    <button class="btn-ctrl" id="btn-notes" onclick="toggleNotes()">📝 Notes</button>
+    <button class="btn-ctrl" onclick="goFullscreen()">⛶</button>
+  </div>
+
+  <!-- Notes panel -->
+  <div id="notes-panel">
+    <h3>Speaker Notes</h3>
+    <div id="notes-text"></div>
+  </div>
+</div>
+
+<script>
+const DURATION = 12000;
+const NOTES = [
+  `<p>Welcome to the Week 7 Monday lecture on Web Accessibility, or A11y for short. Today we'll learn what accessibility means, who benefits from it, and how to build websites that work for everyone. By the end of this lecture, you'll know the key techniques and be ready to audit and fix your own projects.</p>`,
+
+  `<p>Let's start by asking: who uses the web? The answer is: everyone — but in very different ways. About <strong>1 billion people worldwide</strong>, roughly 15% of the global population, live with some form of disability. This includes visual impairment — people who use screen readers to hear the page read aloud. It includes motor disabilities — people who cannot use a mouse and navigate with keyboard only, or with switch access devices. It includes cognitive differences like dyslexia, and hearing impairment. Building accessible websites is not only a legal requirement in many countries — it is simply the right thing to do.</p>`,
+
+  `<p>To understand why accessibility matters, let's think about what a screen reader does. Imagine browsing the web with your monitor turned off. You hear a voice that reads the page aloud. You press Tab to move between interactive elements — links and buttons. If a button is actually a &lt;div&gt; with an onclick handler, Tab doesn't stop there. It's invisible to you. If an image has no alt text, the screen reader might read the filename — "profile-pic-2026-final-v3 dot jpg" — or nothing at all. Common screen readers include <strong>NVDA</strong> on Windows (free), <strong>VoiceOver</strong> built into Apple devices, and <strong>TalkBack</strong> on Android.</p>`,
+
+  `<p>The international standard for web accessibility is <strong>WCAG</strong> — Web Content Accessibility Guidelines, published by the W3C. It has three levels. Level <strong>A</strong> is the minimum — without this, some users literally cannot use the site at all. Level <strong>AA</strong> is the standard target — required by most laws and what we aim for in professional projects. Level <strong>AAA</strong> is the gold standard — not required for all content but excellent to achieve. WCAG is organized around four principles remembered as POUR: <strong>Perceivable, Operable, Understandable, Robust</strong>. Your exam may ask about these.</p>`,
+
+  `<p>One of the most impactful things you can do for accessibility is use <strong>semantic HTML</strong>. Semantic elements describe their meaning — not just their visual appearance. A &lt;nav&gt; tells the screen reader "this is navigation" — the user can jump directly to it. A &lt;main&gt; tells the screen reader "this is the main content." A &lt;h1&gt; tells the screen reader "this is the page's top-level heading." Screen reader users navigate by landmarks and headings — it's like a table of contents for the page. Compare this to div soup — a page full of &lt;div&gt; elements has no table of contents. The user has to listen to everything from the beginning to find what they want.</p>`,
+
+  `<p>The most common accessibility mistake made by developers today is using &lt;div&gt; or &lt;span&gt; with onclick handlers instead of real &lt;button&gt; elements. From a visual standpoint, they can look identical. But from an accessibility standpoint, they are completely different. A &lt;div onclick&gt; is NOT focusable by the Tab key, NOT announced as a button by screen readers, and NOT activated by Enter or Space. A real &lt;button&gt; gets ALL of this for free. The rule is simple: use &lt;button&gt; for actions that do something on the page, use &lt;a href&gt; for navigation that goes somewhere. Never swap these two.</p>`,
+
+  `<p>Every &lt;img&gt; tag must have an alt attribute. But how you write the alt text matters enormously. The goal is to convey the same information as the image — not just describe its appearance. For a <strong>decorative image</strong> — a border, a wave, a background texture — use alt="" (empty string). Screen readers skip it completely. For an <strong>informational image</strong> — a photo, a chart, a diagram — describe what information it conveys. For a <strong>chart</strong>, summarize the data. For a <strong>linked image</strong>, describe the destination. The most important rule: never use alt="image", alt="photo", or the filename — these are worse than having no alt because they waste the user's time.</p>`,
+
+  `<p>ARIA stands for Accessible Rich Internet Applications. ARIA attributes add meaning to HTML elements when native HTML alone isn't enough. The three you'll use most: <strong>aria-label</strong> provides a text label when there's no visible label — essential for icon-only buttons. <strong>aria-describedby</strong> links an element to additional description text — perfect for form hints. <strong>aria-hidden="true"</strong> hides decorative elements — like the house emoji next to the word "Home" — so screen readers don't read them twice. Remember the first rule of ARIA: don't use ARIA if a native HTML element can do the job.</p>`,
+
+  `<p>Keyboard navigation is a WCAG Level A requirement — the minimum. Users with motor disabilities, and power users, navigate with Tab and arrow keys. Test your own site right now: close your eyes, press Tab, and see if you can complete all the important tasks. Two critical CSS rules: first, use <strong>:focus-visible</strong> instead of :focus — this shows the focus ring for keyboard navigation but not for mouse clicks. Second, NEVER write outline: none without providing an alternative visible focus indicator. This is one of the most common WCAG failures in modern websites. Also add a "Skip to main content" link — your first TAB stop — so keyboard users can jump past the navigation menu.</p>`,
+
+  `<p>Color contrast is about making text readable for people with low vision and color blindness. WCAG AA requires a minimum contrast ratio of <strong>4.5:1</strong> for normal text and <strong>3:1</strong> for large text (18pt or 14pt bold). Pink text on a white background has a ratio of about 1.4:1 — a clear fail. Light gray (#767676) on white is exactly 4.5:1 — just passing. Dark navy on white achieves 14.5:1 — excellent. Check your colors with Chrome DevTools — click any text element, and the color swatch in the inspector shows the contrast ratio and a WCAG badge. WebAIM's Contrast Checker is another great tool.</p>`,
+
+  `<p>When JavaScript updates the page without reloading — showing a search result count, a form success message, a cart total — screen reader users don't know. They're focused somewhere else. <strong>aria-live</strong> solves this. Add a region with aria-live="polite" somewhere in the DOM. When your JavaScript updates that region's text, the screen reader announces the change — politely, after the user finishes what they were doing. Use aria-live="assertive" for truly urgent messages like form validation errors — it interrupts immediately. The aria-atomic="true" attribute makes it announce the entire content of the region, not just the changed part.</p>`,
+
+  `<p>Lighthouse is your first automated accessibility test. It's free, built into Chrome DevTools. Open DevTools, click the Lighthouse tab, select only Accessibility, and run it. The score is 0 to 100 — aim for 90+. Importantly, a score of 100 does NOT mean your site is fully accessible. Lighthouse catches approximately 30 to 40 percent of real accessibility issues. It cannot detect: wrong alt text (only that alt exists), illogical reading order, keyboard traps, or confusing language. Always complement automated testing with manual keyboard navigation and a real screen reader test. But Lighthouse is still an excellent first step — and it gives you specific elements to fix.</p>`,
+
+  `<p>Let's review the five most common accessibility mistakes you'll encounter in real projects. Number one: missing or bad alt text on images. Number two: using &lt;div&gt; and &lt;span&gt; as buttons. Number three: insufficient color contrast — especially light gray text, or light-colored text on a light background. Number four: form inputs without &lt;label&gt; elements — screen readers say "edit text" with no context about what to type. Number five: no skip navigation link — keyboard users must Tab through every nav link on every page. These five issues account for the majority of accessibility complaints and failures. Fix these and you've dramatically improved your site's accessibility.</p>`,
+
+  `<p>Here is your summary cheat sheet for web accessibility. On the left: what breaks it — div buttons, missing alt, meaningless alt, low contrast, unlabeled inputs, no focus rings, skipped headings, icon buttons without labels, dynamic content without aria-live, no skip link. On the right: what fixes it — the exact opposite of each. Your homework: run a Lighthouse accessibility audit on your team project. Fix at least 3 issues. Screenshot before and after. Your target: Lighthouse Accessibility score of 85 or higher. See you next time!</p>`
+];
+
+const slides = document.querySelectorAll('.slide');
+let cur = 0, playing = true, timer = null, elapsed = 0, timerRaf = null, lastTs = null;
+
+/* ── Per-slide reveal logic ── */
+const REVEALS = {
+  1: () => {  // slide 2 (index 1) — who uses the web
+    const ids = ['r2-1','r2-2','r2-3','r2-4','r2-5','r2-6','r2-7'];
+    ids.forEach((id, i) => {
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) { el.classList.add('show'); el.style.opacity = '1'; el.style.transform = 'none'; }
+      }, 600 + i * 800);
+    });
+  },
+  3: () => {  // slide 4 (index 3) — WCAG
+    ['r4-1','r4-2','r4-3'].forEach((id, i) => {
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) el.style.opacity = '1';
+      }, 600 + i * 900);
+    });
+    setTimeout(() => {
+      const el = document.getElementById('r4-4');
+      if (el) el.style.opacity = '1';
+    }, 3400);
+  },
+  12: () => { // slide 13 (index 12) — common mistakes
+    ['r13-1','r13-2','r13-3','r13-4','r13-5'].forEach((id, i) => {
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) { el.classList.add('show'); }
+      }, 600 + i * 1000);
+    });
+  }
+};
+
+function showSlide(n) {
+  slides[cur].classList.remove('active');
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slides[cur].classList.add('active');
+  document.getElementById('counter').textContent = `${cur+1} / ${slides.length}`;
+  document.getElementById('pfill').style.width = ((cur+1)/slides.length*100) + '%';
+  document.getElementById('notes-text').innerHTML = NOTES[cur] || '';
+  elapsed = 0; resetTimerBar();
+  if (playing) startTimer();
+  // trigger reveals
+  if (REVEALS[cur]) REVEALS[cur]();
+}
+
+function startTimer() {
+  cancelAnimationFrame(timerRaf); clearTimeout(timer);
+  lastTs = performance.now();
+  const tick = (ts) => {
+    if (!playing) return;
+    elapsed += ts - lastTs; lastTs = ts;
+    document.getElementById('tfill').style.width = Math.min(elapsed/DURATION*100, 100) + '%';
+    if (elapsed >= DURATION) { nextSlide(); return; }
+    timerRaf = requestAnimationFrame(tick);
+  };
+  timerRaf = requestAnimationFrame(tick);
+}
+
+function resetTimerBar() { document.getElementById('tfill').style.width = '0%'; }
+
+function nextSlide() { if (cur < slides.length-1) showSlide(cur+1); else { playing = false; updatePlayBtn(); } }
+function prevSlide() { showSlide(cur-1); }
+
+function togglePlay() {
+  playing = !playing;
+  if (playing) { lastTs = performance.now(); startTimer(); }
+  else { cancelAnimationFrame(timerRaf); clearTimeout(timer); }
+  updatePlayBtn();
+}
+function updatePlayBtn() { document.getElementById('btn-play').textContent = playing ? '⏸ Pause' : '▶ Play'; }
+
+function toggleNotes() {
+  const p = document.getElementById('player');
+  const btn = document.getElementById('btn-notes');
+  p.classList.toggle('notes-open');
+  btn.classList.toggle('active');
+}
+
+function goFullscreen() { document.documentElement.requestFullscreen?.(); }
+
+function jumpTo(e) {
+  const rect = document.getElementById('track').getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  showSlide(Math.round(pct * (slides.length - 1)));
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'n' || e.key === 'N') nextSlide();
+  else if (e.key === 'ArrowLeft' || e.key === 'p' || e.key === 'P') prevSlide();
+  else if (e.key === ' ') { e.preventDefault(); togglePlay(); }
+});
+
+showSlide(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web Accessibility (A11y) — Week 7 Monday</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f0f4ff;--surf:#fff;--surf2:#e8eefa;--brd:#c8d4f0;
+  --tx:#1a2340;--mu:#5a6a8a;
+  --ac:#1a56db;--acl:#e0eaff;--ac2:#1240b0;
+  --brand:#1a7f5a;--brandl:#d1fae5;--branddk:#fff;
+  --lime:#16a34a;--limel:#dcfce7;
+  --cor:#dc2626;--corl:#fee2e2;
+  --warn:#d97706;--warnl:#fef3c7;
+  --cb:#1a2540;--ct:#c8daf8;
+  --cyan:#0891b2;--cyanl:#e0f2fe;
+  --purple:#7c3aed;--purplel:#ede9fe;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --bg:#060d16;--surf:#0d1b2a;--surf2:#122236;--brd:#1e3256;
+  --tx:#dbeafe;--mu:#6080b0;
+  --ac:#60a5fa;--acl:#0a1830;--ac2:#93c5fd;
+  --brand:#34d399;--brandl:#064e3b;--branddk:#000;
+  --lime:#4ade80;--limel:#052e16;
+  --cor:#f87171;--corl:#450a0a;
+  --warn:#fbbf24;--warnl:#1a1000;
+  --cb:#060d16;--ct:#bfdbfe;
+  --cyan:#22d3ee;--cyanl:#042f2e;
+  --purple:#a78bfa;--purplel:#2e1065;
+}}
+:root[data-theme=dark]{
+  --bg:#060d16;--surf:#0d1b2a;--surf2:#122236;--brd:#1e3256;
+  --tx:#dbeafe;--mu:#6080b0;
+  --ac:#60a5fa;--acl:#0a1830;--ac2:#93c5fd;
+  --brand:#34d399;--brandl:#064e3b;--branddk:#000;
+  --lime:#4ade80;--limel:#052e16;
+  --cor:#f87171;--corl:#450a0a;
+  --warn:#fbbf24;--warnl:#1a1000;
+  --cb:#060d16;--ct:#bfdbfe;
+  --cyan:#22d3ee;--cyanl:#042f2e;
+  --purple:#a78bfa;--purplel:#2e1065;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',system-ui,sans-serif;font-size:16px;line-height:1.7}
+a{color:var(--ac);text-decoration:none}
+a:hover{text-decoration:underline}
+kbd{background:var(--surf2);border:1px solid var(--brd);border-radius:4px;padding:1px 6px;font-size:12px;font-family:'JetBrains Mono',monospace}
+code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--surf2);padding:1px 5px;border-radius:3px;color:var(--ac2)}
+
+/* ── Header ── */
+#site-header{
+  position:sticky;top:0;z-index:100;
+  background:var(--surf);border-bottom:2px solid var(--brand);
+  display:flex;align-items:center;justify-content:space-between;padding:10px 20px;gap:12px;
+}
+.hdr-left{display:flex;align-items:center;gap:14px}
+.brand-badge{background:var(--brand);color:var(--branddk);font-family:'Space Grotesk',sans-serif;
+  font-weight:700;font-size:16px;padding:4px 10px;border-radius:6px;letter-spacing:.02em}
+.hdr-info{display:flex;flex-direction:column;gap:1px}
+.hdr-course{font-size:11px;color:var(--mu);font-weight:500;letter-spacing:.05em;text-transform:uppercase}
+.hdr-title{font-size:15px;font-weight:700;color:var(--tx);font-family:'Space Grotesk',sans-serif}
+.theme-btn{background:var(--surf2);border:1px solid var(--brd);color:var(--tx);
+  padding:5px 14px;border-radius:20px;cursor:pointer;font-size:13px;white-space:nowrap}
+.theme-btn:hover{border-color:var(--brand);color:var(--brand)}
+
+/* ── Layout ── */
+#layout{display:flex;min-height:calc(100vh - 53px)}
+
+/* ── Sidebar ── */
+#sidebar{
+  width:240px;flex-shrink:0;background:var(--surf);border-right:1px solid var(--brd);
+  position:sticky;top:53px;height:calc(100vh - 53px);overflow-y:auto;padding:12px 0;
+}
+#sidebar nav a{
+  display:flex;align-items:center;gap:8px;padding:5px 14px;
+  font-size:13px;color:var(--mu);border-left:3px solid transparent;transition:all .15s;
+}
+#sidebar nav a:hover{color:var(--tx);background:var(--surf2);text-decoration:none}
+#sidebar nav a.active{color:var(--brand);border-left-color:var(--brand);background:var(--brandl);font-weight:600}
+.nav-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--brand);min-width:26px;font-weight:700}
+.nav-num.ex{color:var(--warn)}
+.nav-label{font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.07em;text-transform:uppercase;
+  padding:12px 14px 4px}
+
+/* ── Main ── */
+#main{flex:1;padding:36px 44px;max-width:920px}
+
+/* ── Topic Sections ── */
+.topic{margin-bottom:56px;padding-bottom:44px;border-bottom:1px solid var(--brd)}
+.topic:last-child{border-bottom:none}
+.topic-hdr{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.t-num{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;
+  color:var(--branddk);background:var(--brand);padding:2px 10px;border-radius:5px}
+.topic-hdr h2{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:var(--tx)}
+.difficulty{font-size:11px;font-weight:700;padding:2px 9px;border-radius:10px}
+.diff-easy{background:var(--limel);color:var(--lime)}
+.diff-med{background:var(--warnl);color:var(--warn)}
+.diff-hard{background:var(--corl);color:var(--cor)}
+
+.theory{margin-bottom:18px;color:var(--tx)}
+.theory p{margin-bottom:10px}
+
+/* ── Code blocks ── */
+.code-wrap{margin:16px 0;border-radius:10px;overflow:hidden;border:1px solid var(--brd)}
+.code-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--surf2);padding:6px 14px;border-bottom:1px solid var(--brd);
+}
+.code-lang{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--brand);font-weight:700}
+.copy-btn{background:transparent;border:1px solid var(--brd);color:var(--mu);
+  padding:2px 10px;border-radius:4px;font-size:11px;cursor:pointer;transition:all .15s}
+.copy-btn:hover{color:var(--brand);border-color:var(--brand)}
+.code-block{background:var(--cb);padding:18px 20px;overflow-x:auto;margin:0}
+.code-block code{font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.75;
+  color:var(--ct);white-space:pre;background:none;padding:0;border-radius:0}
+.sk{color:#c084fc}.sf{color:#f7df1e}.ss{color:#86efac}
+.sc{color:#64748b;font-style:italic}.sn{color:#fb923c}.sp{color:#60a5fa}
+.stag{color:#f7df1e}.sattr{color:#86efac}.sval{color:#fb923c}
+
+/* ── Key Points ── */
+.keypoints{background:var(--brandl);border-left:4px solid var(--brand);
+  border-radius:0 8px 8px 0;padding:14px 18px;margin-top:14px}
+.keypoints h4{font-size:11px;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+.keypoints ul{padding-left:18px}
+.keypoints li{font-size:14px;margin-bottom:4px}
+
+/* ── Alert boxes ── */
+.alert{display:flex;gap:12px;padding:14px 16px;border-radius:8px;margin:14px 0;font-size:14px}
+.alert-warn{background:var(--warnl);border-left:4px solid var(--warn)}
+.alert-danger{background:var(--corl);border-left:4px solid var(--cor)}
+.alert-info{background:var(--cyanl);border-left:4px solid var(--cyan)}
+.alert-ok{background:var(--limel);border-left:4px solid var(--lime)}
+.alert-brand{background:var(--brandl);border-left:4px solid var(--brand)}
+.alert-icon{font-size:20px;flex-shrink:0;line-height:1.4}
+.alert strong{display:block;margin-bottom:3px}
+
+/* ── Demo boxes ── */
+.demo-box{
+  background:var(--surf2);border:1px solid var(--brd);border-radius:10px;
+  padding:20px;margin:16px 0;
+}
+.demo-box h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--mu);margin-bottom:14px}
+.demo-label{font-size:11px;color:var(--mu);font-weight:600;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+
+/* ── Comparison grid ── */
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+.cg-bad{background:var(--corl);border:2px solid var(--cor);border-radius:10px;padding:16px}
+.cg-good{background:var(--limel);border:2px solid var(--lime);border-radius:10px;padding:16px}
+.cg-label{font-weight:700;font-size:13px;margin-bottom:8px}
+.cg-bad .cg-label{color:var(--cor)}
+.cg-good .cg-label{color:var(--lime)}
+
+/* ── Contrast visual ── */
+.contrast-pair{display:inline-flex;align-items:center;justify-content:center;
+  padding:12px 20px;border-radius:8px;font-size:15px;font-weight:600;margin:6px}
+.contrast-fail{background:#ff9999;color:#ff4444;border:2px solid var(--cor)}
+.contrast-pass-aa{background:#fff;color:#595959;border:2px solid #595959}
+.contrast-pass-aaa{background:#fff;color:#1a1a1a;border:2px solid #1a1a1a}
+
+/* ── Exercise section ── */
+#exercises h1{font-family:'Space Grotesk',sans-serif;font-size:30px;font-weight:800;margin-bottom:8px}
+.ex-intro{color:var(--mu);margin-bottom:32px;font-size:15px}
+.exercise{background:var(--surf);border:1px solid var(--brd);border-radius:12px;margin-bottom:32px;overflow:hidden}
+.ex-header{display:flex;align-items:center;gap:12px;padding:14px 20px;background:var(--surf2);border-bottom:1px solid var(--brd)}
+.ex-num{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--warn);
+  background:var(--warnl);padding:2px 8px;border-radius:4px}
+.ex-header h3{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;flex:1}
+.ex-body{padding:20px}
+.task-box{background:var(--surf2);border:1px solid var(--brd);border-radius:6px;padding:14px 16px;margin-bottom:16px;font-size:15px}
+.task-box ul{padding-left:18px;margin-top:6px}
+.task-box li{margin-bottom:4px}
+.editor-row{display:flex;gap:0;border:1px solid var(--brd);border-radius:8px;overflow:hidden;margin-top:12px}
+.editor-row textarea{
+  flex:1;min-height:200px;background:var(--cb);color:var(--ct);
+  font-family:'JetBrains Mono',monospace;font-size:12.5px;padding:14px;
+  border:none;resize:vertical;line-height:1.65;outline:none;
+}
+.editor-row iframe{flex:1;border:none;border-left:1px solid var(--brd);background:#fff;min-height:200px}
+.ex-btns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.btn-run{background:var(--brand);color:var(--branddk);border:none;padding:7px 18px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer}
+.btn-hint{background:var(--surf2);color:var(--tx);border:1px solid var(--brd);padding:7px 16px;border-radius:6px;font-size:13px;cursor:pointer}
+.btn-hint:hover{border-color:var(--brand);color:var(--brand)}
+.btn-sol{background:var(--surf2);color:var(--tx);border:1px solid var(--brd);padding:7px 16px;border-radius:6px;font-size:13px;cursor:pointer}
+.btn-sol:hover{border-color:var(--lime);color:var(--lime)}
+.hint-box{margin-top:10px;padding:12px 16px;background:var(--acl);border-left:3px solid var(--ac);border-radius:0 6px 6px 0;font-size:14px;display:none}
+.sol-box{margin-top:10px;display:none}
+
+/* ── Checklist ── */
+.checklist{list-style:none;padding:0}
+.checklist li{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--brd);font-size:14px}
+.checklist li:last-child{border-bottom:none}
+.check-icon{font-size:16px;margin-top:2px;flex-shrink:0}
+
+/* ── WCAG level cards ── */
+.wcag-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:14px 0}
+.wcag-card{border-radius:10px;padding:18px;border:2px solid}
+.wcag-a{background:var(--corl);border-color:var(--cor)}
+.wcag-aa{background:var(--warnl);border-color:var(--warn)}
+.wcag-aaa{background:var(--limel);border-color:var(--lime)}
+.wcag-level{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:800;margin-bottom:6px}
+.wcag-a .wcag-level{color:var(--cor)}
+.wcag-aa .wcag-level{color:var(--warn)}
+.wcag-aaa .wcag-level{color:var(--lime)}
+.wcag-name{font-size:13px;font-weight:700;margin-bottom:8px}
+.wcag-desc{font-size:12px;color:var(--mu);line-height:1.5}
+
+/* ── ARIA table ── */
+.attr-table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+.attr-table th{text-align:left;padding:8px 12px;border-bottom:2px solid var(--brd);font-size:12px;color:var(--mu);font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.attr-table td{padding:8px 12px;border-bottom:1px solid var(--brd);vertical-align:top;line-height:1.5}
+.attr-table td:first-child{font-family:'JetBrains Mono',monospace;color:var(--brand);font-size:12px}
+
+/* ── Footer ── */
+#site-footer{text-align:center;padding:24px;color:var(--mu);font-size:13px;border-top:1px solid var(--brd);margin-top:40px}
+
+/* ── Mobile ── */
+@media(max-width:768px){
+  #sidebar{display:none;position:fixed;top:53px;left:0;height:calc(100vh - 53px);z-index:90;box-shadow:4px 0 20px rgba(0,0,0,.3)}
+  #sidebar.open{display:block}
+  #main{padding:20px 16px}
+  .sandwich{display:block!important}
+  .editor-row{flex-direction:column}
+  .compare-grid{grid-template-columns:1fr}
+  .wcag-cards{grid-template-columns:1fr}
+}
+.sandwich{display:none;background:var(--surf2);border:1px solid var(--brd);color:var(--tx);
+  padding:5px 12px;border-radius:6px;cursor:pointer;font-size:18px}
+
+/* ── Progress bar ── */
+#progress-bar{position:fixed;top:53px;left:0;height:3px;background:var(--brand);width:0%;z-index:101;transition:width .1s}
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<header id="site-header">
+  <div class="hdr-left">
+    <button class="sandwich" onclick="toggleSidebar()">☰</button>
+    <span class="brand-badge">A11y</span>
+    <div class="hdr-info">
+      <span class="hdr-course">K0126002 · Web Programming · Week 7 Monday</span>
+      <span class="hdr-title">Web Accessibility — Study Guide</span>
+    </div>
+  </div>
+  <button class="theme-btn" id="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+</header>
+
+<div id="layout">
+<aside id="sidebar">
+  <nav>
+    <div class="nav-label">Foundations</div>
+    <a href="#t01"><span class="nav-num">01</span>What is Accessibility?</a>
+    <a href="#t02"><span class="nav-num">02</span>WCAG Levels</a>
+    <a href="#t03"><span class="nav-num">03</span>Semantic HTML</a>
+    <div class="nav-label">HTML Patterns</div>
+    <a href="#t04"><span class="nav-num">04</span>button vs div</a>
+    <a href="#t05"><span class="nav-num">05</span>alt Text Deep Dive</a>
+    <a href="#t06"><span class="nav-num">06</span>ARIA Attributes</a>
+    <div class="nav-label">User Experience</div>
+    <a href="#t07"><span class="nav-num">07</span>Keyboard Navigation</a>
+    <a href="#t08"><span class="nav-num">08</span>Color Contrast</a>
+    <a href="#t09"><span class="nav-num">09</span>Lighthouse Audit</a>
+    <div class="nav-label">Practice</div>
+    <a href="#ex1"><span class="nav-num ex">E1</span>Fix div to button</a>
+    <a href="#ex2"><span class="nav-num ex">E2</span>Add alt Text</a>
+    <a href="#ex3"><span class="nav-num ex">E3</span>Lighthouse + Fix</a>
+    <a href="#homework"><span class="nav-num ex">HW</span>Homework</a>
+  </nav>
+</aside>
+
+<main id="main">
+
+<!-- ── Intro ── -->
+<section style="margin-bottom:44px">
+  <h1 style="font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:800;margin-bottom:8px">Web Accessibility (A11y)</h1>
+  <p style="color:var(--mu);font-size:15px;margin-bottom:16px">9 topics · 3 exercises · building an inclusive web for everyone</p>
+  <div class="alert alert-brand">
+    <span class="alert-icon">♿</span>
+    <div><strong>Why this matters</strong>
+    About 1 billion people worldwide — 15% of the global population — live with some form of disability. Accessibility is not a "nice to have" — in many countries it's a legal requirement. More importantly, it makes your website better for everyone.</div>
+  </div>
+</section>
+
+<!-- ════════ TOPIC 01 ════════ -->
+<section class="topic" id="t01">
+  <div class="topic-hdr">
+    <span class="t-num">01</span>
+    <h2>What is Accessibility?</h2>
+    <span class="difficulty diff-easy">Foundations</span>
+  </div>
+  <div class="theory">
+    <p><strong>Web accessibility</strong> means designing and building websites so that people with disabilities can perceive, understand, navigate, and interact with them. The abbreviation <strong>A11y</strong> stands for "accessibility" — 11 letters between the A and y.</p>
+    <p>Think about all the different ways people experience the web:</p>
+  </div>
+
+  <div class="demo-box">
+    <h4>Real User Stories — Different Ways People Use the Web</h4>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div style="background:var(--surf);border:1px solid var(--brd);border-radius:8px;padding:14px">
+        <div style="font-size:22px;margin-bottom:6px">👁️</div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px;color:var(--tx)">Visual Impairment</div>
+        <div style="font-size:13px;color:var(--mu);line-height:1.5">Min-jun uses a <strong>screen reader</strong> (NVDA) to browse the web. It reads page content aloud. He navigates by pressing <kbd>Tab</kbd> between links and buttons. If your button is a <code>&lt;div&gt;</code>, he can't reach it.</div>
+      </div>
+      <div style="background:var(--surf);border:1px solid var(--brd);border-radius:8px;padding:14px">
+        <div style="font-size:22px;margin-bottom:6px">🤝</div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px;color:var(--tx)">Motor Disability</div>
+        <div style="font-size:13px;color:var(--mu);line-height:1.5">Soyeon has limited hand mobility and uses a <strong>switch access device</strong> — a single button that cycles through focusable elements. She needs large click targets and logical tab order to fill out forms.</div>
+      </div>
+      <div style="background:var(--surf);border:1px solid var(--brd);border-radius:8px;padding:14px">
+        <div style="font-size:22px;margin-bottom:6px">🧠</div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px;color:var(--tx)">Cognitive Differences</div>
+        <div style="font-size:13px;color:var(--mu);line-height:1.5">Hyunwoo has dyslexia. He needs clear fonts, generous spacing, and <strong>simple language</strong>. Flashing animations trigger his anxiety. Good structure — headings and short paragraphs — helps him find information fast.</div>
+      </div>
+      <div style="background:var(--surf);border:1px solid var(--brd);border-radius:8px;padding:14px">
+        <div style="font-size:22px;margin-bottom:6px">👂</div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px;color:var(--tx)">Hearing Impairment</div>
+        <div style="font-size:13px;color:var(--mu);line-height:1.5">Yuna is Deaf. She needs <strong>captions</strong> on all videos and cannot rely on audio cues. Warning sounds must have a visual equivalent. Auto-playing audio is a major barrier.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-info">
+    <span class="alert-icon">💡</span>
+    <div><strong>Accessibility benefits everyone</strong><br>
+    Curb cuts (ramps at sidewalk edges) were designed for wheelchair users — but they help parents with strollers, delivery workers, and cyclists too. Captions help people in noisy environments. Good color contrast helps people in bright sunlight. A11y is good design.</div>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li>Accessibility = designing so people with disabilities can use your site.</li>
+      <li>A11y covers visual, motor, cognitive, and hearing disabilities.</li>
+      <li>1 billion people worldwide have some form of disability (15% of population).</li>
+      <li>Accessibility improvements benefit all users — not just disabled users.</li>
+      <li>In many countries, inaccessible government and commercial websites are illegal.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════ TOPIC 02 ════════ -->
+<section class="topic" id="t02">
+  <div class="topic-hdr">
+    <span class="t-num">02</span>
+    <h2>WCAG Levels</h2>
+    <span class="difficulty diff-easy">Foundations</span>
+  </div>
+  <div class="theory">
+    <p>The <strong>Web Content Accessibility Guidelines (WCAG)</strong> are international standards published by the W3C. They define what an accessible website looks like. WCAG 2.1 (current standard) organizes requirements into three levels of conformance:</p>
+  </div>
+
+  <div class="wcag-cards">
+    <div class="wcag-card wcag-a">
+      <div class="wcag-level">A</div>
+      <div class="wcag-name">Minimum — Required</div>
+      <div class="wcag-desc">The bare minimum. Without these, some users simply cannot use your site at all. Example: images must have alt text. Forms must have labels. Content must not require a color sense to understand.</div>
+    </div>
+    <div class="wcag-card wcag-aa">
+      <div class="wcag-level">AA</div>
+      <div class="wcag-name">Standard Target — Expected</div>
+      <div class="wcag-desc">This is the target for most websites and is legally required in many jurisdictions. Includes: 4.5:1 color contrast ratio, resizable text up to 200%, keyboard accessible for all features, no seizure triggers.</div>
+    </div>
+    <div class="wcag-card wcag-aaa">
+      <div class="wcag-level">AAA</div>
+      <div class="wcag-name">Excellent — Enhanced</div>
+      <div class="wcag-desc">The gold standard. Not required for whole sites but worth aiming for key features. Examples: 7:1 contrast ratio, sign language for all video content, reading level simplified to lower-secondary.</div>
+    </div>
+  </div>
+
+  <div class="demo-box">
+    <h4>WCAG Success Criteria — Examples</h4>
+    <div style="font-size:14px">
+      <div style="border-bottom:1px solid var(--brd);padding:8px 0"><strong style="color:var(--cor)">A (1.1.1)</strong> — Non-text content: Every image must have an alt attribute describing it.</div>
+      <div style="border-bottom:1px solid var(--brd);padding:8px 0"><strong style="color:var(--cor)">A (2.1.1)</strong> — Keyboard: All functionality available via keyboard only.</div>
+      <div style="border-bottom:1px solid var(--brd);padding:8px 0"><strong style="color:var(--warn)">AA (1.4.3)</strong> — Contrast: Normal text must achieve 4.5:1 contrast ratio.</div>
+      <div style="border-bottom:1px solid var(--brd);padding:8px 0"><strong style="color:var(--warn)">AA (2.4.7)</strong> — Focus visible: Keyboard focus indicator must be visible.</div>
+      <div style="border-bottom:1px solid var(--brd);padding:8px 0"><strong style="color:var(--lime)">AAA (1.4.6)</strong> — Enhanced contrast: 7:1 ratio for text.</div>
+      <div style="padding:8px 0"><strong style="color:var(--lime)">AAA (2.4.9)</strong> — Link purpose: Each link's text alone describes its destination.</div>
+    </div>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li><strong>WCAG A</strong> = minimum — sites must meet this to be usable at all.</li>
+      <li><strong>WCAG AA</strong> = standard target — aim for this for all web projects.</li>
+      <li><strong>WCAG AAA</strong> = excellent — go here for important, user-facing features.</li>
+      <li>WCAG 2.1 is the current standard; WCAG 2.2 adds more focus-related criteria.</li>
+      <li>The four WCAG principles (POUR): Perceivable, Operable, Understandable, Robust.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════ TOPIC 03 ════════ -->
+<section class="topic" id="t03">
+  <div class="topic-hdr">
+    <span class="t-num">03</span>
+    <h2>Semantic HTML</h2>
+    <span class="difficulty diff-easy">HTML Patterns</span>
+  </div>
+  <div class="theory">
+    <p><strong>Semantic HTML</strong> means using elements that describe their meaning — not just their visual appearance. A screen reader doesn't see CSS. It reads the HTML structure and announces what each element is.</p>
+    <p>Semantic elements give the browser and assistive technology a map of the page: where is the navigation? Where is the main content? What is a footer? Generic <code>&lt;div&gt;</code> elements communicate nothing.</p>
+  </div>
+
+  <div class="compare-grid">
+    <div class="cg-bad">
+      <div class="cg-label">❌ Div Soup — no semantic meaning</div>
+      <div class="code-block" style="border-radius:8px;font-size:12px"><code><span class="sc">&lt;!-- Screen reader: "just a bunch of divs" --&gt;</span>
+&lt;div id="header"&gt;
+  &lt;div id="logo"&gt;My Site&lt;/div&gt;
+  &lt;div id="nav"&gt;
+    &lt;div class="link"&gt;Home&lt;/div&gt;
+    &lt;div class="link"&gt;About&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div id="main"&gt;
+  &lt;div class="post"&gt;
+    &lt;div class="title"&gt;Hello&lt;/div&gt;
+    &lt;div class="text"&gt;World&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div id="footer"&gt;© 2026&lt;/div&gt;</code></div>
+    </div>
+    <div class="cg-good">
+      <div class="cg-label">✅ Semantic HTML — meaningful structure</div>
+      <div class="code-block" style="border-radius:8px;font-size:12px"><code><span class="sc">&lt;!-- Screen reader: "header, navigation, main, article, footer" --&gt;</span>
+&lt;header&gt;
+  &lt;a href="/"&gt;My Site&lt;/a&gt;
+  &lt;nav aria-label="Main navigation"&gt;
+    &lt;a href="/"&gt;Home&lt;/a&gt;
+    &lt;a href="/about"&gt;About&lt;/a&gt;
+  &lt;/nav&gt;
+&lt;/header&gt;
+&lt;main&gt;
+  &lt;article&gt;
+    &lt;h1&gt;Hello&lt;/h1&gt;
+    &lt;p&gt;World&lt;/p&gt;
+  &lt;/article&gt;
+&lt;/main&gt;
+&lt;footer&gt;© 2026&lt;/footer&gt;</code></div>
+    </div>
+  </div>
+
+  <div class="demo-box">
+    <h4>Semantic Element Reference</h4>
+    <table class="attr-table">
+      <thead><tr><th>Element</th><th>Role</th><th>Screen Reader Announcement</th></tr></thead>
+      <tbody>
+        <tr><td>&lt;header&gt;</td><td>Site or section header</td><td>"banner landmark" (for page-level header)</td></tr>
+        <tr><td>&lt;nav&gt;</td><td>Navigation links</td><td>"navigation landmark" — users jump directly here</td></tr>
+        <tr><td>&lt;main&gt;</td><td>Primary page content</td><td>"main landmark" — skip-to-main target</td></tr>
+        <tr><td>&lt;article&gt;</td><td>Self-contained content</td><td>"article" — could be read in any context</td></tr>
+        <tr><td>&lt;aside&gt;</td><td>Supplementary content</td><td>"complementary landmark"</td></tr>
+        <tr><td>&lt;footer&gt;</td><td>Bottom info / copyright</td><td>"contentinfo landmark" (for page-level footer)</td></tr>
+        <tr><td>&lt;section&gt;</td><td>Thematic grouping</td><td>"region landmark" (when given an aria-label)</td></tr>
+        <tr><td>&lt;h1&gt;–&lt;h6&gt;</td><td>Headings / document outline</td><td>"Heading level 1: …" — users navigate between headings</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li>Semantic HTML gives meaning to structure — not just visual appearance.</li>
+      <li><code>&lt;header&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;footer&gt;</code> create named landmarks screen readers jump to.</li>
+      <li><code>&lt;article&gt;</code> = self-contained; <code>&lt;section&gt;</code> = thematic grouping (add aria-label).</li>
+      <li>Heading hierarchy (<code>&lt;h1&gt;</code> → <code>&lt;h6&gt;</code>) is how screen reader users skim pages.</li>
+      <li>One <code>&lt;main&gt;</code> per page. One <code>&lt;h1&gt;</code> per page.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════ TOPIC 04 ════════ -->
+<section class="topic" id="t04">
+  <div class="topic-hdr">
+    <span class="t-num">04</span>
+    <h2>The &lt;button&gt; vs &lt;div&gt; Problem</h2>
+    <span class="difficulty diff-med">HTML Patterns</span>
+  </div>
+  <div class="theory">
+    <p>One of the most common accessibility mistakes is using a <code>&lt;div&gt;</code> or <code>&lt;span&gt;</code> with a click handler instead of a real <code>&lt;button&gt;</code> element. Visually they can look identical — but to assistive technology and keyboard users, they are completely different.</p>
+  </div>
+
+  <div class="compare-grid">
+    <div class="cg-bad">
+      <div class="cg-label">❌ div as button — broken</div>
+      <div class="code-block" style="border-radius:8px;font-size:12px"><code><span class="sc">&lt;!-- This is NOT accessible: --&gt;</span>
+&lt;div class="btn"
+  onclick="submitForm()"&gt;
+  Submit
+&lt;/div&gt;
+
+<span class="sc">&lt;!-- Problems:
+  - Not reachable by Tab key
+  - Screen reader: "Submit" (nothing else)
+  - No keyboard activation (Enter/Space)
+  - No disabled state support
+  - No implicit ARIA role --&gt;</span></code></div>
+    </div>
+    <div class="cg-good">
+      <div class="cg-label">✅ real &lt;button&gt; — works for everyone</div>
+      <div class="code-block" style="border-radius:8px;font-size:12px"><code><span class="sc">&lt;!-- This IS accessible: --&gt;</span>
+&lt;button
+  type="button"
+  onclick="submitForm()"&gt;
+  Submit
+&lt;/button&gt;
+
+<span class="sc">&lt;!-- Benefits:
+  ✓ Tab focusable by default
+  ✓ Screen reader: "Submit, button"
+  ✓ Activated by Enter and Space
+  ✓ disabled attribute works
+  ✓ Built-in role="button" --&gt;</span></code></div>
+    </div>
+  </div>
+
+  <div class="demo-box">
+    <h4>What &lt;button&gt; gives you for FREE</h4>
+    <ul class="checklist">
+      <li><span class="check-icon">⌨️</span><div><strong>Keyboard focus:</strong> <kbd>Tab</kbd> stops here automatically — no <code>tabindex</code> needed.</div></li>
+      <li><span class="check-icon">↵</span><div><strong>Enter &amp; Space activation:</strong> Both keys trigger the click — no keydown handler needed.</div></li>
+      <li><span class="check-icon">🔊</span><div><strong>ARIA role built in:</strong> Screen readers announce "button" after the label — users know it's interactive.</div></li>
+      <li><span class="check-icon">🚫</span><div><strong>disabled attribute:</strong> <code>&lt;button disabled&gt;</code> — automatically not focusable, announced as "dimmed" or "unavailable".</div></li>
+      <li><span class="check-icon">🎨</span><div><strong>Focus style:</strong> Browsers provide a default focus ring — you can customize but shouldn't remove it.</div></li>
+    </ul>
+  </div>
+
+  <div class="alert alert-warn">
+    <span class="alert-icon">⚠️</span>
+    <div><strong>If you MUST use a non-semantic element…</strong><br>
+    Add <code>role="button"</code>, <code>tabindex="0"</code>, and a <code>keydown</code> handler for Enter/Space. But ask yourself first: why not just use <code>&lt;button&gt;</code>? The answer is almost always "we can."</div>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li>Use <code>&lt;button&gt;</code> for clickable actions. Use <code>&lt;a href="…"&gt;</code> for navigation links.</li>
+      <li>A <code>&lt;button&gt;</code> is keyboard focusable, screen reader announced, and Enter/Space activatable by default.</li>
+      <li>A <code>&lt;div onclick&gt;</code> has NONE of those behaviors — it's invisible to keyboard and screen reader.</li>
+      <li>Add <code>type="button"</code> to buttons inside forms to prevent accidental form submission.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════ TOPIC 05 ════════ -->
+<section class="topic" id="t05">
+  <div class="topic-hdr">
+    <span class="t-num">05</span>
+    <h2>alt Text Deep Dive</h2>
+    <span class="difficulty diff-easy">HTML Patterns</span>
+  </div>
+  <div class="theory">
+    <p>The <code>alt</code> attribute on <code>&lt;img&gt;</code> elements is the most commonly known accessibility feature — and the most commonly done wrong. The goal is to provide a <strong>text equivalent</strong> that conveys the same information as the image. The rule is not "describe what you see" — it's "describe the <em>purpose</em> the image serves."</p>
+  </div>
+
+  <div class="demo-box">
+    <h4>alt Text Decision Tree</h4>
+    <div style="font-size:14px;line-height:1.8">
+      <div style="background:var(--acl);border-radius:8px;padding:12px;margin-bottom:10px">
+        <strong style="color:var(--ac)">Is the image purely decorative?</strong> (border, texture, visual flourish with no informational value)<br>
+        → Use <code>alt=""</code> (empty alt). Screen readers skip it. Do NOT omit the attribute entirely!
+      </div>
+      <div style="background:var(--limel);border-radius:8px;padding:12px;margin-bottom:10px">
+        <strong style="color:var(--lime)">Is the image a link?</strong><br>
+        → The alt text should describe the destination of the link, not what the image looks like.<br>
+        <code>&lt;a href="/home"&gt;&lt;img src="logo.png" alt="Gachon University homepage"&gt;&lt;/a&gt;</code>
+      </div>
+      <div style="background:var(--warnl);border-radius:8px;padding:12px;margin-bottom:10px">
+        <strong style="color:var(--warn)">Is the image informational?</strong> (photo, chart, diagram)<br>
+        → Describe what information the image conveys — not just what it looks like.<br>
+        Bad: <code>alt="chart"</code> · Good: <code>alt="Bar chart showing student enrollment rose 23% from 2024 to 2026"</code>
+      </div>
+      <div style="background:var(--corl);border-radius:8px;padding:12px">
+        <strong style="color:var(--cor)">Is the image text?</strong> (screenshot of code, image of a receipt)<br>
+        → Always prefer real text. If you must use an image, provide the full text in alt.
+      </div>
+    </div>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-bar"><span class="code-lang">HTML — alt text examples</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <div class="code-block"><code><span class="sc">&lt;!-- ❌ Missing alt (WCAG failure — worst case) --&gt;</span>
+&lt;img src="profile.jpg"&gt;
+
+<span class="sc">&lt;!-- ❌ Useless alt (screen reader: "image image") --&gt;</span>
+&lt;img src="profile.jpg" alt="image"&gt;
+
+<span class="sc">&lt;!-- ❌ Filename as alt (uninformative) --&gt;</span>
+&lt;img src="profile.jpg" alt="profile.jpg"&gt;
+
+<span class="sc">&lt;!-- ✅ Informational image --&gt;</span>
+&lt;img src="profile.jpg" alt="Kim Jisoo, Web Programming student"&gt;
+
+<span class="sc">&lt;!-- ✅ Decorative image — empty alt --&gt;</span>
+&lt;img src="decorative-wave.svg" alt=""&gt;
+
+<span class="sc">&lt;!-- ✅ Complex chart — use figcaption or aria-describedby for longer descriptions --&gt;</span>
+&lt;figure&gt;
+  &lt;img src="chart.png" alt="Enrollment bar chart — see caption below"
+       aria-describedby="chart-desc"&gt;
+  &lt;figcaption id="chart-desc"&gt;
+    Bar chart: 2024: 1,200 students; 2025: 1,400 students; 2026: 1,476 students.
+  &lt;/figcaption&gt;
+&lt;/figure&gt;</code></div>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li>Every <code>&lt;img&gt;</code> must have an <code>alt</code> attribute — with or without a value.</li>
+      <li>Decorative images: <code>alt=""</code> (empty string, not missing) — screen readers skip them.</li>
+      <li>Informational images: describe the <em>purpose/information</em>, not just the visual appearance.</li>
+      <li>Linked images: alt text describes the link destination.</li>
+      <li>For complex images, use <code>&lt;figcaption&gt;</code> or <code>aria-describedby</code> for long descriptions.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════ TOPIC 06 ════════ -->
+<section class="topic" id="t06">
+  <div class="topic-hdr">
+    <span class="t-num">06</span>
+    <h2>ARIA Attributes</h2>
+    <span class="difficulty diff-med">HTML Patterns</span>
+  </div>
+  <div class="theory">
+    <p><strong>ARIA</strong> stands for <em>Accessible Rich Internet Applications</em>. ARIA attributes are added to HTML elements to communicate more meaning to assistive technology — when semantic HTML alone is not enough. The first rule of ARIA: <strong>don't use ARIA if native HTML can do it</strong>.</p>
+  </div>
+
+  <table class="attr-table">
+    <thead><tr><th>Attribute</th><th>Purpose</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>aria-label</td>
+        <td>Provides a text label for an element that has no visible text</td>
+        <td><code>&lt;button aria-label="Close dialog"&gt;✕&lt;/button&gt;</code></td>
+      </tr>
+      <tr>
+        <td>aria-describedby</td>
+        <td>Points to another element that provides additional description</td>
+        <td><code>&lt;input aria-describedby="pwd-hint"&gt; &lt;p id="pwd-hint"&gt;Min 8 chars&lt;/p&gt;</code></td>
+      </tr>
+      <tr>
+        <td>aria-hidden</td>
+        <td>Hides an element from screen readers (decorative icons, duplicated text)</td>
+        <td><code>&lt;span aria-hidden="true"&gt;🏠&lt;/span&gt; Home</code></td>
+      </tr>
+      <tr>
+        <td>aria-live</td>
+        <td>Announces dynamic content changes to screen readers</td>
+        <td><code>&lt;div aria-live="polite"&gt;{status message}&lt;/div&gt;</code></td>
+      </tr>
+      <tr>
+        <td>aria-expanded</td>
+        <td>Indicates whether a collapsible section is open or closed</td>
+        <td><code>&lt;button aria-expanded="false"&gt;Menu&lt;/button&gt;</code></td>
+      </tr>
+      <tr>
+        <td>role</td>
+        <td>Defines the semantic role of an element (only when no native element exists)</td>
+        <td><code>&lt;div role="alert"&gt;Form saved!&lt;/div&gt;</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="code-wrap">
+    <div class="code-bar"><span class="code-lang">HTML — ARIA in practice</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <div class="code-block"><code><span class="sc">&lt;!-- aria-label: icon-only button --&gt;</span>
+&lt;button aria-label="Search"&gt;
+  &lt;svg aria-hidden="true"&gt;...&lt;/svg&gt;
+&lt;/button&gt;
+
+<span class="sc">&lt;!-- aria-describedby: form field with hint --&gt;</span>
+&lt;label for="email"&gt;Email address&lt;/label&gt;
+&lt;input type="email" id="email"
+       aria-describedby="email-hint"
+       aria-required="true"&gt;
+&lt;p id="email-hint"&gt;We will send a verification link here.&lt;/p&gt;
+
+<span class="sc">&lt;!-- aria-live: live status region --&gt;</span>
+&lt;div aria-live="polite" aria-atomic="true" id="status"&gt;
+  &lt;!-- JS updates this div — screen reader announces changes --&gt;
+&lt;/div&gt;
+
+<span class="sc">&lt;!-- aria-expanded: accordion / disclosure pattern --&gt;</span>
+&lt;button aria-expanded="false" aria-controls="faq-1"&gt;
+  What is accessibility?
+&lt;/button&gt;
+&lt;div id="faq-1" hidden&gt;
+  Accessibility means designing for everyone...
+&lt;/div&gt;</code></div>
+  </div>
+
+  <div class="alert alert-warn">
+    <span class="alert-icon">⚠️</span>
+    <div><strong>The first rule of ARIA: don't use ARIA</strong><br>
+    If a native HTML element can express the semantics, use that instead. <code>&lt;button&gt;</code> is better than <code>&lt;div role="button"&gt;</code>. <code>&lt;label&gt;</code> is better than <code>aria-label</code>. ARIA is for cases where no HTML element exists (custom dropdowns, tabs, sliders).</div>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li><code>aria-label</code> — provides a label when no visible text exists (icon buttons).</li>
+      <li><code>aria-describedby</code> — links to additional description text (form hints, tooltips).</li>
+      <li><code>aria-hidden="true"</code> — hides decorative elements (icons next to text) from screen readers.</li>
+      <li><code>aria-live="polite"</code> — announces dynamic updates when the user is idle.</li>
+      <li><code>role</code> — only for widgets without a semantic HTML equivalent.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════ TOPIC 07 ════════ -->
+<section class="topic" id="t07">
+  <div class="topic-hdr">
+    <span class="t-num">07</span>
+    <h2>Keyboard Navigation</h2>
+    <span class="difficulty diff-med">User Experience</span>
+  </div>
+  <div class="theory">
+    <p>Many users cannot use a mouse — they navigate with the keyboard alone. Your entire website must be fully usable with just <kbd>Tab</kbd>, <kbd>Shift+Tab</kbd>, <kbd>Enter</kbd>, <kbd>Space</kbd>, and arrow keys. This is WCAG 2.1.1 — a Level A (minimum) requirement.</p>
+  </div>
+
+  <div class="demo-box">
+    <h4>Keyboard Navigation Essentials</h4>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:14px">
+      <div style="background:var(--surf);border:1px solid var(--brd);border-radius:8px;padding:14px">
+        <div style="font-weight:700;margin-bottom:6px;color:var(--tx)"><kbd>Tab</kbd> — Move forward</div>
+        <div style="color:var(--mu)">Moves focus to the next interactive element: links, buttons, inputs, selects. Elements must be natively focusable or have <code>tabindex="0"</code>.</div>
+      </div>
+      <div style="background:var(--surf);border:1px solid var(--brd);border-radius:8px;padding:14px">
+        <div style="font-weight:700;margin-bottom:6px;color:var(--tx)"><kbd>Shift+Tab</kbd> — Move backward</div>
+        <div style="color:var(--mu)">Moves focus to the previous interactive element. Tab order should follow reading order (usually top to bottom, left to right).</div>
+      </div>
+      <div style="background:var(--surf);border:1px solid var(--brd);border-radius:8px;padding:14px">
+        <div style="font-weight:700;margin-bottom:6px;color:var(--tx)"><kbd>Enter</kbd> / <kbd>Space</kbd> — Activate</div>
+        <div style="color:var(--mu)">Enter activates links and buttons. Space activates buttons, checkboxes, and selects. If you use <code>&lt;button&gt;</code>, both keys work automatically.</div>
+      </div>
+      <div style="background:var(--surf);border:1px solid var(--brd);border-radius:8px;padding:14px">
+        <div style="font-weight:700;margin-bottom:6px;color:var(--tx)">Arrow Keys — Components</div>
+        <div style="color:var(--mu)">Used inside widgets: radio groups, menus, tabs, sliders. Arrow keys move between options within a component; Tab moves between components.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-bar"><span class="code-lang">CSS / HTML — Focus styles &amp; tabindex</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <div class="code-block"><code><span class="sc">/* ✅ :focus-visible — shows focus ring for keyboard, not mouse clicks */</span>
+<span class="stag">:focus-visible</span> {
+  <span class="sattr">outline</span>: <span class="sval">3px solid #1a7f5a</span>;
+  <span class="sattr">outline-offset</span>: <span class="sval">3px</span>;
+  <span class="sattr">border-radius</span>: <span class="sval">4px</span>;
+}
+
+<span class="sc">/* ❌ Never do this — removes focus for keyboard users! */</span>
+<span class="stag">*:focus</span> { <span class="sattr">outline</span>: <span class="sval">none</span>; }
+
+<span class="sc">&lt;!-- HTML: tabindex values --&gt;</span>
+<span class="sc">&lt;!-- tabindex="0" — adds element to natural tab order --&gt;</span>
+&lt;div role="button" tabindex="0" onclick="..." onkeydown="..."&gt;
+  Custom widget
+&lt;/div&gt;
+
+<span class="sc">&lt;!-- tabindex="-1" — focusable via JS but not by Tab key --&gt;</span>
+&lt;div id="modal" tabindex="-1"&gt;...&lt;/div&gt;
+
+<span class="sc">&lt;!-- Skip navigation link — lets keyboard users jump past nav --&gt;</span>
+&lt;a href="#main-content" class="skip-link"&gt;Skip to main content&lt;/a&gt;
+&lt;nav&gt;...&lt;/nav&gt;
+&lt;main id="main-content"&gt;...&lt;/main&gt;</code></div>
+  </div>
+
+  <div class="alert alert-info">
+    <span class="alert-icon">💡</span>
+    <div><strong>Skip Navigation Links</strong><br>
+    A "skip to main content" link at the top of the page lets keyboard users jump past the navigation menu directly to the content. It can be visually hidden until focused. This is a WCAG AA requirement (2.4.1) for sites with repeated navigation.</div>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li>All interactive elements must be keyboard reachable — WCAG Level A.</li>
+      <li>Use <code>:focus-visible</code> for focus styles — visible for keyboard, hidden for mouse clicks.</li>
+      <li><strong>Never</strong> set <code>outline: none</code> without an alternative focus indicator.</li>
+      <li><code>tabindex="0"</code> — adds to tab order; <code>tabindex="-1"</code> — focusable by JS only.</li>
+      <li>Skip links help keyboard and screen reader users jump past repeated navigation.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════ TOPIC 08 ════════ -->
+<section class="topic" id="t08">
+  <div class="topic-hdr">
+    <span class="t-num">08</span>
+    <h2>Color Contrast</h2>
+    <span class="difficulty diff-easy">User Experience</span>
+  </div>
+  <div class="theory">
+    <p>Low color contrast makes text hard to read for people with low vision, color blindness, or anyone in bright sunlight. WCAG defines minimum contrast ratios that text must meet against its background. The contrast ratio is calculated from the relative luminance of foreground and background colors.</p>
+  </div>
+
+  <div class="demo-box">
+    <h4>Contrast Requirements (WCAG 1.4.3)</h4>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+      <div>
+        <div class="demo-label">Normal text (under 18pt / 14pt bold)</div>
+        <div style="background:var(--surf);border:1px solid var(--brd);border-radius:8px;padding:12px;text-align:center">
+          <div style="font-size:24px;font-weight:700;color:var(--brand)">4.5 : 1</div>
+          <div style="font-size:12px;color:var(--mu);margin-top:4px">WCAG AA minimum</div>
+        </div>
+      </div>
+      <div>
+        <div class="demo-label">Large text (18pt+ / 14pt+ bold)</div>
+        <div style="background:var(--surf);border:1px solid var(--brd);border-radius:8px;padding:12px;text-align:center">
+          <div style="font-size:24px;font-weight:700;color:var(--warn)">3.0 : 1</div>
+          <div style="font-size:12px;color:var(--mu);margin-top:4px">WCAG AA minimum</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-label">Visual Examples — FAIL vs PASS</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin:10px 0">
+      <span class="contrast-pair contrast-fail">Pink on white — FAIL (1.4:1)</span>
+      <span class="contrast-pair" style="background:#ff9900;color:#fff">Orange on white — FAIL (2.9:1)</span>
+      <span class="contrast-pair" style="background:#fff;color:#767676">Gray #767676 — PASS AA (4.5:1)</span>
+      <span class="contrast-pair" style="background:#fff;color:#595959">Gray #595959 — PASS AA (7.0:1)</span>
+      <span class="contrast-pair" style="background:#1a7f5a;color:#fff">Green + white — PASS AA (5.8:1)</span>
+    </div>
+  </div>
+
+  <div class="demo-box">
+    <h4>Tools for Checking Contrast</h4>
+    <ul class="checklist">
+      <li><span class="check-icon">🔍</span><div><strong>WebAIM Contrast Checker</strong> — <code>webaim.org/resources/contrastchecker</code> — enter two hex colors, get an instant ratio and WCAG pass/fail.</div></li>
+      <li><span class="check-icon">🎨</span><div><strong>Chrome DevTools</strong> — Click any text element in inspector, the color swatch shows contrast ratio and WCAG badge.</div></li>
+      <li><span class="check-icon">🔆</span><div><strong>Lighthouse Accessibility Audit</strong> — automatically flags elements with insufficient contrast.</div></li>
+      <li><span class="check-icon">🖱️</span><div><strong>Colour Contrast Analyser (app)</strong> — eyedropper tool to check contrast anywhere on screen, including images.</div></li>
+    </ul>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li>Normal text: minimum <strong>4.5:1</strong> contrast ratio (WCAG AA).</li>
+      <li>Large text (18pt+ or 14pt+ bold): minimum <strong>3:1</strong> contrast ratio.</li>
+      <li>AAA enhanced: <strong>7:1</strong> for normal text, 4.5:1 for large text.</li>
+      <li>Pure decorative graphics and disabled UI components are exempt.</li>
+      <li>Use Chrome DevTools, WebAIM checker, or Lighthouse to verify ratios.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════ TOPIC 09 ════════ -->
+<section class="topic" id="t09">
+  <div class="topic-hdr">
+    <span class="t-num">09</span>
+    <h2>Lighthouse Accessibility Audit</h2>
+    <span class="difficulty diff-easy">User Experience</span>
+  </div>
+  <div class="theory">
+    <p><strong>Lighthouse</strong> is a built-in Chrome DevTools tool that audits your page across five categories: Performance, Accessibility, Best Practices, SEO, and PWA. The Accessibility score checks around 50 automated ARIA and HTML rules. Note: automated tools catch roughly 30–40% of issues — always test with a real screen reader too.</p>
+  </div>
+
+  <div class="demo-box">
+    <h4>How to Run a Lighthouse Accessibility Audit</h4>
+    <ul class="checklist">
+      <li><span class="check-icon">1️⃣</span><div>Open your page in Chrome. Right-click anywhere → <strong>Inspect</strong> (or press <kbd>F12</kbd>).</div></li>
+      <li><span class="check-icon">2️⃣</span><div>Click the <strong>"Lighthouse"</strong> tab at the top of DevTools (may be hidden under ">>" arrow).</div></li>
+      <li><span class="check-icon">3️⃣</span><div>Check only <strong>"Accessibility"</strong> category (uncheck others for a faster run).</div></li>
+      <li><span class="check-icon">4️⃣</span><div>Click <strong>"Analyze page load"</strong>. Wait 10–20 seconds.</div></li>
+      <li><span class="check-icon">5️⃣</span><div>Read the score (0–100). Expand each failing item to see the exact element and how to fix it.</div></li>
+    </ul>
+  </div>
+
+  <div class="demo-box">
+    <h4>Reading the Lighthouse Report</h4>
+    <div style="font-size:14px;line-height:1.6">
+      <div style="background:var(--limel);border-radius:8px;padding:12px;margin-bottom:8px">
+        <strong style="color:var(--lime)">Score 90–100 (Green)</strong><br>
+        Excellent. The automated checks pass. Still manually test with a screen reader and keyboard.
+      </div>
+      <div style="background:var(--warnl);border-radius:8px;padding:12px;margin-bottom:8px">
+        <strong style="color:var(--warn)">Score 50–89 (Orange)</strong><br>
+        Needs improvement. Look at the failing items — many are quick fixes (add missing alt text, fix contrast, add labels).
+      </div>
+      <div style="background:var(--corl);border-radius:8px;padding:12px">
+        <strong style="color:var(--cor)">Score 0–49 (Red)</strong><br>
+        Significant issues. Users with disabilities cannot use the site. Fix critical items first: missing alt, missing form labels, low contrast.
+      </div>
+    </div>
+  </div>
+
+  <div class="alert alert-warn">
+    <span class="alert-icon">⚠️</span>
+    <div><strong>Lighthouse is not a complete accessibility test</strong><br>
+    A score of 100 does NOT mean your site is fully accessible. Lighthouse cannot detect: wrong alt text (it can only check if alt exists), illogical reading order, keyboard traps, confusing language, or poor UX for screen reader users. Always complement with manual testing.</div>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li>Lighthouse is in Chrome DevTools → Lighthouse tab → run Accessibility category.</li>
+      <li>Score is 0–100; aim for 90+. Each failing item links to the exact element in the DOM.</li>
+      <li>Automated tools catch ~30–40% of real accessibility issues.</li>
+      <li>Always test with keyboard navigation and a real screen reader (NVDA, VoiceOver, JAWS).</li>
+      <li>Common quick wins: add missing alt text, fix contrast, add form labels, add button text.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ════════ EXERCISES ════════ -->
+<section id="exercises">
+  <h1>Practice Exercises</h1>
+  <p class="ex-intro">Write code in the left panel. Click <strong>Run</strong> to see it in the preview. Use hints if stuck.</p>
+
+  <!-- E1 -->
+  <div class="exercise" id="ex1">
+    <div class="ex-header">
+      <span class="ex-num">E1</span>
+      <h3>Fix a div-button to a real &lt;button&gt;</h3>
+      <span class="difficulty diff-easy">Beginner</span>
+    </div>
+    <div class="ex-body">
+      <div class="task-box">
+        <strong>Task:</strong> The HTML below uses a <code>&lt;div&gt;</code> as a button. Fix it to use a real <code>&lt;button&gt;</code> element. Then verify it is keyboard accessible.
+        <ul>
+          <li>Replace the outer <code>&lt;div class="btn"&gt;</code> with <code>&lt;button type="button"&gt;</code></li>
+          <li>Add a CSS focus style so it has a visible focus ring</li>
+          <li>Test: press <kbd>Tab</kbd> key to reach the button, then <kbd>Enter</kbd> to activate</li>
+          <li>Bonus: add <code>aria-label</code> to the close button (it only has an × symbol)</li>
+        </ul>
+      </div>
+      <div class="editor-row">
+        <textarea id="ex1-editor" spellcheck="false">&lt;!DOCTYPE html&gt;
+&lt;html&gt;&lt;body style="font-family:system-ui;padding:24px"&gt;
+&lt;style&gt;
+  .btn {
+    display:inline-block; background:#1a7f5a; color:white;
+    padding:10px 24px; border-radius:8px; cursor:pointer; font-size:15px;
+    font-weight:600; border:none; /* Add :focus-visible style here! */
+  }
+  /* Add :focus-visible rule below */
+&lt;/style&gt;
+
+&lt;p&gt;Try pressing Tab then Enter:&lt;/p&gt;
+
+&lt;!-- ❌ FIX THIS: change div to button --&gt;
+&lt;div class="btn" onclick="alert('Clicked!')"&gt;
+  Submit form
+&lt;/div&gt;
+
+&lt;!-- ❌ FIX THIS: make the close button accessible --&gt;
+&lt;button type="button" style="
+  margin-left:16px; background:#dc2626; color:white;
+  border:none; border-radius:50%; width:36px; height:36px;
+  font-size:18px; cursor:pointer;" onclick="alert('Closed')"&gt;
+  ✕
+&lt;/button&gt;
+
+&lt;div id="result" style="margin-top:16px;font-size:14px;color:#666"&gt;&lt;/div&gt;
+
+&lt;script&gt;
+  // Log when each button is activated (click or keyboard)
+  document.querySelectorAll('button, .btn').forEach(el =&gt; {
+    el.addEventListener('click', () =&gt; {
+      document.getElementById('result').textContent =
+        '✅ Activated! (works by keyboard and mouse)';
+    });
+  });
+&lt;/script&gt;
+&lt;/body&gt;&lt;/html&gt;</textarea>
+        <iframe id="ex1-frame"></iframe>
+      </div>
+      <div class="ex-btns">
+        <button class="btn-run" onclick="runEx('ex1')">▶ Run</button>
+        <button class="btn-hint" onclick="toggleHint('ex1')">💡 Hint</button>
+        <button class="btn-sol" onclick="toggleSol('ex1')">✅ Solution</button>
+      </div>
+      <div class="hint-box" id="ex1-hint">
+        <strong>Hint:</strong> Change <code>&lt;div class="btn" onclick="..."&gt;</code> to <code>&lt;button class="btn" type="button" onclick="..."&gt;</code>. Add CSS: <code>.btn:focus-visible { outline: 3px solid #1a7f5a; outline-offset: 3px; }</code>. For the close button, add <code>aria-label="Close"</code>.
+      </div>
+      <div class="sol-box" id="ex1-sol">
+        <div class="code-wrap"><div class="code-bar"><span class="code-lang">Solution — key changes</span></div>
+        <div class="code-block"><code><span class="sc">/* CSS — add focus-visible styles */</span>
+<span class="stag">.btn:focus-visible</span> {
+  <span class="sattr">outline</span>: <span class="sval">3px solid #1a7f5a</span>;
+  <span class="sattr">outline-offset</span>: <span class="sval">3px</span>;
+}
+<span class="stag">button:focus-visible</span> {
+  <span class="sattr">outline</span>: <span class="sval">3px solid #dc2626</span>;
+  <span class="sattr">outline-offset</span>: <span class="sval">3px</span>;
+}
+
+<span class="sc">&lt;!-- HTML: div → button, add aria-label --&gt;</span>
+&lt;button class="btn" type="button" onclick="alert('Clicked!')"&gt;
+  Submit form
+&lt;/button&gt;
+
+&lt;button type="button" aria-label="Close"
+  style="..." onclick="alert('Closed')"&gt;
+  ✕
+&lt;/button&gt;</code></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- E2 -->
+  <div class="exercise" id="ex2">
+    <div class="ex-header">
+      <span class="ex-num">E2</span>
+      <h3>Add Proper alt Text to Images</h3>
+      <span class="difficulty diff-easy">Beginner</span>
+    </div>
+    <div class="ex-body">
+      <div class="task-box">
+        <strong>Task:</strong> The page below has four images with bad or missing alt text. Fix each one.
+        <ul>
+          <li>Image 1: a photo of the campus — write a descriptive alt</li>
+          <li>Image 2: a decorative wave divider — should be skipped by screen readers</li>
+          <li>Image 3: a logo linking to the homepage — alt should describe the link</li>
+          <li>Image 4: a bar chart — write a brief description of what the chart shows</li>
+        </ul>
+      </div>
+      <div class="editor-row">
+        <textarea id="ex2-editor" spellcheck="false">&lt;!DOCTYPE html&gt;
+&lt;html&gt;&lt;body style="font-family:system-ui;padding:24px;max-width:500px"&gt;
+&lt;style&gt;
+  .img-placeholder {
+    width:100%; height:80px; border-radius:8px; display:flex;
+    align-items:center; justify-content:center; font-size:24px;
+    margin-bottom:6px; border:2px dashed #999;
+  }
+  .label { font-size:12px; color:#666; margin-bottom:14px; }
+  .check { padding:6px 10px; background:#dcfce7; border-radius:4px; font-size:12px; margin-bottom:10px; display:none; }
+&lt;/style&gt;
+
+&lt;!-- Image 1: campus photo (bad alt) --&gt;
+&lt;div class="img-placeholder" style="background:#e0eaff"&gt;🏫&lt;/div&gt;
+&lt;img src="" alt="image" style="display:none"&gt; &lt;!-- FIX THIS ALT --&gt;
+&lt;p class="label"&gt;Image 1: Campus building photo (informational)&lt;/p&gt;
+
+&lt;!-- Image 2: decorative wave (missing alt) --&gt;
+&lt;div class="img-placeholder" style="background:#f0fdf4"&gt;〰️&lt;/div&gt;
+&lt;img src="" style="display:none"&gt; &lt;!-- ADD ALT ATTRIBUTE --&gt;
+&lt;p class="label"&gt;Image 2: Decorative wavy divider&lt;/p&gt;
+
+&lt;!-- Image 3: linked logo --&gt;
+&lt;div class="img-placeholder" style="background:#fef3c7"&gt;🏫</div&gt;
+&lt;a href="/"&gt;&lt;img src="" alt="logo" style="display:none"&gt;&lt;/a&gt; &lt;!-- FIX ALT --&gt;
+&lt;p class="label"&gt;Image 3: University logo (inside a link to homepage)&lt;/p&gt;
+
+&lt;!-- Image 4: bar chart --&gt;
+&lt;div class="img-placeholder" style="background:#f5f0ff"&gt;📊&lt;/div&gt;
+&lt;img src="" alt="chart" style="display:none"&gt; &lt;!-- FIX ALT --&gt;
+&lt;p class="label"&gt;Image 4: Enrollment chart: 2024: 1,200 | 2025: 1,400 | 2026: 1,476 students&lt;/p&gt;
+
+&lt;button onclick="checkAlts()" style="
+  background:#1a7f5a;color:white;border:none;padding:10px 20px;
+  border-radius:8px;cursor:pointer;font-size:14px;font-weight:600"&gt;
+  Check my alt text
+&lt;/button&gt;
+&lt;div id="feedback" style="margin-top:12px;font-size:14px"&gt;&lt;/div&gt;
+
+&lt;script&gt;
+function checkAlts() {
+  const imgs = document.querySelectorAll('img');
+  const results = [];
+  imgs.forEach((img, i) =&gt; {
+    const alt = img.getAttribute('alt');
+    if (alt === null) results.push(`❌ Image ${i+1}: missing alt attribute`);
+    else if (alt === 'image' || alt === 'logo' || alt === 'chart')
+      results.push(`⚠️ Image ${i+1}: alt="${alt}" is too generic`);
+    else if (i === 1 &amp;&amp; alt !== '')
+      results.push(`⚠️ Image 2 should have alt="" (decorative)`);
+    else results.push(`✅ Image ${i+1}: alt="${alt}"`);
+  });
+  document.getElementById('feedback').innerHTML = results.join('&lt;br&gt;');
+}
+&lt;/script&gt;
+&lt;/body&gt;&lt;/html&gt;</textarea>
+        <iframe id="ex2-frame"></iframe>
+      </div>
+      <div class="ex-btns">
+        <button class="btn-run" onclick="runEx('ex2')">▶ Run</button>
+        <button class="btn-hint" onclick="toggleHint('ex2')">💡 Hint</button>
+        <button class="btn-sol" onclick="toggleSol('ex2')">✅ Solution</button>
+      </div>
+      <div class="hint-box" id="ex2-hint">
+        <strong>Hint:</strong> Image 1: <code>alt="Gachon University main building, a modern glass structure"</code>. Image 2: <code>alt=""</code> (empty — decorative). Image 3: <code>alt="Gachon University — go to homepage"</code>. Image 4: <code>alt="Bar chart: student enrollment 2024: 1,200, 2025: 1,400, 2026: 1,476"</code>.
+      </div>
+      <div class="sol-box" id="ex2-sol">
+        <div class="code-wrap"><div class="code-bar"><span class="code-lang">Solution — fixed alt attributes</span></div>
+        <div class="code-block"><code>&lt;!-- Image 1: informational description --&gt;
+&lt;img src="" alt="Gachon University main building,
+  a modern glass structure surrounded by trees"&gt;
+
+&lt;!-- Image 2: decorative — empty alt --&gt;
+&lt;img src="" alt=""&gt;
+
+&lt;!-- Image 3: linked image — describe the link destination --&gt;
+&lt;a href="/"&gt;&lt;img src=""
+  alt="Gachon University — go to homepage"&gt;&lt;/a&gt;
+
+&lt;!-- Image 4: chart — key data in alt --&gt;
+&lt;img src="" alt="Bar chart showing student enrollment:
+  2024: 1,200 students; 2025: 1,400 students; 2026: 1,476 students"&gt;</code></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- E3 -->
+  <div class="exercise" id="ex3">
+    <div class="ex-header">
+      <span class="ex-num">E3</span>
+      <h3>Run Lighthouse &amp; Fix 2 Issues</h3>
+      <span class="difficulty diff-med">Intermediate</span>
+    </div>
+    <div class="ex-body">
+      <div class="task-box">
+        <strong>Task:</strong> The HTML below has multiple accessibility issues. Fix at least 2 of them, then click Run to see the improvement.
+        <ul>
+          <li>Issue 1: The button has no accessible name (icon only, no aria-label)</li>
+          <li>Issue 2: The input has no <code>&lt;label&gt;</code> element</li>
+          <li>Issue 3: The error text uses color alone to indicate an error (no text marker)</li>
+          <li>Issue 4: The image link has a generic alt text</li>
+        </ul>
+      </div>
+      <div class="editor-row">
+        <textarea id="ex3-editor" spellcheck="false">&lt;!DOCTYPE html&gt;
+&lt;html&gt;&lt;body style="font-family:system-ui;padding:24px;max-width:400px"&gt;
+&lt;style&gt;
+  input { width:100%; padding:8px; border:2px solid #ccc; border-radius:6px; font-size:15px; margin-bottom:4px; }
+  .error { color:red; font-size:13px; } /* bad: color only */
+  button { padding:8px 16px; border:none; border-radius:6px; cursor:pointer; }
+  .icon-btn { background:#1a7f5a; color:white; width:36px; height:36px; font-size:18px; border-radius:50%; }
+  .submit-btn { background:#1a56db; color:white; padding:10px 24px; font-size:15px; width:100%; margin-top:8px; }
+  a img { display:block; width:80px; }
+&lt;/style&gt;
+
+&lt;h2&gt;Sign Up&lt;/h2&gt;
+
+&lt;!-- Issue 1: icon button with no label --&gt;
+&lt;button class="icon-btn"&gt;🔍&lt;/button&gt;
+
+&lt;!-- Issue 2: input with no label --&gt;
+&lt;input type="email" placeholder="Email address" id="email-field"&gt;
+&lt;div class="error"&gt;Please enter a valid email address.&lt;/div&gt;
+
+&lt;!-- Issue 3: error shown only in color (no text marker like "Error:") --&gt;
+&lt;div class="error"&gt;Password too short.&lt;/div&gt;
+
+&lt;button class="submit-btn"&gt;Create account&lt;/button&gt;
+
+&lt;!-- Issue 4: linked image with bad alt --&gt;
+&lt;a href="/about" style="margin-top:16px; display:inline-block"&gt;
+  &lt;img src="" alt="click here" style="background:#e0eaff;width:80px;height:40px;border-radius:4px"&gt;
+&lt;/a&gt;
+
+&lt;/body&gt;&lt;/html&gt;</textarea>
+        <iframe id="ex3-frame"></iframe>
+      </div>
+      <div class="ex-btns">
+        <button class="btn-run" onclick="runEx('ex3')">▶ Run</button>
+        <button class="btn-hint" onclick="toggleHint('ex3')">💡 Hint</button>
+        <button class="btn-sol" onclick="toggleSol('ex3')">✅ Solution</button>
+      </div>
+      <div class="hint-box" id="ex3-hint">
+        <strong>Hint:</strong> Issue 1: add <code>aria-label="Search"</code> to the icon button. Issue 2: add <code>&lt;label for="email-field"&gt;Email address&lt;/label&gt;</code> before the input. Issue 3: add "Error: " text before the message. Issue 4: change alt to <code>alt="Learn about our team"</code>.
+      </div>
+      <div class="sol-box" id="ex3-sol">
+        <div class="code-wrap"><div class="code-bar"><span class="code-lang">Solution — 4 fixes</span></div>
+        <div class="code-block"><code><span class="sc">&lt;!-- Fix 1: add aria-label to icon button --&gt;</span>
+&lt;button class="icon-btn" aria-label="Search"&gt;🔍&lt;/button&gt;
+
+<span class="sc">&lt;!-- Fix 2: add label element --&gt;</span>
+&lt;label for="email-field"&gt;Email address&lt;/label&gt;
+&lt;input type="email" placeholder="you@example.com"
+       id="email-field"&gt;
+
+<span class="sc">&lt;!-- Fix 3: don't rely on color alone --&gt;</span>
+&lt;div class="error" role="alert"&gt;
+  ⚠️ Error: Password too short. Must be 8+ characters.
+&lt;/div&gt;
+
+<span class="sc">&lt;!-- Fix 4: descriptive link alt --&gt;</span>
+&lt;a href="/about"&gt;
+  &lt;img src="" alt="Learn about our team"&gt;
+&lt;/a&gt;</code></div></div>
+      </div>
+    </div>
+  </div>
+
+</section><!-- /exercises -->
+
+<!-- ════════ HOMEWORK ════════ -->
+<section id="homework" style="margin-top:56px;padding-top:44px;border-top:1px solid var(--brd)">
+  <div class="topic-hdr">
+    <span class="t-num" style="background:var(--warn);color:#fff">HW</span>
+    <h2>Homework Assignment</h2>
+  </div>
+  <div class="task-box" style="margin-bottom:20px">
+    <strong>Goal:</strong> Audit your team project page with Lighthouse, fix at least 3 accessibility issues, and document before/after.
+    <ul style="margin-top:10px">
+      <li><strong>Step 1:</strong> Run a Lighthouse Accessibility audit on your team project page. Screenshot the score.</li>
+      <li><strong>Step 2:</strong> Read each failing item. Identify at least 3 you can fix.</li>
+      <li><strong>Step 3:</strong> Fix those 3+ issues in your HTML/CSS code. Common fixes: add missing alt text, add form labels, increase color contrast, change div buttons to real buttons.</li>
+      <li><strong>Step 4:</strong> Run Lighthouse again. Screenshot the improved score.</li>
+      <li><strong>Step 5:</strong> Submit a document (PDF or Google Doc) with:<br>
+        — Before screenshot (score + list of issues)<br>
+        — What you changed (code snippets, before/after)<br>
+        — After screenshot (improved score)</li>
+    </ul>
+  </div>
+  <div class="alert alert-brand">
+    <span class="alert-icon">🎯</span>
+    <div><strong>Due:</strong> Before next Monday's class. Target a Lighthouse Accessibility score of 85 or higher. Bonus: test with keyboard navigation and fix any keyboard trap you find.</div>
+  </div>
+</section>
+
+<footer id="site-footer">
+  <p>K0126002 · Web Programming · Gachon University · Week 7 Monday</p>
+  <p style="margin-top:4px">Web Accessibility (A11y) — Study Guide</p>
+</footer>
+
+</main>
+</div><!-- /layout -->
+
+<script>
+/* ─── Theme ─── */
+function toggleTheme() {
+  const r = document.documentElement;
+  const isDark = r.dataset.theme === 'dark';
+  r.dataset.theme = isDark ? 'light' : 'dark';
+  document.getElementById('theme-toggle').textContent = isDark ? '🌙 Dark' : '☀️ Light';
+  try { localStorage.setItem('w7mon-theme', r.dataset.theme); } catch(e){}
+}
+try {
+  const s = localStorage.getItem('w7mon-theme');
+  if (s) {
+    document.documentElement.dataset.theme = s;
+    document.getElementById('theme-toggle').textContent = s === 'dark' ? '☀️ Light' : '🌙 Dark';
+  }
+} catch(e){}
+
+/* ─── Sidebar ─── */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+/* ─── Progress bar ─── */
+window.addEventListener('scroll', () => {
+  const d = document.documentElement;
+  const pct = d.scrollTop / (d.scrollHeight - d.clientHeight) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+});
+
+/* ─── Active nav link ─── */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      document.querySelectorAll('#sidebar nav a').forEach(a => a.classList.remove('active'));
+      const id = e.target.id;
+      const link = document.querySelector(`#sidebar nav a[href="#${id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+document.querySelectorAll('.topic, .exercise, #exercises, #homework').forEach(s => observer.observe(s));
+
+/* ─── Copy code ─── */
+function copyCode(btn) {
+  const code = btn.closest('.code-wrap').querySelector('code').innerText;
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+/* ─── Exercise runner ─── */
+function runEx(id) {
+  const src = document.getElementById(id + '-editor').value;
+  document.getElementById(id + '-frame').srcdoc = src;
+}
+function toggleHint(id) {
+  const h = document.getElementById(id + '-hint');
+  h.style.display = h.style.display === 'block' ? 'none' : 'block';
+}
+function toggleSol(id) {
+  const s = document.getElementById(id + '-sol');
+  s.style.display = s.style.display === 'block' ? 'none' : 'block';
+}
+</script>
+</body>
+</html>
