@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript Form Validation — Week 6 Friday</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f0f4ff;--surf:#fff;--surf2:#e8eefa;--brd:#c8d4f0;
+  --tx:#1a2340;--mu:#5a6a8a;
+  --ac:#1a56db;--acl:#e0eaff;--ac2:#1240b0;
+  --jsyel:#f7df1e;--jsdk:#3a3000;
+  --lime:#16a34a;--limel:#dcfce7;
+  --cor:#dc2626;--corl:#fee2e2;
+  --warn:#d97706;--warnl:#fef3c7;
+  --cb:#1a2540;--ct:#c8daf8;
+  --cyan:#0891b2;--cyanl:#e0f2fe;
+  --purple:#7c3aed;--purplel:#ede9fe;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --bg:#060d16;--surf:#0d1b2a;--surf2:#122236;--brd:#1e3256;
+  --tx:#dbeafe;--mu:#6080b0;
+  --ac:#60a5fa;--acl:#0a1830;--ac2:#93c5fd;
+  --jsyel:#f7df1e;--jsdk:#1a1400;
+  --lime:#4ade80;--limel:#052e16;
+  --cor:#f87171;--corl:#450a0a;
+  --warn:#fbbf24;--warnl:#1a1000;
+  --cb:#060d16;--ct:#bfdbfe;
+  --cyan:#22d3ee;--cyanl:#042f2e;
+  --purple:#a78bfa;--purplel:#2e1065;
+}}
+:root[data-theme=dark]{
+  --bg:#060d16;--surf:#0d1b2a;--surf2:#122236;--brd:#1e3256;
+  --tx:#dbeafe;--mu:#6080b0;
+  --ac:#60a5fa;--acl:#0a1830;--ac2:#93c5fd;
+  --jsyel:#f7df1e;--jsdk:#1a1400;
+  --lime:#4ade80;--limel:#052e16;
+  --cor:#f87171;--corl:#450a0a;
+  --warn:#fbbf24;--warnl:#1a1000;
+  --cb:#060d16;--ct:#bfdbfe;
+  --cyan:#22d3ee;--cyanl:#042f2e;
+  --purple:#a78bfa;--purplel:#2e1065;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',system-ui,sans-serif;font-size:16px;line-height:1.7}
+a{color:var(--ac);text-decoration:none}
+a:hover{text-decoration:underline}
+kbd{background:var(--surf2);border:1px solid var(--brd);border-radius:4px;padding:1px 6px;font-size:12px;font-family:'JetBrains Mono',monospace}
+code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--surf2);padding:1px 5px;border-radius:3px;color:var(--ac2)}
+
+/* ── Header ── */
+#site-header{
+  position:sticky;top:0;z-index:100;
+  background:var(--surf);border-bottom:2px solid var(--jsyel);
+  display:flex;align-items:center;justify-content:space-between;padding:10px 20px;gap:12px;
+}
+.hdr-left{display:flex;align-items:center;gap:14px}
+.js-badge{background:var(--jsyel);color:var(--jsdk);font-family:'Space Grotesk',sans-serif;
+  font-weight:700;font-size:18px;padding:4px 10px;border-radius:6px;letter-spacing:.02em}
+.hdr-info{display:flex;flex-direction:column;gap:1px}
+.hdr-course{font-size:11px;color:var(--mu);font-weight:500;letter-spacing:.05em;text-transform:uppercase}
+.hdr-title{font-size:15px;font-weight:700;color:var(--tx);font-family:'Space Grotesk',sans-serif}
+.theme-btn{background:var(--surf2);border:1px solid var(--brd);color:var(--tx);
+  padding:5px 14px;border-radius:20px;cursor:pointer;font-size:13px;white-space:nowrap}
+.theme-btn:hover{border-color:var(--ac);color:var(--ac)}
+
+/* ── Layout ── */
+#layout{display:flex;min-height:calc(100vh - 53px)}
+
+/* ── Sidebar ── */
+#sidebar{
+  width:240px;flex-shrink:0;background:var(--surf);border-right:1px solid var(--brd);
+  position:sticky;top:53px;height:calc(100vh - 53px);overflow-y:auto;padding:12px 0;
+}
+#sidebar nav a{
+  display:flex;align-items:center;gap:8px;padding:5px 14px;
+  font-size:13px;color:var(--mu);border-left:3px solid transparent;transition:all .15s;
+}
+#sidebar nav a:hover{color:var(--tx);background:var(--surf2);text-decoration:none}
+#sidebar nav a.active{color:var(--ac);border-left-color:var(--ac);background:var(--acl);font-weight:600}
+.nav-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ac);min-width:26px;font-weight:700}
+.nav-num.ex{color:var(--warn)}
+.nav-label{font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.07em;text-transform:uppercase;
+  padding:12px 14px 4px}
+
+/* ── Main ── */
+#main{flex:1;padding:36px 44px;max-width:920px}
+
+/* ── Topic Sections ── */
+.topic{margin-bottom:56px;padding-bottom:44px;border-bottom:1px solid var(--brd)}
+.topic:last-child{border-bottom:none}
+.topic-hdr{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.t-num{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;
+  color:var(--jsdk);background:var(--jsyel);padding:2px 10px;border-radius:5px}
+.topic-hdr h2{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:var(--tx)}
+.difficulty{font-size:11px;font-weight:700;padding:2px 9px;border-radius:10px}
+.diff-easy{background:var(--limel);color:var(--lime)}
+.diff-med{background:var(--warnl);color:var(--warn)}
+.diff-hard{background:var(--corl);color:var(--cor)}
+
+.theory{margin-bottom:18px;color:var(--tx)}
+.theory p{margin-bottom:10px}
+
+/* ── Code blocks ── */
+.code-wrap{margin:16px 0;border-radius:10px;overflow:hidden;border:1px solid var(--brd)}
+.code-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--surf2);padding:6px 14px;border-bottom:1px solid var(--brd);
+}
+.code-lang{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ac);font-weight:700}
+.copy-btn{background:transparent;border:1px solid var(--brd);color:var(--mu);
+  padding:2px 10px;border-radius:4px;font-size:11px;cursor:pointer;transition:all .15s}
+.copy-btn:hover{color:var(--ac);border-color:var(--ac)}
+.code-block{background:var(--cb);padding:18px 20px;overflow-x:auto;margin:0}
+.code-block code{font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.75;
+  color:var(--ct);white-space:pre;background:none;padding:0;border-radius:0}
+.sk{color:#c084fc}.sf{color:#f7df1e}.ss{color:#86efac}
+.sc{color:#64748b;font-style:italic}.sn{color:#fb923c}.sp{color:#60a5fa}
+
+/* ── Key Points ── */
+.keypoints{background:var(--acl);border-left:4px solid var(--ac);
+  border-radius:0 8px 8px 0;padding:14px 18px;margin-top:14px}
+.keypoints h4{font-size:11px;font-weight:700;color:var(--ac);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+.keypoints ul{padding-left:18px}
+.keypoints li{font-size:14px;margin-bottom:4px}
+
+/* ── Alert boxes ── */
+.alert{display:flex;gap:12px;padding:14px 16px;border-radius:8px;margin:14px 0;font-size:14px}
+.alert-warn{background:var(--warnl);border-left:4px solid var(--warn)}
+.alert-danger{background:var(--corl);border-left:4px solid var(--cor)}
+.alert-info{background:var(--cyanl);border-left:4px solid var(--cyan)}
+.alert-ok{background:var(--limel);border-left:4px solid var(--lime)}
+.alert-icon{font-size:20px;flex-shrink:0;line-height:1.4}
+.alert strong{display:block;margin-bottom:3px}
+
+/* ── Demo boxes ── */
+.demo-box{
+  background:var(--surf2);border:1px solid var(--brd);border-radius:10px;
+  padding:20px;margin:16px 0;
+}
+.demo-box h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--mu);margin-bottom:14px}
+
+/* ── Validity table ── */
+.validity-table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+.validity-table th{padding:8px 12px;text-align:left;font-weight:700;font-size:12px;color:var(--mu);
+  border-bottom:2px solid var(--brd);font-family:'Space Grotesk',sans-serif}
+.validity-table td{padding:8px 12px;border-bottom:1px solid var(--brd);vertical-align:top}
+.validity-table td:first-child{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--jsyel);font-weight:700}
+.validity-table td:nth-child(2){font-size:13px;color:var(--mu);line-height:1.5}
+.validity-table tr:last-child td{border-bottom:none}
+
+/* Live validation styles */
+.live-field{margin-bottom:18px}
+.live-field label{display:block;font-size:13px;font-weight:600;margin-bottom:4px;color:var(--mu)}
+.live-field input{
+  width:100%;padding:10px 14px;border:2px solid var(--brd);border-radius:8px;
+  background:var(--surf);color:var(--tx);font-size:14px;font-family:inherit;
+  outline:none;transition:border-color .2s,box-shadow .2s;
+}
+.live-field input.valid-ok{border-color:var(--lime);background:var(--limel)}
+.live-field input.valid-err{border-color:var(--cor);background:var(--corl)}
+.error-msg{font-size:12px;margin-top:4px;color:var(--cor);min-height:16px;font-weight:600}
+.error-msg:empty{display:block}
+
+/* Demo buttons */
+.demo-btn{
+  background:var(--ac);color:#fff;border:none;padding:8px 18px;
+  border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .15s;
+}
+.demo-btn:hover{background:var(--ac2)}
+.demo-btn.yellow{background:var(--jsyel);color:var(--jsdk)}
+.demo-btn.green{background:var(--lime);color:#fff}
+
+/* Demo output */
+.demo-output{
+  background:var(--surf);border:2px dashed var(--brd);border-radius:8px;
+  padding:14px;margin-top:10px;min-height:42px;font-size:14px;
+}
+
+/* Exercises */
+#exercises h1{font-family:'Space Grotesk',sans-serif;font-size:30px;font-weight:800;margin-bottom:8px}
+.ex-intro{color:var(--mu);margin-bottom:32px;font-size:15px}
+.exercise{background:var(--surf);border:1px solid var(--brd);border-radius:12px;margin-bottom:32px;overflow:hidden}
+.ex-header{display:flex;align-items:center;gap:12px;padding:14px 20px;background:var(--surf2);border-bottom:1px solid var(--brd)}
+.ex-num{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--warn);
+  background:var(--warnl);padding:2px 8px;border-radius:4px}
+.ex-header h3{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;flex:1}
+.ex-body{padding:20px}
+.task-box{background:var(--surf2);border:1px solid var(--brd);border-radius:6px;padding:14px 16px;margin-bottom:16px;font-size:15px}
+.task-box ul{padding-left:18px;margin-top:6px}
+.task-box li{margin-bottom:4px}
+.editor-row{display:flex;gap:0;border:1px solid var(--brd);border-radius:8px;overflow:hidden;margin-top:12px}
+.editor-row textarea{
+  flex:1;min-height:260px;background:var(--cb);color:var(--ct);
+  font-family:'JetBrains Mono',monospace;font-size:12.5px;padding:14px;
+  border:none;resize:vertical;line-height:1.65;outline:none;
+}
+.editor-row iframe{flex:1;border:none;border-left:1px solid var(--brd);background:#fff;min-height:260px}
+.ex-btns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.btn-run{background:var(--jsyel);color:var(--jsdk);border:none;padding:7px 18px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer}
+.btn-hint{background:var(--surf2);color:var(--tx);border:1px solid var(--brd);padding:7px 16px;border-radius:6px;font-size:13px;cursor:pointer}
+.btn-hint:hover{border-color:var(--ac);color:var(--ac)}
+.btn-sol{background:var(--surf2);color:var(--tx);border:1px solid var(--brd);padding:7px 16px;border-radius:6px;font-size:13px;cursor:pointer}
+.btn-sol:hover{border-color:var(--lime);color:var(--lime)}
+.hint-box{margin-top:10px;padding:12px 16px;background:var(--acl);border-left:3px solid var(--ac);border-radius:0 6px 6px 0;font-size:14px;display:none}
+.sol-box{margin-top:10px;display:none}
+
+/* Homework */
+.homework-box{background:var(--surf);border:2px dashed var(--jsyel);border-radius:12px;padding:24px 28px;margin:16px 0}
+.homework-box h3{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:var(--warn);margin-bottom:12px}
+.homework-box ol{padding-left:20px;font-size:14px;line-height:1.8}
+.homework-box li{margin-bottom:6px}
+
+/* Footer */
+#site-footer{text-align:center;padding:24px;color:var(--mu);font-size:13px;border-top:1px solid var(--brd);margin-top:40px}
+
+/* Mobile */
+@media(max-width:768px){
+  #sidebar{display:none;position:fixed;top:53px;left:0;height:calc(100vh - 53px);z-index:90;box-shadow:4px 0 20px rgba(0,0,0,.3)}
+  #sidebar.open{display:block}
+  #main{padding:20px 16px}
+  .sandwich{display:block!important}
+  .editor-row{flex-direction:column}
+}
+.sandwich{display:none;background:var(--surf2);border:1px solid var(--brd);color:var(--tx);
+  padding:5px 12px;border-radius:6px;cursor:pointer;font-size:18px}
+
+#progress-bar{position:fixed;top:53px;left:0;height:3px;background:var(--jsyel);width:0%;z-index:101;transition:width .1s}
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<header id="site-header">
+  <div class="hdr-left">
+    <button class="sandwich" onclick="toggleSidebar()">☰</button>
+    <span class="js-badge">JS</span>
+    <div class="hdr-info">
+      <span class="hdr-course">K0126002 · Web Programming · Week 6 Friday</span>
+      <span class="hdr-title">JavaScript Form Validation — Study Guide</span>
+    </div>
+  </div>
+  <button class="theme-btn" id="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+</header>
+
+<div id="layout">
+<aside id="sidebar">
+  <nav>
+    <div class="nav-label">Why JS Validation</div>
+    <a href="#t01"><span class="nav-num">01</span>Limits of HTML5</a>
+    <a href="#t02"><span class="nav-num">02</span>preventDefault()</a>
+    <div class="nav-label">Validity API</div>
+    <a href="#t03"><span class="nav-num">03</span>checkValidity()</a>
+    <a href="#t04"><span class="nav-num">04</span>validity Object</a>
+    <a href="#t05"><span class="nav-num">05</span>setCustomValidity()</a>
+    <div class="nav-label">Real-time UX</div>
+    <a href="#t06"><span class="nav-num">06</span>input Event</a>
+    <a href="#t07"><span class="nav-num">07</span>Regex in JS</a>
+    <a href="#t08"><span class="nav-num">08</span>Password Confirm</a>
+    <a href="#t09"><span class="nav-num">09</span>ARIA &amp; A11y</a>
+    <div class="nav-label">Practice</div>
+    <a href="#ex1"><span class="nav-num ex">E1</span>Prevent Submit</a>
+    <a href="#ex2"><span class="nav-num ex">E2</span>Real-time Email</a>
+    <a href="#ex3"><span class="nav-num ex">E3</span>Password Confirm</a>
+    <div class="nav-label">Assignment</div>
+    <a href="#hw"><span class="nav-num">HW</span>Homework</a>
+  </nav>
+</aside>
+
+<main id="main">
+
+<!-- ── Intro ── -->
+<section style="margin-bottom:44px">
+  <h1 style="font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:800;margin-bottom:8px">JavaScript Form Validation</h1>
+  <p style="color:var(--mu);font-size:15px;margin-bottom:16px">9 topics · 3 live-code exercises · builds on Monday's HTML5 foundation</p>
+  <div class="alert alert-info">
+    <span class="alert-icon">💡</span>
+    <div><strong>What we're doing today</strong>
+    HTML5 validation catches simple errors but cannot compare two fields, show real-time feedback, or provide custom messages in Korean. JavaScript gives us complete control. All exercises build toward the homework: making Monday's registration form fully interactive.</div>
+  </div>
+</section>
+
+<!-- ══════════════════ TOPIC 01 ══════════════════ -->
+<section class="topic" id="t01">
+  <div class="topic-hdr">
+    <span class="t-num">01</span>
+    <h2>Limits of HTML5 Validation</h2>
+    <span class="difficulty diff-easy">Beginner</span>
+  </div>
+  <div class="theory">
+    <p>HTML5 validation is great for simple cases, but it has hard limits. When those limits are hit, you need JavaScript.</p>
+  </div>
+
+  <div class="demo-box">
+    <h4>What HTML5 CANNOT Do</h4>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div style="background:var(--corl);border:1px solid var(--cor);border-radius:8px;padding:14px">
+        <div style="font-size:12px;font-weight:700;color:var(--cor);margin-bottom:6px">PROBLEM 1</div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:4px">Compare two fields</div>
+        <div style="font-size:13px;color:var(--mu)">HTML5 cannot check "password" == "confirm password"</div>
+      </div>
+      <div style="background:var(--corl);border:1px solid var(--cor);border-radius:8px;padding:14px">
+        <div style="font-size:12px;font-weight:700;color:var(--cor);margin-bottom:6px">PROBLEM 2</div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:4px">Real-time feedback</div>
+        <div style="font-size:13px;color:var(--mu)">HTML5 only validates on submit, not as you type</div>
+      </div>
+      <div style="background:var(--corl);border:1px solid var(--cor);border-radius:8px;padding:14px">
+        <div style="font-size:12px;font-weight:700;color:var(--cor);margin-bottom:6px">PROBLEM 3</div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:4px">Custom error messages</div>
+        <div style="font-size:13px;color:var(--mu)">Browser validation messages are in the OS language, cannot be customized</div>
+      </div>
+      <div style="background:var(--corl);border:1px solid var(--cor);border-radius:8px;padding:14px">
+        <div style="font-size:12px;font-weight:700;color:var(--cor);margin-bottom:6px">PROBLEM 4</div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:4px">Remote validation</div>
+        <div style="font-size:13px;color:var(--mu)">Cannot check "is this email already registered?" without a server call</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li>HTML5 validation = free, fast, no code needed — but very limited.</li>
+      <li>JavaScript validation = full control, custom rules, real-time UX.</li>
+      <li>Best practice: use <strong>both</strong> — HTML5 for basic rules, JS for advanced ones.</li>
+      <li>Add <code>novalidate</code> to the <code>&lt;form&gt;</code> when you take over validation with JS.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ══════════════════ TOPIC 02 ══════════════════ -->
+<section class="topic" id="t02">
+  <div class="topic-hdr">
+    <span class="t-num">02</span>
+    <h2>event.preventDefault()</h2>
+    <span class="difficulty diff-easy">Beginner</span>
+  </div>
+  <div class="theory">
+    <p>When a form is submitted, the browser's default behavior is to navigate to the <code>action</code> URL (or reload the page). <code>event.preventDefault()</code> stops this, letting your JavaScript take over.</p>
+    <p>This is <strong>the first line of every JS validation handler</strong>.</p>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-bar"><span class="code-lang">JavaScript — Intercept Form Submit</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <div class="code-block"><code><span class="sk">const</span> form = document.<span class="sf">querySelector</span>(<span class="ss">'#my-form'</span>);
+
+form.<span class="sf">addEventListener</span>(<span class="ss">'submit'</span>, (e) =&gt; {
+  e.<span class="sf">preventDefault</span>();  <span class="sc">// ← STOP the page reload!</span>
+
+  <span class="sc">// Now run your own validation</span>
+  <span class="sk">const</span> email = document.<span class="sf">querySelector</span>(<span class="ss">'#email'</span>).value;
+
+  <span class="sk">if</span> (!email) {
+    <span class="sf">showError</span>(<span class="ss">'Email is required'</span>);
+    <span class="sk">return</span>;  <span class="sc">// stop here</span>
+  }
+
+  <span class="sc">// All good — submit programmatically or via fetch()</span>
+  <span class="sf">console</span>.<span class="sf">log</span>(<span class="ss">'Form is valid! Sending...'</span>);
+});</code></div>
+  </div>
+
+  <div class="demo-box">
+    <h4>Live Demo — preventDefault in action</h4>
+    <p style="font-size:14px;color:var(--mu);margin-bottom:12px">This form would normally reload the page when submitted. Click "Submit" to see our JS intercept it instead.</p>
+    <form id="demo-prevent-form" style="display:flex;gap:10px;flex-wrap:wrap">
+      <input type="text" id="demo-prevent-input" placeholder="Type anything..." style="flex:1;padding:9px 14px;border:2px solid var(--brd);border-radius:8px;background:var(--surf);color:var(--tx);font-size:14px;outline:none" onfocus="this.style.borderColor='var(--ac)'" onblur="this.style.borderColor='var(--brd)'">
+      <button type="submit" style="background:var(--ac);color:#fff;border:none;padding:9px 20px;border-radius:8px;cursor:pointer;font-weight:700">Submit</button>
+    </form>
+    <div class="demo-output" id="demo-prevent-out">← Click Submit and watch what happens here (page does NOT reload)</div>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li>Listen on the <code>'submit'</code> event of the <code>&lt;form&gt;</code> element, not the button.</li>
+      <li><code>e.preventDefault()</code> must be called before any async code.</li>
+      <li>Without <code>preventDefault()</code>, the page reloads even if you have other code below.</li>
+      <li>The event object <code>e</code> also has <code>e.target</code> — the form element itself.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ══════════════════ TOPIC 03 ══════════════════ -->
+<section class="topic" id="t03">
+  <div class="topic-hdr">
+    <span class="t-num">03</span>
+    <h2>checkValidity()</h2>
+    <span class="difficulty diff-med">Intermediate</span>
+  </div>
+  <div class="theory">
+    <p><code>checkValidity()</code> is a browser built-in that runs all HTML5 validation rules programmatically. Call it on an individual input to check just that field, or on the whole form to check every field.</p>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-bar"><span class="code-lang">JavaScript — checkValidity()</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <div class="code-block"><code><span class="sk">const</span> emailInput = document.<span class="sf">querySelector</span>(<span class="ss">'#email'</span>);
+<span class="sk">const</span> form = document.<span class="sf">querySelector</span>(<span class="ss">'#my-form'</span>);
+
+<span class="sc">// Check a single field</span>
+<span class="sk">if</span> (!emailInput.<span class="sf">checkValidity</span>()) {
+  <span class="sf">console</span>.<span class="sf">log</span>(<span class="ss">'Email is invalid'</span>);
+  <span class="sf">console</span>.<span class="sf">log</span>(emailInput.validity.valid);        <span class="sc">// false</span>
+  <span class="sf">console</span>.<span class="sf">log</span>(emailInput.validity.valueMissing);   <span class="sc">// true if empty + required</span>
+  <span class="sf">console</span>.<span class="sf">log</span>(emailInput.validity.typeMismatch);   <span class="sc">// true if bad email format</span>
+}
+
+<span class="sc">// Check the entire form (returns false if ANY field is invalid)</span>
+<span class="sk">if</span> (!form.<span class="sf">checkValidity</span>()) {
+  <span class="sf">console</span>.<span class="sf">log</span>(<span class="ss">'Form has errors'</span>);
+}
+
+<span class="sc">// The .validity property is always there — no need to call checkValidity() first</span>
+<span class="sf">console</span>.<span class="sf">log</span>(emailInput.validity.valid);  <span class="sc">// true or false right now</span></code></div>
+  </div>
+
+  <div class="demo-box">
+    <h4>Live Demo — check validity as you type</h4>
+    <div class="live-field">
+      <label>Email (required):</label>
+      <input type="email" id="cv-email" required placeholder="Type an email...">
+      <div class="error-msg" id="cv-email-err"></div>
+    </div>
+    <button class="demo-btn yellow" onclick="checkDemoValidity()">checkValidity()</button>
+    <div class="demo-output" id="cv-out" style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:13px">Click the button to check validity</div>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li><code>input.checkValidity()</code> returns <code>true</code> or <code>false</code>.</li>
+      <li><code>input.validity</code> is a <code>ValidityState</code> object with detailed properties.</li>
+      <li><code>input.validity.valid</code> — quick check: is everything valid?</li>
+      <li><code>form.checkValidity()</code> — checks ALL fields in the form.</li>
+      <li>Calling <code>checkValidity()</code> does NOT display any UI — it only returns a boolean.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ══════════════════ TOPIC 04 ══════════════════ -->
+<section class="topic" id="t04">
+  <div class="topic-hdr">
+    <span class="t-num">04</span>
+    <h2>The validity Object</h2>
+    <span class="difficulty diff-med">Intermediate</span>
+  </div>
+  <div class="theory">
+    <p>Every input has a <code>validity</code> property — a <code>ValidityState</code> object with boolean properties that describe exactly <em>why</em> an input is invalid. Use this to show specific, helpful error messages.</p>
+  </div>
+
+  <div class="demo-box">
+    <h4>ValidityState Properties</h4>
+    <table class="validity-table">
+      <thead><tr><th>Property</th><th>True when...</th><th>Triggered by attribute</th></tr></thead>
+      <tbody>
+        <tr><td>valueMissing</td><td>Field is empty and has <code>required</code></td><td><code>required</code></td></tr>
+        <tr><td>typeMismatch</td><td>Value doesn't match the input type format</td><td><code>type="email"</code> etc.</td></tr>
+        <tr><td>patternMismatch</td><td>Value doesn't match the regex pattern</td><td><code>pattern="..."</code></td></tr>
+        <tr><td>tooShort</td><td>Value is shorter than minlength</td><td><code>minlength="n"</code></td></tr>
+        <tr><td>tooLong</td><td>Value is longer than maxlength</td><td><code>maxlength="n"</code></td></tr>
+        <tr><td>rangeUnderflow</td><td>Number is below min</td><td><code>min="n"</code></td></tr>
+        <tr><td>rangeOverflow</td><td>Number is above max</td><td><code>max="n"</code></td></tr>
+        <tr><td>stepMismatch</td><td>Number doesn't fit the step interval</td><td><code>step="n"</code></td></tr>
+        <tr><td>customError</td><td>setCustomValidity() was called with a non-empty string</td><td>JS only</td></tr>
+        <tr><td>valid</td><td>All constraints pass (all above are false)</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-bar"><span class="code-lang">JavaScript — Using validity Properties for Custom Messages</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <div class="code-block"><code><span class="sk">function</span> <span class="sf">getError</span>(input) {
+  <span class="sk">const</span> v = input.validity;
+
+  <span class="sk">if</span> (v.valueMissing)    <span class="sk">return</span> <span class="ss">'This field is required.'</span>;
+  <span class="sk">if</span> (v.typeMismatch)    <span class="sk">return</span> <span class="ss">'Please enter a valid email address.'</span>;
+  <span class="sk">if</span> (v.tooShort)        <span class="sk">return</span> <span class="ss">`Minimum ${input.minLength} characters.`</span>;
+  <span class="sk">if</span> (v.patternMismatch) <span class="sk">return</span> input.title || <span class="ss">'Invalid format.'</span>;
+  <span class="sk">if</span> (v.rangeUnderflow)  <span class="sk">return</span> <span class="ss">`Minimum value is ${input.min}.`</span>;
+  <span class="sk">if</span> (v.rangeOverflow)   <span class="sk">return</span> <span class="ss">`Maximum value is ${input.max}.`</span>;
+  <span class="sk">return</span> <span class="ss">''</span>;
+}</code></div>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li><code>validity.valid</code> is <code>true</code> only when ALL other properties are <code>false</code>.</li>
+      <li>Check specific properties to give targeted error messages (not just "invalid").</li>
+      <li>Template literals (<code>`Minimum ${input.minLength} characters`</code>) let you include the actual constraint value in the message.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ══════════════════ TOPIC 05 ══════════════════ -->
+<section class="topic" id="t05">
+  <div class="topic-hdr">
+    <span class="t-num">05</span>
+    <h2>setCustomValidity()</h2>
+    <span class="difficulty diff-med">Intermediate</span>
+  </div>
+  <div class="theory">
+    <p><code>setCustomValidity(message)</code> sets a custom error on an input, making it invalid regardless of its value. Pass an empty string <code>''</code> to clear the error. This is how you show a browser tooltip with your own message.</p>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-bar"><span class="code-lang">JavaScript — setCustomValidity()</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <div class="code-block"><code><span class="sk">const</span> passwordInput = document.<span class="sf">querySelector</span>(<span class="ss">'#password'</span>);
+<span class="sk">const</span> confirmInput  = document.<span class="sf">querySelector</span>(<span class="ss">'#confirm'</span>);
+
+confirmInput.<span class="sf">addEventListener</span>(<span class="ss">'input'</span>, () =&gt; {
+  <span class="sk">if</span> (confirmInput.value !== passwordInput.value) {
+    <span class="sc">// Mark the field as invalid with a custom message</span>
+    confirmInput.<span class="sf">setCustomValidity</span>(<span class="ss">'Passwords do not match.'</span>);
+  } <span class="sk">else</span> {
+    <span class="sc">// Clear the custom error (field becomes valid again)</span>
+    confirmInput.<span class="sf">setCustomValidity</span>(<span class="ss">''</span>);
+  }
+});
+
+<span class="sc">// After setCustomValidity(), validity.customError is true</span>
+<span class="sc">// and validity.valid is false — until you clear it with ''</span></code></div>
+  </div>
+
+  <div class="alert alert-warn">
+    <span class="alert-icon">⚠️</span>
+    <div><strong>Always clear it!</strong> If you set a custom validity and then the user fixes the input, you must call <code>setCustomValidity('')</code> to clear the error. If you forget, the field stays invalid forever.</div>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li><code>input.setCustomValidity('message')</code> — marks field as invalid, sets message for browser tooltip.</li>
+      <li><code>input.setCustomValidity('')</code> — clears the custom error (field returns to its natural validity state).</li>
+      <li>After setting, <code>input.validity.customError</code> is <code>true</code> and <code>input.validity.valid</code> is <code>false</code>.</li>
+      <li>The browser shows this message in its native validation tooltip on submit.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ══════════════════ TOPIC 06 ══════════════════ -->
+<section class="topic" id="t06">
+  <div class="topic-hdr">
+    <span class="t-num">06</span>
+    <h2>Real-time Feedback with the "input" Event</h2>
+    <span class="difficulty diff-med">Intermediate</span>
+  </div>
+  <div class="theory">
+    <p>The <code>'input'</code> event fires every time the field's value changes (on every keystroke). Combined with a function that checks validity and updates error messages, this creates live feedback as the user types — much better UX than waiting for submit.</p>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-bar"><span class="code-lang">JavaScript — Real-time Validation Pattern</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <div class="code-block"><code><span class="sk">const</span> emailInput = document.<span class="sf">querySelector</span>(<span class="ss">'#email'</span>);
+<span class="sk">const</span> emailError = document.<span class="sf">querySelector</span>(<span class="ss">'#email-error'</span>);
+
+emailInput.<span class="sf">addEventListener</span>(<span class="ss">'input'</span>, () =&gt; {
+  <span class="sk">const</span> v = emailInput.validity;
+
+  <span class="sk">if</span> (v.valid) {
+    emailError.textContent = <span class="ss">''</span>;          <span class="sc">// clear error</span>
+    emailInput.classList.<span class="sf">remove</span>(<span class="ss">'error'</span>);
+    emailInput.classList.<span class="sf">add</span>(<span class="ss">'ok'</span>);
+  } <span class="sk">else</span> {
+    <span class="sk">if</span> (v.valueMissing)  emailError.textContent = <span class="ss">'Email is required.'</span>;
+    <span class="sk">if</span> (v.typeMismatch)  emailError.textContent = <span class="ss">'Not a valid email format.'</span>;
+    emailInput.classList.<span class="sf">add</span>(<span class="ss">'error'</span>);
+    emailInput.classList.<span class="sf">remove</span>(<span class="ss">'ok'</span>);
+  }
+});</code></div>
+  </div>
+
+  <div class="demo-box">
+    <h4>Live Demo — real-time email validation</h4>
+    <div class="live-field">
+      <label for="rt-email">Email address:</label>
+      <input type="email" id="rt-email" required placeholder="Type an email address...">
+      <div class="error-msg" id="rt-email-err"></div>
+    </div>
+    <div class="live-field">
+      <label for="rt-sid">Student ID (9 digits):</label>
+      <input type="text" id="rt-sid" required pattern="\d{9}" placeholder="202112345" title="9-digit student ID">
+      <div class="error-msg" id="rt-sid-err"></div>
+    </div>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li><code>'input'</code> fires on every keystroke — use it for live feedback.</li>
+      <li><code>'change'</code> fires only when focus leaves the field — use for less aggressive validation.</li>
+      <li>Always <strong>show errors only after the user has started typing</strong>. Don't mark empty required fields red immediately.</li>
+      <li>Pattern: read <code>input.validity</code> → update error message → update CSS class.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ══════════════════ TOPIC 07 ══════════════════ -->
+<section class="topic" id="t07">
+  <div class="topic-hdr">
+    <span class="t-num">07</span>
+    <h2>Regex Patterns in JavaScript</h2>
+    <span class="difficulty diff-med">Intermediate</span>
+  </div>
+  <div class="theory">
+    <p>Regular expressions (regex) are patterns that describe a set of strings. In JavaScript, create them with <code>/pattern/flags</code> syntax, then test a string with <code>regex.test(string)</code>. Regex is more powerful than HTML <code>pattern</code> — you can combine multiple checks, use logical OR (<code>|</code>), and add your own logic.</p>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-bar"><span class="code-lang">JavaScript — Common Validation Regexes</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <div class="code-block"><code><span class="sc">// Korean student ID: exactly 9 digits</span>
+<span class="sk">const</span> studentIdRegex = <span class="sp">/^\d{9}$/</span>;
+studentIdRegex.<span class="sf">test</span>(<span class="ss">'202112345'</span>);   <span class="sc">// true</span>
+studentIdRegex.<span class="sf">test</span>(<span class="ss">'20211234'</span>);    <span class="sc">// false (8 digits)</span>
+studentIdRegex.<span class="sf">test</span>(<span class="ss">'2021abc12'</span>);   <span class="sc">// false (letters)</span>
+
+<span class="sc">// Email: basic pattern (HTML5 type="email" is usually enough)</span>
+<span class="sk">const</span> emailRegex = <span class="sp">/^[^\s@]+@[^\s@]+\.[^\s@]+$/</span>;
+
+<span class="sc">// Korean phone: 010-XXXX-XXXX or 02-XXX-XXXX</span>
+<span class="sk">const</span> phoneRegex = <span class="sp">/^(010|011|016|017|018|019)-\d{3,4}-\d{4}$/</span>;
+
+<span class="sc">// Password strength: at least 8 chars, one uppercase, one number</span>
+<span class="sk">const</span> strongPw = <span class="sp">/^(?=.*[A-Z])(?=.*\d).{8,}$/</span>;
+
+<span class="sc">// Regex syntax cheat sheet:</span>
+<span class="sc">// ^       = start of string</span>
+<span class="sc">// $       = end of string</span>
+<span class="sc">// \d      = any digit (0-9)</span>
+<span class="sc">// \s      = any whitespace</span>
+<span class="sc">// {9}     = exactly 9 times</span>
+<span class="sc">// {3,4}   = 3 to 4 times</span>
+<span class="sc">// [A-Z]   = any uppercase letter</span>
+<span class="sc">// (?=...) = lookahead (condition, not consumed)</span></code></div>
+  </div>
+
+  <div class="demo-box">
+    <h4>Interactive Regex Tester</h4>
+    <label for="regex-input" style="font-size:13px;font-weight:600;color:var(--mu);display:block;margin-bottom:6px">Type below — see which patterns match:</label>
+    <input type="text" id="regex-input" placeholder="Try: 202112345  or  010-1234-5678" style="width:100%;padding:10px 14px;border:2px solid var(--brd);border-radius:8px;background:var(--surf);color:var(--tx);font-size:14px;outline:none" oninput="testRegexDemo(this.value)">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+      <div id="rx-sid"  style="padding:10px 14px;border-radius:6px;background:var(--surf2);border:1px solid var(--brd);font-size:13px">Student ID: —</div>
+      <div id="rx-email" style="padding:10px 14px;border-radius:6px;background:var(--surf2);border:1px solid var(--brd);font-size:13px">Email: —</div>
+      <div id="rx-phone" style="padding:10px 14px;border-radius:6px;background:var(--surf2);border:1px solid var(--brd);font-size:13px">Phone: —</div>
+      <div id="rx-pw"   style="padding:10px 14px;border-radius:6px;background:var(--surf2);border:1px solid var(--brd);font-size:13px">Strong PW: —</div>
+    </div>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li><code>/^pattern$/</code> — anchors with <code>^</code> (start) and <code>$</code> (end) ensure the whole string must match.</li>
+      <li><code>\d{9}</code> — exactly nine digits.</li>
+      <li><code>regex.test(string)</code> — returns <code>true</code> or <code>false</code>.</li>
+      <li>In HTML <code>pattern</code> attribute, write the regex WITHOUT <code>/ /</code>; in JS, wrap with <code>/ /</code>.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ══════════════════ TOPIC 08 ══════════════════ -->
+<section class="topic" id="t08">
+  <div class="topic-hdr">
+    <span class="t-num">08</span>
+    <h2>Password Confirmation</h2>
+    <span class="difficulty diff-med">Intermediate</span>
+  </div>
+  <div class="theory">
+    <p>Comparing two fields is a classic JavaScript task that HTML5 cannot do. The pattern: listen on the confirm field's <code>'input'</code> event, compare its value to the password field, and use <code>setCustomValidity()</code> to mark it invalid if they don't match.</p>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-bar"><span class="code-lang">JavaScript — Password Confirmation Pattern</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <div class="code-block"><code><span class="sk">const</span> pw      = document.<span class="sf">querySelector</span>(<span class="ss">'#password'</span>);
+<span class="sk">const</span> confirm  = document.<span class="sf">querySelector</span>(<span class="ss">'#confirm'</span>);
+<span class="sk">const</span> pwErr    = document.<span class="sf">querySelector</span>(<span class="ss">'#pw-error'</span>);
+<span class="sk">const</span> cfmErr   = document.<span class="sf">querySelector</span>(<span class="ss">'#cfm-error'</span>);
+
+<span class="sc">// Validate password strength on every keystroke</span>
+pw.<span class="sf">addEventListener</span>(<span class="ss">'input'</span>, () =&gt; {
+  <span class="sk">if</span> (pw.value.length &lt; <span class="sn">8</span>) {
+    pwErr.textContent = <span class="ss">'Password must be at least 8 characters.'</span>;
+  } <span class="sk">else</span> {
+    pwErr.textContent = <span class="ss">''</span>;
+  }
+  <span class="sc">// Re-check confirm if already typed</span>
+  <span class="sk">if</span> (confirm.value) checkConfirm();
+});
+
+<span class="sk">function</span> <span class="sf">checkConfirm</span>() {
+  <span class="sk">if</span> (confirm.value !== pw.value) {
+    confirm.<span class="sf">setCustomValidity</span>(<span class="ss">'Passwords do not match.'</span>);
+    cfmErr.textContent = <span class="ss">'Passwords do not match.'</span>;
+  } <span class="sk">else</span> {
+    confirm.<span class="sf">setCustomValidity</span>(<span class="ss">''</span>);
+    cfmErr.textContent = <span class="ss">''</span>;
+  }
+}
+
+confirm.<span class="sf">addEventListener</span>(<span class="ss">'input'</span>, checkConfirm);</code></div>
+  </div>
+
+  <div class="demo-box">
+    <h4>Live Demo — Password Confirmation</h4>
+    <div class="live-field">
+      <label for="demo-pw">Password:</label>
+      <input type="password" id="demo-pw" required minlength="8" placeholder="At least 8 characters">
+      <div class="error-msg" id="demo-pw-err"></div>
+    </div>
+    <div class="live-field">
+      <label for="demo-confirm">Confirm Password:</label>
+      <input type="password" id="demo-confirm" required placeholder="Repeat your password">
+      <div class="error-msg" id="demo-confirm-err"></div>
+    </div>
+    <div id="demo-pw-match" style="font-size:14px;font-weight:600;margin-top:4px"></div>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li>Listen on the confirm field AND re-validate when the password field changes.</li>
+      <li>Use <code>setCustomValidity('...')</code> so browser's form submission also catches the mismatch.</li>
+      <li>Always display a visible error message in your own element, not just the browser tooltip.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ══════════════════ TOPIC 09 ══════════════════ -->
+<section class="topic" id="t09">
+  <div class="topic-hdr">
+    <span class="t-num">09</span>
+    <h2>ARIA &amp; Accessibility</h2>
+    <span class="difficulty diff-med">Intermediate</span>
+  </div>
+  <div class="theory">
+    <p>When error messages are added dynamically by JavaScript, screen readers don't automatically notice them. ARIA attributes tell screen readers about these dynamic changes.</p>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-bar"><span class="code-lang">HTML + JavaScript — ARIA Accessible Errors</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <div class="code-block"><code><span class="sc">&lt;!-- 1. Link each error span to its input with aria-describedby --&gt;</span>
+<span class="sk">&lt;div&gt;</span>
+  <span class="sk">&lt;label</span> <span class="sf">for</span>=<span class="ss">"email"</span><span class="sk">&gt;</span>Email<span class="sk">&lt;/label&gt;</span>
+  <span class="sk">&lt;input</span> <span class="sf">type</span>=<span class="ss">"email"</span> <span class="sf">id</span>=<span class="ss">"email"</span> <span class="sf">name</span>=<span class="ss">"email"</span>
+         <span class="sf">aria-describedby</span>=<span class="ss">"email-error"</span>
+         <span class="sf">aria-required</span>=<span class="ss">"true"</span><span class="sk">&gt;</span>
+  <span class="sk">&lt;span</span> <span class="sf">id</span>=<span class="ss">"email-error"</span> <span class="sf">role</span>=<span class="ss">"alert"</span> <span class="sf">aria-live</span>=<span class="ss">"polite"</span><span class="sk">&gt;&lt;/span&gt;</span>
+<span class="sk">&lt;/div&gt;</span>
+
+<span class="sc">// 2. When invalid, also set aria-invalid=true on the input</span>
+<span class="sk">function</span> <span class="sf">showError</span>(input, errorEl, msg) {
+  errorEl.textContent = msg;
+  input.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>, <span class="ss">'true'</span>);
+}
+
+<span class="sk">function</span> <span class="sf">clearError</span>(input, errorEl) {
+  errorEl.textContent = <span class="ss">''</span>;
+  input.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>, <span class="ss">'false'</span>);
+}</code></div>
+  </div>
+
+  <div class="demo-box">
+    <h4>ARIA Attributes Summary</h4>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px">
+      <div style="background:var(--surf);border:1px solid var(--brd);border-radius:8px;padding:14px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ac);font-weight:700;margin-bottom:6px">aria-describedby="id"</div>
+        <div style="font-size:13px;color:var(--mu)">Links the input to its error message element. Screen reader reads the error after the input's label.</div>
+      </div>
+      <div style="background:var(--surf);border:1px solid var(--brd);border-radius:8px;padding:14px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--cor);font-weight:700;margin-bottom:6px">aria-invalid="true/false"</div>
+        <div style="font-size:13px;color:var(--mu)">Tells screen readers whether the field currently has an error. Set to "true" when showing error.</div>
+      </div>
+      <div style="background:var(--surf);border:1px solid var(--brd);border-radius:8px;padding:14px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--lime);font-weight:700;margin-bottom:6px">aria-live="polite"</div>
+        <div style="font-size:13px;color:var(--mu)">On the error element: screen reader announces changes to this element when it's not busy.</div>
+      </div>
+      <div style="background:var(--surf);border:1px solid var(--brd);border-radius:8px;padding:14px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--warn);font-weight:700;margin-bottom:6px">role="alert"</div>
+        <div style="font-size:13px;color:var(--mu)">Makes the element an alert region — the message is announced immediately when content changes.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="keypoints">
+    <h4>Key Points</h4>
+    <ul>
+      <li><code>aria-describedby="error-id"</code> links an input to its error message.</li>
+      <li><code>aria-invalid="true"</code> tells screen readers the field has an error.</li>
+      <li><code>aria-live="polite"</code> on the error element announces changes when the user pauses.</li>
+      <li><code>role="alert"</code> announces immediately (useful for critical errors).</li>
+      <li>These attributes do nothing visual — they only affect assistive technologies.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ══════════════════ EXERCISES ══════════════════ -->
+<section id="exercises">
+  <h1>Practice Exercises</h1>
+  <p class="ex-intro">3 exercises · Write HTML+JS in the editor · click Run to see it live</p>
+
+  <!-- E1 -->
+  <div class="exercise" id="ex1">
+    <div class="ex-header">
+      <span class="ex-num">E1</span>
+      <h3>Prevent Submit &amp; Show Custom Error</h3>
+      <span class="difficulty diff-easy">Beginner</span>
+    </div>
+    <div class="ex-body">
+      <div class="task-box">
+        <strong>Task:</strong> Write JavaScript to:
+        <ul>
+          <li>Listen for the form's <code>'submit'</code> event</li>
+          <li>Call <code>e.preventDefault()</code> to stop the page reload</li>
+          <li>Check if the username field is empty</li>
+          <li>If empty: show "Username is required" in the error span</li>
+          <li>If not empty: show "Welcome, [name]!" in a success message</li>
+        </ul>
+      </div>
+      <div class="editor-row">
+        <textarea id="ex1-editor" spellcheck="false">&lt;!DOCTYPE html&gt;
+&lt;html&gt;&lt;head&gt;
+&lt;style&gt;
+  body { font-family: system-ui; padding: 28px; max-width: 380px; }
+  label { font-size: 13px; font-weight: 600; display: block; margin-bottom: 4px; }
+  input { width: 100%; padding: 10px 14px; border: 2px solid #c8d4f0;
+    border-radius: 8px; font-size: 14px; margin-bottom: 4px; }
+  input:focus { border-color: #1a56db; outline: none; }
+  .error { color: #dc2626; font-size: 12px; font-weight: 600; min-height: 16px; }
+  .success { color: #16a34a; font-size: 15px; font-weight: 700; margin-top: 12px; }
+  button { background: #1a56db; color: #fff; border: none;
+    padding: 11px 24px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 14px; margin-top: 12px; }
+&lt;/style&gt;
+&lt;/head&gt;&lt;body&gt;
+&lt;h2&gt;Login Demo&lt;/h2&gt;
+&lt;form id="login-form"&gt;
+  &lt;label for="uname"&gt;Username&lt;/label&gt;
+  &lt;input type="text" id="uname" placeholder="Enter username"&gt;
+  &lt;span class="error" id="uname-error"&gt;&lt;/span&gt;
+  &lt;button type="submit"&gt;Log In&lt;/button&gt;
+&lt;/form&gt;
+&lt;div class="success" id="success-msg"&gt;&lt;/div&gt;
+
+&lt;script&gt;
+  // YOUR CODE HERE
+  // 1. Select #login-form, #uname, #uname-error, #success-msg
+  // 2. Add 'submit' listener to the form
+  // 3. Call e.preventDefault()
+  // 4. If #uname.value.trim() is empty: show error, clear success
+  // 5. Otherwise: show success message, clear error
+&lt;/script&gt;
+&lt;/body&gt;&lt;/html&gt;</textarea>
+        <iframe id="ex1-frame"></iframe>
+      </div>
+      <div class="ex-btns">
+        <button class="btn-run" onclick="runEx('ex1')">▶ Run</button>
+        <button class="btn-hint" onclick="toggleHint('ex1')">💡 Hint</button>
+        <button class="btn-sol" onclick="toggleSol('ex1')">✅ Solution</button>
+      </div>
+      <div class="hint-box" id="ex1-hint">
+        <strong>Hint:</strong><br>
+        <code>form.addEventListener('submit', (e) => { e.preventDefault(); ... })</code><br>
+        Check: <code>if (uname.value.trim() === '') { error.textContent = 'Username is required'; }</code><br>
+        Else: <code>success.textContent = 'Welcome, ' + uname.value + '!';</code>
+      </div>
+      <div class="sol-box" id="ex1-sol">
+        <div class="code-wrap"><div class="code-bar"><span class="code-lang">Solution</span></div>
+        <div class="code-block"><code><span class="sk">const</span> form    = document.<span class="sf">querySelector</span>(<span class="ss">'#login-form'</span>);
+<span class="sk">const</span> uname   = document.<span class="sf">querySelector</span>(<span class="ss">'#uname'</span>);
+<span class="sk">const</span> errEl   = document.<span class="sf">querySelector</span>(<span class="ss">'#uname-error'</span>);
+<span class="sk">const</span> success = document.<span class="sf">querySelector</span>(<span class="ss">'#success-msg'</span>);
+
+form.<span class="sf">addEventListener</span>(<span class="ss">'submit'</span>, (e) =&gt; {
+  e.<span class="sf">preventDefault</span>();
+  <span class="sk">const</span> val = uname.value.<span class="sf">trim</span>();
+  <span class="sk">if</span> (!val) {
+    errEl.textContent = <span class="ss">'Username is required.'</span>;
+    success.textContent = <span class="ss">''</span>;
+  } <span class="sk">else</span> {
+    errEl.textContent = <span class="ss">''</span>;
+    success.textContent = <span class="ss">`Welcome, ${val}!`</span>;
+  }
+});</code></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- E2 -->
+  <div class="exercise" id="ex2">
+    <div class="ex-header">
+      <span class="ex-num">E2</span>
+      <h3>Real-time Email Validation</h3>
+      <span class="difficulty diff-med">Intermediate</span>
+    </div>
+    <div class="ex-body">
+      <div class="task-box">
+        <strong>Task:</strong> Add a real-time <code>'input'</code> event listener on the email field that:
+        <ul>
+          <li>Only shows errors after the user has typed something (not on empty)</li>
+          <li>Shows "Email is required" if field is empty after being typed</li>
+          <li>Shows "Not a valid email format" if <code>validity.typeMismatch</code> is true</li>
+          <li>Adds class <code>valid-ok</code> when valid and <code>valid-err</code> when invalid</li>
+          <li>Removes both classes when the field is empty again</li>
+        </ul>
+      </div>
+      <div class="editor-row">
+        <textarea id="ex2-editor" spellcheck="false">&lt;!DOCTYPE html&gt;
+&lt;html&gt;&lt;head&gt;
+&lt;style&gt;
+  body { font-family: system-ui; padding: 28px; max-width: 400px; }
+  label { font-size: 13px; font-weight: 600; display: block; margin-bottom: 4px; }
+  input {
+    width: 100%; padding: 10px 14px; border: 2px solid #c8d4f0;
+    border-radius: 8px; font-size: 14px; outline: none; transition: all .2s;
+  }
+  input.valid-ok  { border-color: #16a34a; background: #f0fdf4; }
+  input.valid-err { border-color: #dc2626; background: #fef2f2; }
+  .error-msg { font-size: 12px; font-weight: 600; color: #dc2626;
+    min-height: 18px; margin-top: 4px; }
+  .ok-msg { font-size: 12px; font-weight: 600; color: #16a34a; min-height: 18px; margin-top: 4px; }
+&lt;/style&gt;
+&lt;/head&gt;&lt;body&gt;
+&lt;h2&gt;Email Validation&lt;/h2&gt;
+&lt;label for="rt-email"&gt;Email Address&lt;/label&gt;
+&lt;input type="email" id="rt-email" required placeholder="name@example.com"&gt;
+&lt;div class="error-msg" id="email-err"&gt;&lt;/div&gt;
+&lt;div class="ok-msg"  id="email-ok"&gt;&lt;/div&gt;
+
+&lt;script&gt;
+  const emailInput = document.querySelector('#rt-email');
+  const errEl = document.querySelector('#email-err');
+  const okEl  = document.querySelector('#email-ok');
+
+  emailInput.addEventListener('input', () => {
+    const v = emailInput.validity;
+    const isEmpty = emailInput.value === '';
+
+    // YOUR CODE HERE
+    // if empty: clear classes, clear messages
+    // else if v.valid: add valid-ok, clear err, show ok message
+    // else: add valid-err, show correct error message
+  });
+&lt;/script&gt;
+&lt;/body&gt;&lt;/html&gt;</textarea>
+        <iframe id="ex2-frame"></iframe>
+      </div>
+      <div class="ex-btns">
+        <button class="btn-run" onclick="runEx('ex2')">▶ Run</button>
+        <button class="btn-hint" onclick="toggleHint('ex2')">💡 Hint</button>
+        <button class="btn-sol" onclick="toggleSol('ex2')">✅ Solution</button>
+      </div>
+      <div class="hint-box" id="ex2-hint">
+        <strong>Hint:</strong> Structure your if/else like this:
+        <code>if (isEmpty) { /* reset */ } else if (v.valid) { /* show OK */ } else { /* show error */ }</code>
+        To clear classes: <code>emailInput.classList.remove('valid-ok', 'valid-err')</code>
+      </div>
+      <div class="sol-box" id="ex2-sol">
+        <div class="code-wrap"><div class="code-bar"><span class="code-lang">Solution</span></div>
+        <div class="code-block"><code>emailInput.<span class="sf">addEventListener</span>(<span class="ss">'input'</span>, () =&gt; {
+  <span class="sk">const</span> v = emailInput.validity;
+  <span class="sk">const</span> isEmpty = emailInput.value === <span class="ss">''</span>;
+
+  <span class="sk">if</span> (isEmpty) {
+    emailInput.classList.<span class="sf">remove</span>(<span class="ss">'valid-ok'</span>, <span class="ss">'valid-err'</span>);
+    errEl.textContent = <span class="ss">''</span>;
+    okEl.textContent  = <span class="ss">''</span>;
+  } <span class="sk">else if</span> (v.valid) {
+    emailInput.classList.<span class="sf">add</span>(<span class="ss">'valid-ok'</span>);
+    emailInput.classList.<span class="sf">remove</span>(<span class="ss">'valid-err'</span>);
+    errEl.textContent = <span class="ss">''</span>;
+    okEl.textContent  = <span class="ss">'✓ Valid email!'</span>;
+  } <span class="sk">else</span> {
+    emailInput.classList.<span class="sf">add</span>(<span class="ss">'valid-err'</span>);
+    emailInput.classList.<span class="sf">remove</span>(<span class="ss">'valid-ok'</span>);
+    okEl.textContent = <span class="ss">''</span>;
+    <span class="sk">if</span> (v.valueMissing)  errEl.textContent = <span class="ss">'Email is required.'</span>;
+    <span class="sk">if</span> (v.typeMismatch)  errEl.textContent = <span class="ss">'Not a valid email format.'</span>;
+  }
+});</code></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- E3 -->
+  <div class="exercise" id="ex3">
+    <div class="ex-header">
+      <span class="ex-num">E3</span>
+      <h3>Password Confirmation with ARIA</h3>
+      <span class="difficulty diff-hard">Challenge</span>
+    </div>
+    <div class="ex-body">
+      <div class="task-box">
+        <strong>Task:</strong> Build a password + confirm form with full JS validation and ARIA:
+        <ul>
+          <li>Live validation on the password field: must be ≥ 8 chars</li>
+          <li>Live validation on confirm: must match the password field exactly</li>
+          <li>Use <code>setCustomValidity()</code> on the confirm field</li>
+          <li>Add <code>aria-describedby</code> linking inputs to their error spans</li>
+          <li>Set <code>aria-invalid="true"</code> when invalid, <code>"false"</code> when valid</li>
+          <li>Both error spans should have <code>aria-live="polite"</code></li>
+        </ul>
+      </div>
+      <div class="editor-row">
+        <textarea id="ex3-editor" spellcheck="false">&lt;!DOCTYPE html&gt;
+&lt;html&gt;&lt;head&gt;
+&lt;style&gt;
+  body { font-family: system-ui; padding: 28px; max-width: 400px; }
+  label { font-size: 13px; font-weight: 600; display: block; margin-bottom: 4px; margin-top: 16px; }
+  input {
+    width: 100%; padding: 10px 14px; border: 2px solid #c8d4f0;
+    border-radius: 8px; font-size: 14px; outline: none; transition: all .2s;
+  }
+  input.ok  { border-color: #16a34a; }
+  input.err { border-color: #dc2626; }
+  .err-span { font-size: 12px; font-weight: 600; color: #dc2626; min-height: 18px; display: block; margin-top: 4px; }
+  button { margin-top: 18px; background: #1a56db; color: #fff; border: none;
+    padding: 11px 24px; border-radius: 8px; cursor: pointer; font-weight: 700; }
+&lt;/style&gt;
+&lt;/head&gt;&lt;body&gt;
+&lt;h2&gt;Create Account&lt;/h2&gt;
+&lt;form id="pw-form"&gt;
+  &lt;label for="pw"&gt;Password&lt;/label&gt;
+  &lt;input type="password" id="pw" required minlength="8"
+         aria-describedby="pw-err" aria-required="true"
+         placeholder="At least 8 characters"&gt;
+  &lt;span id="pw-err" class="err-span" aria-live="polite"&gt;&lt;/span&gt;
+
+  &lt;label for="cfm"&gt;Confirm Password&lt;/label&gt;
+  &lt;input type="password" id="cfm" required
+         aria-describedby="cfm-err" aria-required="true"
+         placeholder="Repeat your password"&gt;
+  &lt;span id="cfm-err" class="err-span" aria-live="polite"&gt;&lt;/span&gt;
+
+  &lt;button type="submit"&gt;Create Account&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;script&gt;
+  const pw     = document.querySelector('#pw');
+  const cfm    = document.querySelector('#cfm');
+  const pwErr  = document.querySelector('#pw-err');
+  const cfmErr = document.querySelector('#cfm-err');
+  const form   = document.querySelector('#pw-form');
+
+  // YOUR CODE HERE:
+  // 1. pw 'input' listener: check length, update class + aria-invalid + pwErr
+  // 2. checkCfm() function: compare cfm.value to pw.value
+  //    - use setCustomValidity('') or setCustomValidity('Passwords do not match.')
+  //    - update class + aria-invalid + cfmErr
+  // 3. cfm 'input' listener: call checkCfm()
+  // 4. pw 'input' should also call checkCfm() if cfm.value !== ''
+  // 5. form 'submit' listener: preventDefault, check both valid, log "submitted"
+&lt;/script&gt;
+&lt;/body&gt;&lt;/html&gt;</textarea>
+        <iframe id="ex3-frame"></iframe>
+      </div>
+      <div class="ex-btns">
+        <button class="btn-run" onclick="runEx('ex3')">▶ Run</button>
+        <button class="btn-hint" onclick="toggleHint('ex3')">💡 Hint</button>
+        <button class="btn-sol" onclick="toggleSol('ex3')">✅ Solution</button>
+      </div>
+      <div class="hint-box" id="ex3-hint">
+        <strong>Hint:</strong><br>
+        For aria: <code>pw.setAttribute('aria-invalid', 'true')</code> / <code>'false'</code><br>
+        For setCustomValidity: <code>cfm.setCustomValidity('Passwords do not match.')</code> — clear with <code>cfm.setCustomValidity('')</code><br>
+        Call <code>checkCfm()</code> at the end of the pw listener too.
+      </div>
+      <div class="sol-box" id="ex3-sol">
+        <div class="code-wrap"><div class="code-bar"><span class="code-lang">Solution</span></div>
+        <div class="code-block"><code>pw.<span class="sf">addEventListener</span>(<span class="ss">'input'</span>, () =&gt; {
+  <span class="sk">if</span> (pw.validity.tooShort || pw.validity.valueMissing) {
+    pw.classList.<span class="sf">add</span>(<span class="ss">'err'</span>); pw.classList.<span class="sf">remove</span>(<span class="ss">'ok'</span>);
+    pw.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>, <span class="ss">'true'</span>);
+    pwErr.textContent = <span class="ss">'Password must be at least 8 characters.'</span>;
+  } <span class="sk">else</span> {
+    pw.classList.<span class="sf">add</span>(<span class="ss">'ok'</span>); pw.classList.<span class="sf">remove</span>(<span class="ss">'err'</span>);
+    pw.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>, <span class="ss">'false'</span>);
+    pwErr.textContent = <span class="ss">''</span>;
+  }
+  <span class="sk">if</span> (cfm.value) <span class="sf">checkCfm</span>();
+});
+
+<span class="sk">function</span> <span class="sf">checkCfm</span>() {
+  <span class="sk">if</span> (cfm.value !== pw.value) {
+    cfm.<span class="sf">setCustomValidity</span>(<span class="ss">'Passwords do not match.'</span>);
+    cfm.classList.<span class="sf">add</span>(<span class="ss">'err'</span>); cfm.classList.<span class="sf">remove</span>(<span class="ss">'ok'</span>);
+    cfm.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>, <span class="ss">'true'</span>);
+    cfmErr.textContent = <span class="ss">'Passwords do not match.'</span>;
+  } <span class="sk">else</span> {
+    cfm.<span class="sf">setCustomValidity</span>(<span class="ss">''</span>);
+    cfm.classList.<span class="sf">add</span>(<span class="ss">'ok'</span>); cfm.classList.<span class="sf">remove</span>(<span class="ss">'err'</span>);
+    cfm.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>, <span class="ss">'false'</span>);
+    cfmErr.textContent = <span class="ss">''</span>;
+  }
+}
+cfm.<span class="sf">addEventListener</span>(<span class="ss">'input'</span>, checkCfm);
+
+form.<span class="sf">addEventListener</span>(<span class="ss">'submit'</span>, (e) =&gt; {
+  e.<span class="sf">preventDefault</span>();
+  <span class="sk">if</span> (pw.validity.valid &amp;&amp; cfm.validity.valid) {
+    <span class="sf">alert</span>(<span class="ss">'Account created successfully!'</span>);
+  }
+});</code></div></div>
+      </div>
+    </div>
+  </div>
+
+</section><!-- /exercises -->
+
+<!-- ══════════════════ HOMEWORK ══════════════════ -->
+<section class="topic" id="hw">
+  <div class="topic-hdr">
+    <span class="t-num" style="background:var(--warn);color:#1a1000">HW</span>
+    <h2>Homework</h2>
+    <span class="difficulty diff-hard">Challenge</span>
+  </div>
+
+  <div class="homework-box">
+    <h3>Upgrade Monday's Registration Form with JS Validation</h3>
+    <p style="font-size:14px;color:var(--mu);margin-bottom:16px">Due: before next Monday · Combine your Monday .html file with JS validation</p>
+    <ol>
+      <li>Add <code>novalidate</code> to the form to disable built-in browser validation</li>
+      <li>Intercept the <code>'submit'</code> event with <code>preventDefault()</code></li>
+      <li>Real-time validation (<code>'input'</code> event) on every field:
+        <ul style="margin-top:6px">
+          <li>Student ID: regex test <code>/^\d{9}$/</code></li>
+          <li>Email: check <code>validity.typeMismatch</code></li>
+          <li>Password: check <code>validity.tooShort</code></li>
+          <li>Phone: regex test <code>/^\d{3}-\d{4}-\d{4}$/</code></li>
+        </ul>
+      </li>
+      <li>Show custom error messages in <code>&lt;span&gt;</code> elements next to each field</li>
+      <li>Implement password + confirm comparison using <code>setCustomValidity()</code></li>
+      <li>Add ARIA attributes: <code>aria-describedby</code>, <code>aria-invalid</code>, <code>aria-live="polite"</code></li>
+      <li>On successful submit: show a styled "Registration successful!" message</li>
+      <li><strong>Bonus:</strong> Disable the Submit button until all fields are valid (check <code>form.checkValidity()</code> in every <code>'input'</code> listener)</li>
+    </ol>
+  </div>
+
+  <div class="alert alert-ok">
+    <span class="alert-icon">✅</span>
+    <div><strong>Tip:</strong> Use the pattern from E3 for password confirmation. Use the real-time pattern from E2 for all other fields. Add ARIA attributes to every error <code>&lt;span&gt;</code>.</div>
+  </div>
+</section>
+
+<footer id="site-footer">
+  <p>K0126002 · Web Programming · Gachon University · Week 6 Friday</p>
+  <p style="margin-top:4px">JavaScript Form Validation — Study Guide</p>
+</footer>
+
+</main>
+</div><!-- /layout -->
+
+<script>
+/* ─── Theme ─── */
+function toggleTheme() {
+  const r = document.documentElement;
+  const isDark = r.dataset.theme === 'dark';
+  r.dataset.theme = isDark ? 'light' : 'dark';
+  document.getElementById('theme-toggle').textContent = isDark ? '🌙 Dark' : '☀️ Light';
+  try { localStorage.setItem('w6fri-sg-theme', r.dataset.theme); } catch(e){}
+}
+try {
+  const s = localStorage.getItem('w6fri-sg-theme');
+  if (s) { document.documentElement.dataset.theme = s;
+    document.getElementById('theme-toggle').textContent = s === 'dark' ? '☀️ Light' : '🌙 Dark'; }
+} catch(e){}
+
+/* ─── Sidebar ─── */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+/* ─── Progress bar ─── */
+window.addEventListener('scroll', () => {
+  const d = document.documentElement;
+  const pct = d.scrollTop / (d.scrollHeight - d.clientHeight) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+});
+
+/* ─── Active nav link ─── */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      document.querySelectorAll('#sidebar nav a').forEach(a => a.classList.remove('active'));
+      const id = e.target.id;
+      const link = document.querySelector(`#sidebar nav a[href="#${id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+document.querySelectorAll('.topic, .exercise, #exercises, #hw').forEach(s => observer.observe(s));
+
+/* ─── Copy code ─── */
+function copyCode(btn) {
+  const code = btn.closest('.code-wrap').querySelector('code').innerText;
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+/* ─── Exercise runner ─── */
+function runEx(id) {
+  document.getElementById(id + '-frame').srcdoc = document.getElementById(id + '-editor').value;
+}
+function toggleHint(id) {
+  const el = document.getElementById(id + '-hint');
+  el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+function toggleSol(id) {
+  const el = document.getElementById(id + '-sol');
+  el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+
+/* ─── preventDefault demo ─── */
+document.getElementById('demo-prevent-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const val = document.getElementById('demo-prevent-input').value;
+  const out = document.getElementById('demo-prevent-out');
+  out.textContent = val
+    ? `e.preventDefault() worked! Page stayed here. You typed: "${val}"`
+    : 'e.preventDefault() worked! But the field was empty — try typing something first.';
+  out.style.borderStyle = 'solid';
+  out.style.borderColor = 'var(--lime)';
+});
+
+/* ─── checkValidity demo ─── */
+function checkDemoValidity() {
+  const inp = document.getElementById('cv-email');
+  const out = document.getElementById('cv-out');
+  const v = inp.validity;
+  const lines = [
+    `checkValidity() → ${inp.checkValidity()}`,
+    `validity.valid → ${v.valid}`,
+    `validity.valueMissing → ${v.valueMissing}`,
+    `validity.typeMismatch → ${v.typeMismatch}`,
+    `Current value: "${inp.value}"`
+  ];
+  out.innerHTML = lines.join('<br>');
+}
+
+/* ─── Real-time demo (topic 6) ─── */
+const rtEmail = document.getElementById('rt-email');
+const rtEmailErr = document.getElementById('rt-email-err');
+if (rtEmail) {
+  rtEmail.addEventListener('input', () => {
+    const v = rtEmail.validity;
+    if (rtEmail.value === '') { rtEmailErr.textContent = ''; rtEmail.classList.remove('valid-ok','valid-err'); return; }
+    if (v.valid) { rtEmailErr.textContent = ''; rtEmail.classList.add('valid-ok'); rtEmail.classList.remove('valid-err'); }
+    else {
+      rtEmail.classList.add('valid-err'); rtEmail.classList.remove('valid-ok');
+      if (v.valueMissing) rtEmailErr.textContent = 'Email is required.';
+      else if (v.typeMismatch) rtEmailErr.textContent = 'Not a valid email format.';
+    }
+  });
+}
+const rtSid = document.getElementById('rt-sid');
+const rtSidErr = document.getElementById('rt-sid-err');
+if (rtSid) {
+  rtSid.addEventListener('input', () => {
+    const v = rtSid.validity;
+    if (rtSid.value === '') { rtSidErr.textContent = ''; rtSid.classList.remove('valid-ok','valid-err'); return; }
+    if (v.valid) { rtSidErr.textContent = ''; rtSid.classList.add('valid-ok'); rtSid.classList.remove('valid-err'); }
+    else {
+      rtSid.classList.add('valid-err'); rtSid.classList.remove('valid-ok');
+      if (v.patternMismatch) rtSidErr.textContent = 'Student ID must be exactly 9 digits.';
+      else if (v.valueMissing) rtSidErr.textContent = 'Student ID is required.';
+    }
+  });
+}
+
+/* ─── Regex tester demo ─── */
+function testRegexDemo(val) {
+  const sidRx   = /^\d{9}$/;
+  const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRx = /^(010|011|016|017|018|019)-\d{3,4}-\d{4}$/;
+  const pwRx    = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+  function mark(id, result) {
+    const el = document.getElementById(id);
+    if (!val) { el.style.background = 'var(--surf2)'; el.textContent = id.replace('rx-','').replace('-',' ').toUpperCase() + ': —'; return; }
+    el.style.background = result ? 'var(--limel)' : 'var(--corl)';
+    const label = {
+      'rx-sid': 'Student ID', 'rx-email': 'Email',
+      'rx-phone': 'Phone', 'rx-pw': 'Strong PW'
+    }[id];
+    el.textContent = label + ': ' + (result ? '✓ Match' : '✗ No match');
+  }
+  mark('rx-sid',   sidRx.test(val));
+  mark('rx-email', emailRx.test(val));
+  mark('rx-phone', phoneRx.test(val));
+  mark('rx-pw',    pwRx.test(val));
+}
+
+/* ─── Password confirmation demo ─── */
+const demoPw = document.getElementById('demo-pw');
+const demoCfm = document.getElementById('demo-confirm');
+const demoPwErr = document.getElementById('demo-pw-err');
+const demoCfmErr = document.getElementById('demo-confirm-err');
+const demoPwMatch = document.getElementById('demo-pw-match');
+
+function checkDemoCfm() {
+  if (!demoCfm.value) { demoCfmErr.textContent = ''; demoPwMatch.textContent = ''; return; }
+  if (demoCfm.value !== demoPw.value) {
+    demoCfm.setCustomValidity('Passwords do not match.');
+    demoCfmErr.textContent = 'Passwords do not match.';
+    demoPwMatch.textContent = '';
+    demoPwMatch.style.color = 'var(--cor)';
+  } else {
+    demoCfm.setCustomValidity('');
+    demoCfmErr.textContent = '';
+    demoPwMatch.textContent = '✓ Passwords match!';
+    demoPwMatch.style.color = 'var(--lime)';
+  }
+}
+if (demoPw) {
+  demoPw.addEventListener('input', () => {
+    if (demoPw.validity.tooShort || demoPw.validity.valueMissing) {
+      demoPwErr.textContent = 'Password must be at least 8 characters.';
+    } else { demoPwErr.textContent = ''; }
+    if (demoCfm.value) checkDemoCfm();
+  });
+  demoCfm.addEventListener('input', checkDemoCfm);
+}
+</script>
+</body>
+</html>

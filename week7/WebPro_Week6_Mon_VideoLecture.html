@@ -1,0 +1,765 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTML Forms &amp; Validation — Video Lecture</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap">
+<style>
+:root {
+  --dark: #0f172a; --navy: #1e3a5f; --blue: #1a73e8; --teal: #0891b2;
+  --green: #16a34a; --red: #dc2626; --amber: #d97706;
+  --htmlorg: #e34c26; --text: #f1f5f9; --sub: #94a3b8; --bdr: rgba(255,255,255,.12);
+  --code-bg: #0d1117; --code-txt: #e6edf3;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; font-family: Inter, sans-serif; background: #000; }
+
+/* ── PLAYER SHELL ─────────────────────────────────── */
+#player { display: flex; flex-direction: column; width: 100%; height: 100vh; }
+#player.notes-open { flex-direction: row; }
+
+#slide-area { flex: 1; position: relative; overflow: hidden; }
+#player.notes-open #slide-area { flex: 0 0 65%; }
+
+/* ── SLIDES ──────────────────────────────────────── */
+.slide { display: none; position: absolute; inset: 0; padding: 0; }
+.slide.active { display: flex; flex-direction: column; }
+
+/* Chapter badge */
+.chapter-tag { position: absolute; top: 20px; right: 24px; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: rgba(255,255,255,.1); color: var(--sub); }
+
+/* Title slide */
+.s-title { background: var(--dark); align-items: center; justify-content: center; text-align: center; }
+.s-title .big-badge { font-size: 13px; font-weight: 700; letter-spacing: .12em; background: var(--htmlorg); color: #fff; padding: 6px 16px; border-radius: 20px; margin-bottom: 28px; text-transform: uppercase; }
+.s-title h1 { font-size: 42px; font-weight: 800; color: var(--text); line-height: 1.15; margin-bottom: 12px; }
+.s-title .sub { font-size: 20px; color: var(--sub); margin-bottom: 40px; }
+.s-title .meta { font-size: 14px; color: #475569; }
+
+/* Chapter divider */
+.s-chapter { justify-content: center; align-items: center; text-align: center; }
+.s-chapter .ch-num { font-size: 13px; font-weight: 600; letter-spacing: .12em; color: var(--sub); margin-bottom: 12px; }
+.s-chapter h2 { font-size: 36px; font-weight: 800; color: var(--text); line-height: 1.2; }
+.s-chapter p { font-size: 16px; color: var(--sub); margin-top: 12px; }
+
+/* Content slides */
+.s-content { padding: 40px 52px; overflow: hidden; }
+.s-content.dark-bg { background: var(--dark); color: var(--text); }
+.s-content.navy-bg { background: var(--navy); color: var(--text); }
+.s-content.code-bg { background: #0a0e1a; color: var(--text); }
+.s-content .slide-title { font-size: 26px; font-weight: 700; margin-bottom: 8px; }
+.s-content .slide-sub { font-size: 15px; color: var(--sub); margin-bottom: 24px; }
+
+/* Analogy card */
+.analogy { background: rgba(227,76,38,.1); border-left: 4px solid var(--htmlorg); padding: 14px 16px; border-radius: 0 8px 8px 0; margin-bottom: 20px; font-size: 15px; line-height: 1.6; }
+.analogy strong { color: var(--htmlorg); }
+.analogy.blue { background: rgba(26,115,232,.1); border-left-color: var(--blue); }
+.analogy.blue strong { color: #60a5fa; }
+.analogy.amber { background: rgba(217,119,6,.1); border-left-color: var(--amber); }
+.analogy.amber strong { color: #fbbf24; }
+
+/* Code block */
+.code-box { background: var(--code-bg); border-radius: 10px; padding: 18px 22px; font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 14px; line-height: 1.9; color: var(--code-txt); overflow-x: auto; position: relative; margin-bottom: 16px; }
+.code-box .cm { color: #8b949e; }
+.code-box .ck { color: #ff7b72; }  /* keyword / HTML tag */
+.code-box .cs { color: #a5d6ff; }  /* string / attr value */
+.code-box .cn { color: #79c0ff; }  /* attr name */
+.code-box .cf { color: #d2a8ff; }  /* function / selector */
+.code-box .cv { color: #ffa657; }  /* variable / CSS property */
+.code-box .cnum { color: #f8c555; }
+
+/* Step-reveal lines */
+.code-box .line { opacity: .15; transition: opacity .4s; display: block; }
+.code-box .line.show { opacity: 1; }
+.code-box .line.hl { background: rgba(26,115,232,.18); border-radius: 3px; }
+
+/* Output box */
+.output-box { background: #1a2540; border: 1px solid rgba(255,255,255,.12); border-radius: 8px; padding: 14px 18px; font-family: 'Courier New', monospace; font-size: 13px; color: #80ff90; margin-top: 12px; }
+.output-box .out-label { font-family: Inter, sans-serif; font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: #4ade80; margin-bottom: 6px; font-weight: 600; }
+
+/* Form preview */
+.form-preview { background: #fff; border-radius: 10px; padding: 20px 24px; color: #1a2340; font-family: Inter, sans-serif; font-size: 14px; }
+.form-preview label { display: block; font-size: 12px; font-weight: 700; color: #5a6a8a; margin-bottom: 4px; margin-top: 12px; letter-spacing: .04em; }
+.form-preview input, .form-preview select {
+  width: 100%; padding: 8px 12px; border: 2px solid #c8d4f0; border-radius: 6px;
+  font-size: 13px; font-family: inherit; outline: none; transition: border-color .2s;
+}
+.form-preview input:focus, .form-preview select:focus { border-color: #1a56db; }
+.form-preview button { margin-top: 14px; background: #1a56db; color: #fff; border: none;
+  padding: 9px 20px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer; }
+.form-preview .valid-ex { border-color: #16a34a !important; background: #f0fdf4; }
+.form-preview .invalid-ex { border-color: #dc2626 !important; background: #fef2f2; }
+
+/* Two-column layouts */
+.cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.cols3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+/* Info rows */
+.info-row { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
+.info-dot { width: 28px; height: 28px; min-width: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+.info-dot.blue { background: rgba(26,115,232,.25); color: #60a5fa; }
+.info-dot.green { background: rgba(22,163,74,.25); color: #4ade80; }
+.info-dot.red { background: rgba(220,38,38,.25); color: #f87171; }
+.info-dot.amber { background: rgba(217,119,6,.25); color: #fbbf24; }
+.info-dot.org { background: rgba(227,76,38,.25); color: #fb7c5b; }
+.info-body { flex: 1; }
+.info-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.info-desc { font-size: 13px; color: var(--sub); line-height: 1.5; }
+
+/* Comparison cards */
+.compare-card { border-radius: 10px; padding: 18px 20px; }
+.compare-card.good { background: rgba(22,163,74,.12); border: 1px solid rgba(22,163,74,.4); }
+.compare-card.bad { background: rgba(220,38,38,.12); border: 1px solid rgba(220,38,38,.4); }
+.compare-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; margin-bottom: 10px; }
+.compare-card.good .compare-label { color: #4ade80; }
+.compare-card.bad .compare-label { color: #f87171; }
+
+/* Summary grid */
+.summary-item { background: rgba(255,255,255,.05); border: 1px solid var(--bdr); border-radius: 8px; padding: 14px; }
+.summary-item .s-icon { font-size: 20px; margin-bottom: 6px; }
+.summary-item .s-title { font-size: 12px; font-weight: 700; color: var(--htmlorg); margin-bottom: 4px; }
+.summary-item .s-body { font-size: 11px; color: var(--sub); line-height: 1.5; }
+
+/* Icon reveal grid */
+.icon-grid { display: flex; gap: 32px; justify-content: center; margin-top: 32px; }
+.icon-card { text-align: center; opacity: .15; transition: opacity .5s; }
+.icon-card.show { opacity: 1; }
+.icon-card .i-circle { width: 90px; height: 90px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 38px; margin: 0 auto 12px; }
+.icon-card .i-label { font-size: 15px; font-weight: 700; }
+.icon-card .i-sub { font-size: 12px; color: var(--sub); margin-top: 4px; }
+
+/* Mistake reveal list */
+.mistake-list { list-style: none; margin-top: 8px; }
+.mistake-list li { display: flex; gap: 14px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,.07); opacity: .15; transition: opacity .4s; align-items: flex-start; }
+.mistake-list li.show { opacity: 1; }
+.mistake-list .m-icon { font-size: 20px; min-width: 28px; }
+.mistake-list .m-title { font-size: 14px; font-weight: 700; margin-bottom: 3px; color: #f87171; }
+.mistake-list .m-fix { font-size: 13px; color: var(--sub); line-height: 1.4; }
+.mistake-list .m-fix code { font-family: 'JetBrains Mono', monospace; font-size: 12px; background: rgba(255,255,255,.1); padding: 1px 5px; border-radius: 3px; color: #a5d6ff; }
+
+/* Summary table */
+.sum-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.sum-table th { background: rgba(227,76,38,.2); color: #fb7c5b; padding: 8px 12px; text-align: left; font-weight: 700; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
+.sum-table td { padding: 7px 12px; border-bottom: 1px solid rgba(255,255,255,.06); vertical-align: top; }
+.sum-table td:first-child { font-family: 'JetBrains Mono', monospace; color: #a5d6ff; font-size: 12px; }
+.sum-table td:last-child { color: var(--sub); }
+
+/* ── CONTROLS ─────────────────────────────────────── */
+.controls { background: #0a0a0a; border-top: 1px solid #1e1e1e; padding: 10px 20px; display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+.btn-ctrl { background: #1e1e1e; border: none; color: #ccc; border-radius: 6px; padding: 7px 14px; font-size: 13px; cursor: pointer; transition: background .15s; white-space: nowrap; }
+.btn-ctrl:hover { background: #2e2e2e; }
+.btn-ctrl.active { background: var(--blue); color: #fff; }
+.slide-counter { font-size: 13px; color: #555; margin: 0 4px; white-space: nowrap; }
+.progress-track { flex: 1; height: 4px; background: #222; border-radius: 2px; cursor: pointer; }
+.progress-fill { height: 4px; background: var(--htmlorg); border-radius: 2px; transition: width .5s; }
+
+/* ── NOTES PANEL ─────────────────────────────────── */
+#notes-panel { display: none; flex: 1; background: #0e1219; border-left: 1px solid #1e2432; overflow-y: auto; padding: 32px 28px; }
+#player.notes-open #notes-panel { display: block; }
+#notes-panel h3 { font-size: 14px; font-weight: 700; color: var(--sub); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 16px; }
+#notes-text { font-size: 15px; color: #c9d1d9; line-height: 1.8; }
+#notes-text p { margin-bottom: 12px; }
+#notes-text strong { color: var(--text); }
+
+/* Space indicator */
+#space-hint { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); font-size: 12px; color: rgba(255,255,255,.3); pointer-events: none; transition: opacity .3s; }
+</style>
+</head>
+<body>
+
+<div id="player">
+  <div id="slide-area">
+
+    <!-- S1: Title -->
+    <div class="slide s-title active" style="background: linear-gradient(135deg, #0f172a 0%, #2d1a0f 100%);">
+      <div class="big-badge">Web Programming · Week 6 · Monday</div>
+      <h1>HTML Forms<br>&amp; Validation</h1>
+      <p class="sub">&lt;form&gt; · Input Types · HTML5 Validation · CSS :valid/:invalid</p>
+      <p class="meta">Gachon University · Fall 2026 · K0126002</p>
+    </div>
+
+    <!-- S2: Every Website Needs Input -->
+    <div class="slide s-content dark-bg">
+      <div class="slide-title">Every Website Needs Input</div>
+      <div class="slide-sub">Think about what you did online today — most of it involved a form</div>
+      <div class="icon-grid" id="icon-grid">
+        <div class="icon-card" id="ic1">
+          <div class="i-circle" style="background:rgba(26,115,232,.2);border:2px solid rgba(26,115,232,.5)">🔍</div>
+          <div class="i-label" style="color:#60a5fa">Google Search</div>
+          <div class="i-sub">A search box is a single-field form</div>
+        </div>
+        <div class="icon-card" id="ic2">
+          <div class="i-circle" style="background:rgba(22,163,74,.2);border:2px solid rgba(22,163,74,.5)">🔐</div>
+          <div class="i-label" style="color:#4ade80">Facebook Login</div>
+          <div class="i-sub">Email + password, sent to the server</div>
+        </div>
+        <div class="icon-card" id="ic3">
+          <div class="i-circle" style="background:rgba(227,76,38,.2);border:2px solid rgba(227,76,38,.5)">🛒</div>
+          <div class="i-label" style="color:#fb7c5b">Amazon Checkout</div>
+          <div class="i-sub">Address, payment, delivery — all forms</div>
+        </div>
+      </div>
+      <div class="analogy amber" style="margin-top:32px"><strong>Key insight:</strong> Forms are the primary way users <em>send data</em> to a server. Without forms, websites can only show — they cannot receive.</div>
+      <span id="space-hint">Press Space to reveal</span>
+    </div>
+
+    <!-- S3: The &lt;form&gt; Element -->
+    <div class="slide s-content code-bg">
+      <div class="slide-title">The &lt;form&gt; Element</div>
+      <div class="slide-sub">The container that wraps all your input fields — two attributes matter most</div>
+      <div class="code-box" id="cb3">
+        <span class="line"><span class="ck">&lt;form</span></span>
+        <span class="line">  <span class="cn">action</span>=<span class="cs">"/login"</span>          <span class="cm">← WHERE to send data</span></span>
+        <span class="line">  <span class="cn">method</span>=<span class="cs">"post"</span>          <span class="cm">← HOW to send: GET or POST</span></span>
+        <span class="line"><span class="ck">&gt;</span></span>
+        <span class="line">  <span class="ck">&lt;label</span> <span class="cn">for</span>=<span class="cs">"email"</span><span class="ck">&gt;</span>Email<span class="ck">&lt;/label&gt;</span></span>
+        <span class="line">  <span class="ck">&lt;input</span> <span class="cn">type</span>=<span class="cs">"email"</span> <span class="cn">id</span>=<span class="cs">"email"</span> <span class="cn">name</span>=<span class="cs">"email"</span> <span class="cn">required</span><span class="ck">&gt;</span></span>
+        <span class="line"></span>
+        <span class="line">  <span class="ck">&lt;label</span> <span class="cn">for</span>=<span class="cs">"pw"</span><span class="ck">&gt;</span>Password<span class="ck">&lt;/label&gt;</span></span>
+        <span class="line">  <span class="ck">&lt;input</span> <span class="cn">type</span>=<span class="cs">"password"</span> <span class="cn">id</span>=<span class="cs">"pw"</span> <span class="cn">name</span>=<span class="cs">"password"</span> <span class="cn">required</span><span class="ck">&gt;</span></span>
+        <span class="line"></span>
+        <span class="line">  <span class="ck">&lt;button</span> <span class="cn">type</span>=<span class="cs">"submit"</span><span class="ck">&gt;</span>Log In<span class="ck">&lt;/button&gt;</span></span>
+        <span class="line"><span class="ck">&lt;/form&gt;</span></span>
+      </div>
+    </div>
+
+    <!-- S4: GET vs POST -->
+    <div class="slide s-content dark-bg">
+      <div class="slide-title">GET vs POST</div>
+      <div class="slide-sub">Two ways to send form data — choose based on security and purpose</div>
+      <div class="cols2">
+        <div class="compare-card bad">
+          <div class="compare-label">❌ DO NOT use GET for sensitive data</div>
+          <div class="analogy amber" style="margin-bottom:10px"><strong>Like a postcard:</strong> everyone who handles it can read what's written on it.</div>
+          <div style="font-size:13px;color:var(--sub)">Data is visible in the URL:</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;background:#0d1117;padding:8px 12px;border-radius:6px;margin-top:8px;color:#a5d6ff;word-break:break-all">/login?email=kim@gachon.edu&amp;password=secret123</div>
+          <div style="font-size:12px;color:var(--sub);margin-top:10px;line-height:1.5">✓ Use for: search, filters, bookmarkable pages</div>
+        </div>
+        <div class="compare-card good">
+          <div class="compare-label">✓ POST — use for sensitive data</div>
+          <div class="analogy" style="margin-bottom:10px"><strong>Like a sealed envelope:</strong> only the recipient can read the contents.</div>
+          <div style="font-size:13px;color:var(--sub)">Data is in the request body (hidden):</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;background:#0d1117;padding:8px 12px;border-radius:6px;margin-top:8px;color:#a5d6ff">Request body:<br>email=kim@gachon.edu<br>password=secret123</div>
+          <div style="font-size:12px;color:var(--sub);margin-top:10px;line-height:1.5">✓ Use for: login, register, payment, any form that changes data</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S5: Input Types Part 1 -->
+    <div class="slide s-content code-bg">
+      <div class="slide-title">Input Types — Part 1</div>
+      <div class="slide-sub">The type attribute controls appearance, keyboard (mobile), and built-in validation</div>
+      <div class="cols2">
+        <div class="code-box" id="cb5">
+          <span class="line"><span class="cm">/* text — anything goes */</span></span>
+          <span class="line"><span class="ck">&lt;input</span> <span class="cn">type</span>=<span class="cs">"text"</span> <span class="cn">placeholder</span>=<span class="cs">"Any text"</span><span class="ck">&gt;</span></span>
+          <span class="line"></span>
+          <span class="line"><span class="cm">/* email — validates @ and domain */</span></span>
+          <span class="line"><span class="ck">&lt;input</span> <span class="cn">type</span>=<span class="cs">"email"</span> <span class="cn">placeholder</span>=<span class="cs">"name@site.com"</span><span class="ck">&gt;</span></span>
+          <span class="line"></span>
+          <span class="line"><span class="cm">/* password — masks characters */</span></span>
+          <span class="line"><span class="ck">&lt;input</span> <span class="cn">type</span>=<span class="cs">"password"</span> <span class="cn">placeholder</span>=<span class="cs">"Secret"</span><span class="ck">&gt;</span></span>
+          <span class="line"></span>
+          <span class="line"><span class="cm">/* number — spinner, min/max work here */</span></span>
+          <span class="line"><span class="ck">&lt;input</span> <span class="cn">type</span>=<span class="cs">"number"</span> <span class="cn">min</span>=<span class="cs">"1"</span> <span class="cn">max</span>=<span class="cs">"100"</span><span class="ck">&gt;</span></span>
+        </div>
+        <div class="form-preview">
+          <label>text</label>
+          <input type="text" placeholder="Any text" style="margin-bottom:8px">
+          <label>email</label>
+          <input type="email" placeholder="name@site.com" style="margin-bottom:8px">
+          <label>password</label>
+          <input type="password" placeholder="Secret" style="margin-bottom:8px">
+          <label>number</label>
+          <input type="number" min="1" max="100" placeholder="1–100">
+        </div>
+      </div>
+    </div>
+
+    <!-- S6: Input Types Part 2 -->
+    <div class="slide s-content code-bg">
+      <div class="slide-title">Input Types — Part 2</div>
+      <div class="slide-sub">Specialized types give you date pickers, sliders, checkboxes, radios, and dropdowns</div>
+      <div class="cols2">
+        <div class="code-box" id="cb6">
+          <span class="line"><span class="ck">&lt;input</span> <span class="cn">type</span>=<span class="cs">"date"</span><span class="ck">&gt;</span></span>
+          <span class="line"></span>
+          <span class="line"><span class="ck">&lt;input</span> <span class="cn">type</span>=<span class="cs">"range"</span> <span class="cn">min</span>=<span class="cs">"0"</span> <span class="cn">max</span>=<span class="cs">"100"</span><span class="ck">&gt;</span></span>
+          <span class="line"></span>
+          <span class="line"><span class="cm">/* checkbox — multiple can be selected */</span></span>
+          <span class="line"><span class="ck">&lt;input</span> <span class="cn">type</span>=<span class="cs">"checkbox"</span> <span class="cn">name</span>=<span class="cs">"html"</span><span class="ck">&gt;</span> HTML</span>
+          <span class="line"><span class="ck">&lt;input</span> <span class="cn">type</span>=<span class="cs">"checkbox"</span> <span class="cn">name</span>=<span class="cs">"css"</span><span class="ck">&gt;</span> CSS</span>
+          <span class="line"></span>
+          <span class="line"><span class="cm">/* radio — same name = one choice only */</span></span>
+          <span class="line"><span class="ck">&lt;input</span> <span class="cn">type</span>=<span class="cs">"radio"</span> <span class="cn">name</span>=<span class="cs">"day"</span> <span class="cn">value</span>=<span class="cs">"mon"</span><span class="ck">&gt;</span> Mon</span>
+          <span class="line"><span class="ck">&lt;input</span> <span class="cn">type</span>=<span class="cs">"radio"</span> <span class="cn">name</span>=<span class="cs">"day"</span> <span class="cn">value</span>=<span class="cs">"fri"</span><span class="ck">&gt;</span> Fri</span>
+          <span class="line"></span>
+          <span class="line"><span class="ck">&lt;select</span> <span class="cn">name</span>=<span class="cs">"major"</span><span class="ck">&gt;</span></span>
+          <span class="line">  <span class="ck">&lt;option&gt;</span>Computer Science<span class="ck">&lt;/option&gt;</span></span>
+          <span class="line"><span class="ck">&lt;/select&gt;</span></span>
+        </div>
+        <div class="form-preview">
+          <label>date</label>
+          <input type="date" style="margin-bottom:8px">
+          <label>range</label>
+          <input type="range" min="0" max="100" value="50" style="margin-bottom:8px">
+          <label>checkbox</label>
+          <div style="display:flex;gap:12px;margin-bottom:8px">
+            <label style="font-size:13px;display:flex;gap:5px;align-items:center;margin-top:0"><input type="checkbox" checked> HTML</label>
+            <label style="font-size:13px;display:flex;gap:5px;align-items:center;margin-top:0"><input type="checkbox"> CSS</label>
+          </div>
+          <label>radio</label>
+          <div style="display:flex;gap:12px;margin-bottom:8px">
+            <label style="font-size:13px;display:flex;gap:5px;align-items:center;margin-top:0"><input type="radio" name="pr6" value="mon"> Mon</label>
+            <label style="font-size:13px;display:flex;gap:5px;align-items:center;margin-top:0"><input type="radio" name="pr6" value="fri" checked> Fri</label>
+          </div>
+          <label>select</label>
+          <select><option>-- Choose Major --</option><option>CS</option><option>AI</option></select>
+        </div>
+      </div>
+    </div>
+
+    <!-- S7: required & pattern -->
+    <div class="slide s-content code-bg">
+      <div class="slide-title">Validation Attributes: required &amp; pattern</div>
+      <div class="slide-sub">Add rules directly in HTML — the browser enforces them for free on submit</div>
+      <div class="cols2">
+        <div>
+          <div style="font-size:12px;color:#fbbf24;font-weight:700;letter-spacing:.08em;margin-bottom:10px">required &amp; pattern</div>
+          <div class="code-box" id="cb7">
+            <span class="line"><span class="cm">/* required: field must not be empty */</span></span>
+            <span class="line"><span class="ck">&lt;input</span> <span class="cn">type</span>=<span class="cs">"text"</span> <span class="cn">required</span><span class="ck">&gt;</span></span>
+            <span class="line"></span>
+            <span class="line"><span class="cm">/* pattern: regex the value must match */</span></span>
+            <span class="line"><span class="ck">&lt;input</span> <span class="cn">type</span>=<span class="cs">"text"</span></span>
+            <span class="line">  <span class="cn">pattern</span>=<span class="cs">"\d{9}"</span></span>
+            <span class="line">  <span class="cn">title</span>=<span class="cs">"9-digit student ID"</span></span>
+            <span class="line">  <span class="cn">required</span><span class="ck">&gt;</span></span>
+            <span class="line"></span>
+            <span class="line"><span class="cm">/* type="email" has built-in pattern */</span></span>
+            <span class="line"><span class="ck">&lt;input</span> <span class="cn">type</span>=<span class="cs">"email"</span> <span class="cn">required</span><span class="ck">&gt;</span></span>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;color:#4ade80;font-weight:700;letter-spacing:.08em;margin-bottom:10px">What the user sees</div>
+          <div class="form-preview">
+            <label>Student ID (try leaving empty)</label>
+            <input type="text" pattern="\d{9}" required placeholder="202112345" title="9-digit student ID" style="margin-bottom:12px">
+            <label>Email (try a bad format)</label>
+            <input type="email" required placeholder="name@gachon.ac.kr" style="margin-bottom:12px">
+            <button type="button" onclick="this.closest('.form-preview').querySelectorAll('input').forEach(i=>{if(!i.checkValidity())i.reportValidity()})">Test Validation</button>
+          </div>
+          <div class="output-box" style="margin-top:12px">
+            <div class="out-label">Browser tooltip shown when invalid</div>
+            Please fill in this field.<br>
+            Please match the requested format.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S8: min/max/maxlength/step -->
+    <div class="slide s-content code-bg">
+      <div class="slide-title">Validation Attributes: min, max, maxlength, step</div>
+      <div class="slide-sub">Constrain numeric ranges and text lengths with HTML attributes alone</div>
+      <div class="cols2">
+        <div class="code-box" id="cb8">
+          <span class="line"><span class="cm">/* minlength / maxlength for text */</span></span>
+          <span class="line"><span class="ck">&lt;input</span> <span class="cn">type</span>=<span class="cs">"text"</span></span>
+          <span class="line">  <span class="cn">minlength</span>=<span class="cs">"8"</span></span>
+          <span class="line">  <span class="cn">maxlength</span>=<span class="cs">"20"</span><span class="ck">&gt;</span></span>
+          <span class="line"></span>
+          <span class="line"><span class="cm">/* min / max for numbers and dates */</span></span>
+          <span class="line"><span class="ck">&lt;input</span> <span class="cn">type</span>=<span class="cs">"number"</span></span>
+          <span class="line">  <span class="cn">min</span>=<span class="cs">"1"</span></span>
+          <span class="line">  <span class="cn">max</span>=<span class="cs">"100"</span><span class="ck">&gt;</span></span>
+          <span class="line"></span>
+          <span class="line"><span class="cm">/* step: only multiples of 5 allowed */</span></span>
+          <span class="line"><span class="ck">&lt;input</span> <span class="cn">type</span>=<span class="cs">"number"</span></span>
+          <span class="line">  <span class="cn">step</span>=<span class="cs">"5"</span> <span class="cn">min</span>=<span class="cs">"0"</span> <span class="cn">max</span>=<span class="cs">"100"</span><span class="ck">&gt;</span></span>
+        </div>
+        <div>
+          <div class="form-preview">
+            <label>Password (8–20 chars)</label>
+            <input type="text" minlength="8" maxlength="20" placeholder="8 to 20 characters" style="margin-bottom:10px">
+            <label>Score (1–100)</label>
+            <input type="number" min="1" max="100" placeholder="Enter 1-100" style="margin-bottom:10px">
+            <label>Multiples of 5 (0–100)</label>
+            <input type="number" step="5" min="0" max="100" placeholder="0, 5, 10, 15...">
+          </div>
+          <div class="info-row" style="margin-top:16px">
+            <div class="info-dot amber">!</div>
+            <div class="info-body"><div class="info-desc">These only validate on <strong>submit</strong>. For real-time feedback, you'll need JavaScript (Friday's class).</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S9: Labels -->
+    <div class="slide s-content dark-bg">
+      <div class="slide-title">Labels — Why They Matter</div>
+      <div class="slide-sub">Skipping labels is one of the most common and harmful accessibility mistakes</div>
+      <div class="cols2">
+        <div class="compare-card bad" style="padding:20px">
+          <div class="compare-label">❌ WITHOUT LABEL (placeholder only)</div>
+          <div class="form-preview" style="margin-top:12px">
+            <input type="text" placeholder="Enter your name" style="margin-bottom:10px">
+            <input type="email" placeholder="Email address" style="margin-bottom:10px">
+            <button>Submit</button>
+          </div>
+          <ul style="font-size:12px;color:#f87171;margin-top:14px;padding-left:16px;line-height:1.8">
+            <li>Clicking "Email address" text does nothing</li>
+            <li>Placeholder disappears when you type</li>
+            <li>Screen readers say "edit text" — no context</li>
+            <li>Small click target (just the input box)</li>
+          </ul>
+        </div>
+        <div class="compare-card good" style="padding:20px">
+          <div class="compare-label">✓ WITH LABEL (for/id pairing)</div>
+          <div class="form-preview" style="margin-top:12px">
+            <label for="ls9-name">Full Name</label>
+            <input type="text" id="ls9-name" placeholder="Kim Jisoo" style="margin-bottom:10px">
+            <label for="ls9-email">Email Address</label>
+            <input type="email" id="ls9-email" placeholder="name@gachon.ac.kr" style="margin-bottom:10px">
+            <button>Submit</button>
+          </div>
+          <ul style="font-size:12px;color:#4ade80;margin-top:14px;padding-left:16px;line-height:1.8">
+            <li>Clicking "Full Name" focuses the input</li>
+            <li>Label stays visible while typing</li>
+            <li>Screen readers announce label on focus</li>
+            <li>Larger click target = better mobile UX</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- S10: CSS :valid and :invalid -->
+    <div class="slide s-content code-bg">
+      <div class="slide-title">CSS :valid and :invalid</div>
+      <div class="slide-sub">Style inputs automatically based on their validation state — no JavaScript needed</div>
+      <div class="cols2">
+        <div class="code-box" id="cb10">
+          <span class="line"><span class="cm">/* focus: blue ring on active field */</span></span>
+          <span class="line"><span class="cf">input:focus</span> {</span>
+          <span class="line">  <span class="cv">border-color</span>: <span class="cs">#1a73e8</span>;</span>
+          <span class="line">  <span class="cv">box-shadow</span>: <span class="cs">0 0 0 3px rgba(26,115,232,.2)</span>;</span>
+          <span class="line">}</span>
+          <span class="line"></span>
+          <span class="line"><span class="cm">/* valid + typed → green */</span></span>
+          <span class="line"><span class="cf">input:valid:not(:placeholder-shown)</span> {</span>
+          <span class="line">  <span class="cv">border-color</span>: <span class="cs">#16a34a</span>;</span>
+          <span class="line">  <span class="cv">background</span>: <span class="cs">#f0fdf4</span>;</span>
+          <span class="line">}</span>
+          <span class="line"></span>
+          <span class="line"><span class="cm">/* invalid + typed → red */</span></span>
+          <span class="line"><span class="cf">input:invalid:not(:placeholder-shown)</span> {</span>
+          <span class="line">  <span class="cv">border-color</span>: <span class="cs">#dc2626</span>;</span>
+          <span class="line">  <span class="cv">background</span>: <span class="cs">#fef2f2</span>;</span>
+          <span class="line">}</span>
+        </div>
+        <div>
+          <div style="font-size:12px;color:#4ade80;font-weight:700;letter-spacing:.08em;margin-bottom:10px">Live result — type into the fields</div>
+          <div class="form-preview" style="padding:16px">
+            <style>
+              .css-demo-inp { width:100%;padding:9px 12px;border:2px solid #c8d4f0;border-radius:7px;font-size:13px;outline:none;transition:all .2s;margin-bottom:10px;font-family:inherit; }
+              .css-demo-inp:focus{border-color:#1a73e8;box-shadow:0 0 0 3px rgba(26,115,232,.15)}
+              .css-demo-inp:valid:not(:placeholder-shown){border-color:#16a34a;background:#f0fdf4}
+              .css-demo-inp:invalid:not(:placeholder-shown){border-color:#dc2626;background:#fef2f2}
+            </style>
+            <label for="s10a">Email (type something wrong, then fix it)</label>
+            <input class="css-demo-inp" type="email" id="s10a" required placeholder="Type here...">
+            <label for="s10b">Student ID (\d{9})</label>
+            <input class="css-demo-inp" type="text" id="s10b" pattern="\d{9}" required placeholder="202112345">
+          </div>
+          <div class="info-row" style="margin-top:12px">
+            <div class="info-dot blue">!</div>
+            <div class="info-body"><div class="info-desc"><code style="font-size:12px;background:rgba(255,255,255,.1);padding:1px 4px;border-radius:3px">:not(:placeholder-shown)</code> prevents showing red on an empty, untouched field.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S11: Fieldset and Legend -->
+    <div class="slide s-content code-bg">
+      <div class="slide-title">Fieldset &amp; Legend</div>
+      <div class="slide-sub">Group related fields with a visible border and accessible label</div>
+      <div class="cols2">
+        <div class="code-box" id="cb11">
+          <span class="line"><span class="ck">&lt;form</span> <span class="cn">method</span>=<span class="cs">"post"</span><span class="ck">&gt;</span></span>
+          <span class="line"></span>
+          <span class="line">  <span class="ck">&lt;fieldset&gt;</span></span>
+          <span class="line">    <span class="ck">&lt;legend&gt;</span>Personal Info<span class="ck">&lt;/legend&gt;</span></span>
+          <span class="line">    <span class="ck">&lt;label</span> <span class="cn">for</span>=<span class="cs">"fn"</span><span class="ck">&gt;</span>First Name<span class="ck">&lt;/label&gt;</span></span>
+          <span class="line">    <span class="ck">&lt;input</span> <span class="cn">type</span>=<span class="cs">"text"</span> <span class="cn">id</span>=<span class="cs">"fn"</span> <span class="cn">required</span><span class="ck">&gt;</span></span>
+          <span class="line">    <span class="ck">&lt;label</span> <span class="cn">for</span>=<span class="cs">"ln"</span><span class="ck">&gt;</span>Last Name<span class="ck">&lt;/label&gt;</span></span>
+          <span class="line">    <span class="ck">&lt;input</span> <span class="cn">type</span>=<span class="cs">"text"</span> <span class="cn">id</span>=<span class="cs">"ln"</span> <span class="cn">required</span><span class="ck">&gt;</span></span>
+          <span class="line">  <span class="ck">&lt;/fieldset&gt;</span></span>
+          <span class="line"></span>
+          <span class="line">  <span class="ck">&lt;fieldset&gt;</span></span>
+          <span class="line">    <span class="ck">&lt;legend&gt;</span>Account Details<span class="ck">&lt;/legend&gt;</span></span>
+          <span class="line">    <span class="ck">&lt;label</span> <span class="cn">for</span>=<span class="cs">"em"</span><span class="ck">&gt;</span>Email<span class="ck">&lt;/label&gt;</span></span>
+          <span class="line">    <span class="ck">&lt;input</span> <span class="cn">type</span>=<span class="cs">"email"</span> <span class="cn">id</span>=<span class="cs">"em"</span> <span class="cn">required</span><span class="ck">&gt;</span></span>
+          <span class="line">  <span class="ck">&lt;/fieldset&gt;</span></span>
+          <span class="line"></span>
+          <span class="line"><span class="ck">&lt;/form&gt;</span></span>
+        </div>
+        <div>
+          <div style="font-size:12px;color:#4ade80;font-weight:700;letter-spacing:.08em;margin-bottom:10px">Output</div>
+          <div class="form-preview" style="padding:14px">
+            <style>
+              .fs-demo fieldset{border:2px solid #c8d4f0;border-radius:8px;padding:10px 14px;margin-bottom:12px}
+              .fs-demo legend{font-weight:700;font-size:13px;color:#1a56db;padding:0 6px}
+              .fs-demo label{font-size:12px;font-weight:600;display:block;margin-bottom:3px;margin-top:10px;color:#5a6a8a}
+              .fs-demo input{width:100%;padding:7px 10px;border:1.5px solid #c8d4f0;border-radius:6px;font-size:13px}
+            </style>
+            <div class="fs-demo">
+              <fieldset>
+                <legend>Personal Info</legend>
+                <label>First Name</label>
+                <input type="text" placeholder="Given name">
+                <label>Last Name</label>
+                <input type="text" placeholder="Family name">
+              </fieldset>
+              <fieldset>
+                <legend>Account Details</legend>
+                <label>Email</label>
+                <input type="email" placeholder="your@email.com">
+              </fieldset>
+            </div>
+          </div>
+          <div class="info-row" style="margin-top:8px">
+            <div class="info-dot green">✓</div>
+            <div class="info-body"><div class="info-desc">Screen readers announce the legend text before each field. Essential for long forms.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S12: Common Mistakes -->
+    <div class="slide s-content dark-bg">
+      <div class="slide-title">5 Common Mistakes</div>
+      <div class="slide-sub">Every mistake below has been made by millions of developers — learn them now</div>
+      <ul class="mistake-list" id="mistake-list">
+        <li id="m1">
+          <span class="m-icon">🏷️</span>
+          <div><div class="m-title">Missing &lt;label&gt;</div>
+          <div class="m-fix">Using only placeholder="Username" — placeholders disappear on focus and are invisible to screen readers. Always add <code>&lt;label for="id"&gt;</code>.</div></div>
+        </li>
+        <li id="m2">
+          <span class="m-icon">📮</span>
+          <div><div class="m-title">Wrong method for passwords</div>
+          <div class="m-fix">Using <code>method="get"</code> on a login form — your password appears in the URL! Always use <code>method="post"</code> for sensitive data.</div></div>
+        </li>
+        <li id="m3">
+          <span class="m-icon">📋</span>
+          <div><div class="m-title">Forgetting required</div>
+          <div class="m-fix">Building a form without <code>required</code> on any field — the form submits with everything empty. Add <code>required</code> to every mandatory field.</div></div>
+        </li>
+        <li id="m4">
+          <span class="m-icon">🔤</span>
+          <div><div class="m-title">Regex typo in pattern</div>
+          <div class="m-fix"><code>pattern="d{9}"</code> instead of <code>"\d{9}"</code> — missing the backslash means it matches the letter "d" nine times, not digits.</div></div>
+        </li>
+        <li id="m5">
+          <span class="m-icon">📍</span>
+          <div><div class="m-title">Placeholder as substitute for label</div>
+          <div class="m-fix">Placeholder text is a <em>hint</em> about format (e.g., "YYYY-MM-DD"), not a label. When the user types, they lose the context of what the field is for.</div></div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- S13: Summary Cheat Sheet -->
+    <div class="slide s-content dark-bg" style="background:linear-gradient(135deg,#0f172a,#2d1a0f)">
+      <div class="slide-title">Summary: Week 6 Monday Cheat Sheet</div>
+      <div class="slide-sub">Everything you need on one slide</div>
+      <div class="cols2">
+        <div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--htmlorg);margin-bottom:8px">INPUT TYPES</div>
+          <table class="sum-table">
+            <thead><tr><th>type=</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td>"text"</td><td>Any single-line text</td></tr>
+              <tr><td>"email"</td><td>Validates email format</td></tr>
+              <tr><td>"password"</td><td>Masks characters</td></tr>
+              <tr><td>"number"</td><td>Numeric, with min/max</td></tr>
+              <tr><td>"date"</td><td>Date picker</td></tr>
+              <tr><td>"range"</td><td>Slider control</td></tr>
+              <tr><td>"checkbox"</td><td>Multi-select toggles</td></tr>
+              <tr><td>"radio"</td><td>Single-select (same name)</td></tr>
+              <tr><td>&lt;select&gt;</td><td>Dropdown list</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--htmlorg);margin-bottom:8px">VALIDATION ATTRIBUTES</div>
+          <table class="sum-table">
+            <thead><tr><th>Attribute</th><th>Effect</th></tr></thead>
+            <tbody>
+              <tr><td>required</td><td>Field must not be empty</td></tr>
+              <tr><td>pattern="regex"</td><td>Must match this regex</td></tr>
+              <tr><td>minlength / maxlength</td><td>Text length bounds</td></tr>
+              <tr><td>min / max</td><td>Number/date bounds</td></tr>
+              <tr><td>step="n"</td><td>Only multiples of n</td></tr>
+              <tr><td>title</td><td>Error tooltip text</td></tr>
+            </tbody>
+          </table>
+          <div style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#60a5fa;margin-top:16px;margin-bottom:8px">CSS PSEUDO-CLASSES</div>
+          <table class="sum-table">
+            <thead><tr><th>Pseudo-class</th><th>Matches when…</th></tr></thead>
+            <tbody>
+              <tr><td>:focus</td><td>Input has keyboard focus</td></tr>
+              <tr><td>:valid</td><td>All constraints pass</td></tr>
+              <tr><td>:invalid</td><td>Any constraint fails</td></tr>
+              <tr><td>:placeholder-shown</td><td>Field is empty (placeholder visible)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end slide-area -->
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="btn-ctrl" onclick="prevSlide()">← Prev</button>
+    <button class="btn-ctrl" onclick="nextSlide()">Next →</button>
+    <span class="slide-counter" id="counter">1 / 13</span>
+    <div class="progress-track" id="track" onclick="jumpTo(event)">
+      <div class="progress-fill" id="pfill" style="width:7.69%"></div>
+    </div>
+    <button class="btn-ctrl" id="btn-notes" onclick="toggleNotes()">📝 Notes</button>
+    <button class="btn-ctrl" onclick="goFullscreen()">⛶</button>
+  </div>
+
+  <!-- Notes panel -->
+  <div id="notes-panel">
+    <h3>Speaker Notes</h3>
+    <div id="notes-text"></div>
+  </div>
+</div>
+
+<script>
+const NOTES = [
+  `<p>Welcome to Week 6 Monday — HTML Forms & Validation. Today we'll learn how HTML collects user input and sends it to a server. We'll cover the &lt;form&gt; element, nine input types, HTML5 validation attributes, labels for accessibility, fieldsets for grouping, and CSS pseudo-classes for styling. Press Space or the right arrow to advance through the slides. Press N to toggle the speaker notes panel.</p>`,
+
+  `<p>Before we write a single line of code, think about what you did online this morning. Did you search for something? That's a form. Log in to an email account? That's a form. Every meaningful interaction on the web — searching, buying, registering, posting — goes through an HTML form. Understanding forms is understanding the core of web interactivity.</p><p>We'll reveal three common examples: Google Search (a simple single-field form), Facebook Login (two fields: email and password), and Amazon Checkout (the most complex — name, address, card details, all forms). Each icon reveal is triggered by pressing Space.</p>`,
+
+  `<p>The &lt;form&gt; element is the container for everything. Its two most important attributes are <strong>action</strong> — the URL where the data is sent — and <strong>method</strong> — how to send it. Reveal the code line by line with Space. Point out that the label uses "for" matching the input's "id" — we'll explain why that matters on slide 9. The name attribute on inputs is what the server sees as the key. The submit button inside the form triggers the entire submission.</p>`,
+
+  `<p>GET and POST are the two methods for sending form data. GET appends everything to the URL — you've seen this in Google: /search?q=javascript. It's visible, bookmarkable, and shareable, but completely insecure for sensitive data. POST sends data in the request body, hidden from the URL. The analogy: GET is a postcard — anyone who handles it can read the message. POST is a sealed envelope — only the recipient opens it. Always use POST for login, registration, payment, and any operation that changes server-side data.</p>`,
+
+  `<p>HTML5 added many specialized input types that make forms smarter without any JavaScript. Text is the default — it accepts anything. Email validates the format automatically and shows an @ keyboard on mobile. Password masks the characters. Number shows a spinner and accepts only numbers — important: you can combine it with min, max, and step attributes. Reveal each type's code and point to the live form preview on the right — students can interact with it.</p>`,
+
+  `<p>Continuing the input types tour. Date gives you a native date picker — the format returned is always YYYY-MM-DD regardless of what the user sees. Range creates a slider between min and max — great for ratings, volume, experience levels. Checkbox allows multiple selections — note that checkboxes with the same name submit multiple values. Radio buttons group with the same name attribute — only one can be selected. Select creates a dropdown. Point out that select is not an &lt;input&gt; element but behaves like one when it has a name attribute.</p>`,
+
+  `<p>Now let's add validation. The required attribute is boolean — just writing it is enough, no value needed. It makes the field mandatory. Pattern takes a regular expression — the student ID example shows \d{9} meaning "exactly 9 digits." The title attribute is crucial with pattern — it's the message shown in the browser's validation tooltip. Also: type="email" has its format check built in. When you click "Test Validation" in the preview, it calls reportValidity() to trigger the browser's native tooltips. Remind students these checks run on submit, not while typing.</p>`,
+
+  `<p>More validation attributes. minlength and maxlength set character count bounds for text inputs — great for passwords (minimum 8) and username (maximum 20). For number and date inputs, min and max set the allowed range. Step is interesting: step="5" means only 0, 5, 10, 15... are valid — very useful for quantities. All of these combine: a password field might have minlength="8" maxlength="20" required. The important reminder at the bottom: these only fire on submit. JavaScript is needed for real-time feedback — which we'll add on Friday.</p>`,
+
+  `<p>The label element is one of the most commonly skipped but most important HTML elements. Show the two-column comparison. Without labels: clicking the text "Email address" does nothing, the placeholder disappears as soon as the user types, and screen readers cannot tell what the field is for. With labels: clicking "Full Name" focuses the input (larger click target), the label stays visible always, and screen readers announce "Full Name, required, edit text" when focused. For=id pairing: the label's for attribute must exactly match the input's id. Method 2 is wrapping the input inside the label — also valid, but method 1 is more flexible for CSS.</p>`,
+
+  `<p>CSS has built-in pseudo-classes for validation state. Reveal the CSS rules one group at a time. :focus is the blue ring when typing — always add this to remove the default browser outline and provide your own styled focus indicator. :valid:not(:placeholder-shown) is the key combination — :valid alone would make empty required fields green (because technically an untouched empty field with no value could be considered "valid" before constraint checking). Adding :not(:placeholder-shown) means "only apply when the user has typed something." Same logic for :invalid. The live demo lets students type and see the colors change in real time.</p>`,
+
+  `<p>Fieldsets group related fields with a visible box and legend label. For a registration form with 10+ fields, this is essential for both visual clarity and accessibility. Show the code reveal — each line builds the structure. The legend text is shown in the top-left of the fieldset border. Screen readers announce the legend before every field inside — so a visually impaired user hears "Personal Info — First Name, edit text" and "Personal Info — Last Name, edit text". Fieldsets can be nested. Use them for logical groups: personal info, payment info, delivery preferences.</p>`,
+
+  `<p>These five common mistakes are ones students will make (or have already made). Reveal each one with Space. 1) Placeholder instead of label — extremely common, looks fine visually but breaks accessibility. 2) GET for passwords — this is a security vulnerability; the password ends up in browser history and server logs. 3) Forgetting required — users just skip fields and wonder why the server gets empty data. 4) The regex typo \d vs d — remind students the backslash is essential; d{9} matches the letter d nine times. 5) Over-relying on placeholder — it's a hint about format, not a replacement for a label or instructions.</p>`,
+
+  `<p>The cheat sheet summarizes everything from today. Left column: all nine input types and what they're for. Right top: validation attributes and their effects. Right bottom: the CSS pseudo-classes. Students should bookmark this slide or save it for reference. This is also the foundation for Friday's class — we'll add JavaScript to handle the cases HTML5 cannot: comparing two fields, real-time feedback on every keystroke, custom error messages, and ARIA attributes for full accessibility. The homework is to build a registration form using everything from today. Good luck!</p>`
+];
+
+const slides = document.querySelectorAll('.slide');
+let cur = 0;
+
+/* Per-slide line state */
+function getLines(idx) {
+  return Array.from(slides[idx].querySelectorAll('.code-box .line, .mistake-list li, .icon-card'));
+}
+
+function showAllLines(idx) {
+  getLines(idx).forEach(l => l.classList.add('show'));
+}
+
+function resetLines(idx) {
+  getLines(idx).forEach(l => l.classList.remove('show'));
+}
+
+function nextHiddenLine(idx) {
+  const lines = getLines(idx);
+  const hidden = lines.filter(l => !l.classList.contains('show'));
+  if (hidden.length === 0) return false;
+  hidden[0].classList.add('show');
+  return true;
+}
+
+function showSlide(n, showLines) {
+  const prev = cur;
+  slides[cur].classList.remove('active');
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slides[cur].classList.add('active');
+  document.getElementById('counter').textContent = `${cur + 1} / ${slides.length}`;
+  document.getElementById('pfill').style.width = ((cur + 1) / slides.length * 100) + '%';
+  document.getElementById('notes-text').innerHTML = NOTES[cur] || '';
+  if (showLines) showAllLines(cur);
+  else resetLines(cur);
+  updateSpaceHint();
+}
+
+function updateSpaceHint() {
+  const hint = document.getElementById('space-hint');
+  if (!hint) return;
+  const lines = getLines(cur);
+  const hiddenCount = lines.filter(l => !l.classList.contains('show')).length;
+  if (hiddenCount > 0) {
+    hint.textContent = `Press Space to reveal (${hiddenCount} remaining)`;
+    hint.style.opacity = '1';
+  } else {
+    hint.style.opacity = '0';
+  }
+}
+
+function advanceSpace() {
+  const advanced = nextHiddenLine(cur);
+  if (!advanced) {
+    nextSlide();
+  } else {
+    updateSpaceHint();
+  }
+}
+
+function nextSlide() { if (cur < slides.length - 1) showSlide(cur + 1, false); }
+function prevSlide() { showSlide(cur - 1, true); }
+
+function toggleNotes() {
+  const p = document.getElementById('player');
+  const btn = document.getElementById('btn-notes');
+  p.classList.toggle('notes-open');
+  btn.classList.toggle('active');
+}
+
+function goFullscreen() { document.documentElement.requestFullscreen?.(); }
+
+function jumpTo(e) {
+  const rect = document.getElementById('track').getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  showSlide(Math.round(pct * (slides.length - 1)), true);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === ' ') { e.preventDefault(); advanceSpace(); }
+  else if (e.key === 'ArrowRight') nextSlide();
+  else if (e.key === 'ArrowLeft') prevSlide();
+  else if (e.key === 'n' || e.key === 'N') toggleNotes();
+  else if (e.key === 'f' || e.key === 'F') goFullscreen();
+});
+
+/* Click on slide area advances too */
+document.getElementById('slide-area').addEventListener('click', (e) => {
+  if (e.target.closest('.controls') || e.target.closest('.form-preview')) return;
+  advanceSpace();
+});
+
+/* Init */
+showSlide(0, false);
+</script>
+</body>
+</html>
