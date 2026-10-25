@@ -1,0 +1,834 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JS Form Validation — Video Lecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1b2d;
+  --navy: #0f1b2d;
+  --ink: #1a2a40;
+  --mid: #243454;
+  --muted: #64748b;
+  --sub: #8ba0bc;
+  --text: #e8eef7;
+  --white: #ffffff;
+  --yellow: #F7DF1E;
+  --yellow-dk: #3a3200;
+  --blue: #3b82f6;
+  --blue-dim: rgba(59,130,246,.15);
+  --green: #22c55e;
+  --red: #ef4444;
+  --amber: #f59e0b;
+  --code-bg: #0d1117;
+  --code-txt: #e6edf3;
+  --bdr: rgba(255,255,255,.1);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Inter', sans-serif; background: #000; }
+
+/* ── PLAYER SHELL ───────────────────────────────── */
+#player { display: flex; flex-direction: column; width: 100%; height: 100vh; background: var(--navy); }
+#player.notes-open { flex-direction: row; }
+
+/* Progress bar */
+#prog-bar { height: 4px; background: rgba(255,255,255,.1); flex-shrink: 0; }
+#prog-fill { height: 100%; background: var(--yellow); transition: width .4s; width: 0; }
+
+/* Slide area */
+#slide-area { flex: 1; position: relative; overflow: hidden; }
+#player.notes-open #slide-area { flex: 0 0 65%; }
+
+/* ── SLIDES ─────────────────────────────────────── */
+.slide { display: none; position: absolute; inset: 0; padding: 0; flex-direction: column; }
+.slide.active { display: flex; }
+
+/* ── TITLE SLIDE ────────────────────────────────── */
+.s-title {
+  background: linear-gradient(135deg, #0f1b2d 0%, #0d2040 50%, #0f1b2d 100%);
+  align-items: center; justify-content: center; text-align: center; padding: 40px;
+}
+.s-title .badge {
+  display: inline-block; background: var(--yellow); color: var(--yellow-dk);
+  font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 13px;
+  padding: 6px 18px; border-radius: 20px; letter-spacing: .08em; margin-bottom: 28px;
+  text-transform: uppercase;
+}
+.s-title h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(2.4rem, 6vw, 4.2rem); font-weight: 800;
+  color: var(--yellow); line-height: 1.15; margin-bottom: 18px;
+}
+.s-title .sub { font-size: 20px; color: var(--sub); margin-bottom: 16px; }
+.s-title .tagline { font-size: 16px; color: rgba(255,255,255,.4); font-style: italic; }
+
+/* ── CHAPTER DIVIDER ────────────────────────────── */
+.s-chapter {
+  justify-content: center; align-items: center; text-align: center; padding: 40px;
+  background: linear-gradient(135deg, #0f1b2d 0%, #122040 100%);
+}
+.s-chapter .ch-label {
+  font-size: 12px; font-weight: 700; letter-spacing: .16em; color: var(--yellow);
+  text-transform: uppercase; margin-bottom: 14px; font-family: 'Space Grotesk', sans-serif;
+}
+.s-chapter h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800;
+  color: var(--text); line-height: 1.25; max-width: 700px;
+}
+.s-chapter .ch-accent { color: var(--yellow); }
+.s-chapter p { font-size: 16px; color: var(--sub); margin-top: 16px; }
+
+/* ── CONTENT SLIDES ─────────────────────────────── */
+.s-content { padding: 36px 52px; overflow: hidden; background: var(--navy); color: var(--text); }
+.s-content.dark-bg { background: var(--ink); }
+.s-content.code-bg { background: #090f1a; }
+.s-content .slide-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 24px; font-weight: 700; margin-bottom: 6px; color: var(--text);
+}
+.s-content .slide-sub { font-size: 14px; color: var(--sub); margin-bottom: 20px; }
+
+/* ── ANALOGY BOX ────────────────────────────────── */
+.analogy {
+  background: rgba(59,130,246,.1); border-left: 4px solid var(--blue);
+  padding: 13px 16px; border-radius: 0 8px 8px 0; margin-bottom: 18px;
+  font-size: 14px; line-height: 1.65; color: var(--text);
+}
+.analogy strong { color: #60a5fa; }
+.analogy.amber { background: rgba(245,158,11,.1); border-left-color: var(--amber); }
+.analogy.amber strong { color: #fbbf24; }
+.analogy.green { background: rgba(34,197,94,.1); border-left-color: var(--green); }
+.analogy.green strong { color: #4ade80; }
+
+/* ── CODE BLOCK ─────────────────────────────────── */
+.code-box {
+  background: var(--code-bg); border-radius: 10px; padding: 16px 20px;
+  font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 13px;
+  line-height: 1.9; color: var(--code-txt); overflow-x: auto; position: relative;
+  margin-bottom: 14px; border: 1px solid rgba(255,255,255,.06);
+}
+.code-box .line { opacity: .12; transition: opacity .4s; display: block; }
+.code-box .line.show { opacity: 1; }
+.code-box .line.hl { background: rgba(59,130,246,.15); border-radius: 3px; }
+
+/* Syntax color classes */
+.kw  { color: #ff7b72; }   /* keyword / HTML tag — red-pink */
+.str { color: #a5d6ff; }   /* string / attr value — light blue */
+.cm  { color: #8b949e; font-style: italic; }  /* comment — gray */
+.fn  { color: #d2a8ff; }   /* function / method — purple */
+.at  { color: #79c0ff; }   /* attribute name — blue */
+.nm  { color: #ffa657; }   /* number / variable — orange */
+.op  { color: #e6edf3; }   /* operator / punctuation */
+.rx  { color: #f8c555; }   /* regex — yellow */
+
+/* Code label */
+.code-label {
+  font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--sub); margin-bottom: 6px; font-family: 'Space Grotesk', sans-serif;
+}
+
+/* ── TWO-COLUMN LAYOUT ──────────────────────────── */
+.cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.cols2-60 { display: grid; grid-template-columns: 60fr 40fr; gap: 18px; }
+
+/* ── COMPARISON CARDS ───────────────────────────── */
+.compare-card { border-radius: 10px; padding: 16px 18px; }
+.compare-card.bad  { background: rgba(239,68,68,.1);  border: 1px solid rgba(239,68,68,.3); }
+.compare-card.good { background: rgba(34,197,94,.1);  border: 1px solid rgba(34,197,94,.3); }
+.compare-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; margin-bottom: 10px; font-family: 'Space Grotesk', sans-serif; }
+.compare-card.bad  .compare-label { color: #f87171; }
+.compare-card.good .compare-label { color: #4ade80; }
+
+/* ── OUTPUT BOX ─────────────────────────────────── */
+.output-box {
+  background: #fff; border-radius: 10px; padding: 16px 18px; color: #1a2340;
+  font-family: 'Inter', sans-serif; font-size: 13px; margin-top: 14px;
+}
+.output-box .ob-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: #6b7280; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+}
+.ob-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.ob-dot.r { background: #ef4444; }
+.ob-dot.y { background: #f59e0b; }
+.ob-dot.g { background: #22c55e; }
+.ob-field { margin-bottom: 10px; }
+.ob-field label { display: block; font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 3px; }
+.ob-field input { width: 100%; padding: 7px 10px; border: 2px solid #d1d5db; border-radius: 6px; font-size: 13px; font-family: inherit; outline: none; }
+.ob-field input.valid-state   { border-color: #22c55e; background: #f0fdf4; }
+.ob-field input.invalid-state { border-color: #ef4444; background: #fef2f2; }
+.ob-field .err-msg { font-size: 11px; color: #ef4444; margin-top: 3px; display: none; }
+.ob-field .err-msg.show { display: block; }
+
+/* ── VALIDITY TABLE ─────────────────────────────── */
+.validity-table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 8px; }
+.validity-table th {
+  background: rgba(59,130,246,.2); color: #60a5fa; padding: 8px 12px;
+  text-align: left; font-weight: 700; font-size: 11px; letter-spacing: .06em;
+  text-transform: uppercase; font-family: 'Space Grotesk', sans-serif;
+}
+.validity-table tr.vrow { opacity: .12; transition: opacity .4s; }
+.validity-table tr.vrow.show { opacity: 1; }
+.validity-table td { padding: 7px 12px; border-bottom: 1px solid rgba(255,255,255,.07); vertical-align: top; }
+.validity-table td:first-child { font-family: 'JetBrains Mono', monospace; color: #a5d6ff; font-size: 12px; }
+.validity-table td:nth-child(2) { color: var(--sub); font-size: 12px; }
+.validity-table td.vtrue  { color: var(--green); font-size: 11px; font-weight: 600; }
+
+/* ── CHECKLIST ──────────────────────────────────── */
+.checklist { list-style: none; margin-top: 12px; }
+.checklist li {
+  display: flex; align-items: flex-start; gap: 12px; padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,.06); font-size: 14.5px;
+  opacity: .12; transition: opacity .4s; color: var(--text);
+}
+.checklist li.show { opacity: 1; }
+.checklist .ck-icon { font-size: 16px; min-width: 24px; margin-top: 2px; }
+.checklist .ck-body { flex: 1; line-height: 1.5; }
+.checklist .ck-code { font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  background: rgba(255,255,255,.08); padding: 1px 6px; border-radius: 3px; color: #a5d6ff; }
+
+/* ── HW BOX ─────────────────────────────────────── */
+.hw-box {
+  background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.4);
+  border-radius: 10px; padding: 16px 20px; margin-top: 20px;
+}
+.hw-box .hw-title {
+  font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700;
+  color: #fbbf24; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 8px;
+}
+.hw-box .hw-body { font-size: 14px; color: var(--text); line-height: 1.6; }
+
+/* ── INFO ROW ───────────────────────────────────── */
+.info-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; opacity: .12; transition: opacity .4s; }
+.info-row.show { opacity: 1; }
+.info-dot { width: 28px; height: 28px; min-width: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+.info-dot.blue { background: rgba(59,130,246,.25); color: #60a5fa; }
+.info-dot.green { background: rgba(34,197,94,.25); color: #4ade80; }
+.info-dot.red { background: rgba(239,68,68,.25); color: #f87171; }
+.info-dot.amber { background: rgba(245,158,11,.25); color: #fbbf24; }
+.info-body { flex: 1; }
+.info-title { font-size: 13.5px; font-weight: 600; margin-bottom: 2px; font-family: 'Space Grotesk', sans-serif; }
+.info-desc { font-size: 12px; color: var(--sub); line-height: 1.5; }
+
+/* ── CONTROLS ───────────────────────────────────── */
+.controls {
+  background: #090f1a; border-top: 1px solid rgba(255,255,255,.07);
+  padding: 9px 18px; display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+}
+.btn-ctrl {
+  background: #1a2535; border: none; color: #9ab; border-radius: 6px;
+  padding: 6px 14px; font-size: 13px; font-family: 'Inter', sans-serif;
+  cursor: pointer; transition: background .15s; white-space: nowrap;
+}
+.btn-ctrl:hover { background: #243454; color: var(--text); }
+.btn-ctrl.active { background: var(--blue); color: #fff; }
+.slide-counter { font-size: 13px; color: #4a5a72; margin: 0 4px; white-space: nowrap; font-family: 'Space Grotesk', sans-serif; }
+.progress-track { flex: 1; height: 4px; background: #1a2535; border-radius: 2px; cursor: pointer; }
+.progress-fill { height: 4px; background: var(--yellow); border-radius: 2px; transition: width .4s; }
+
+/* ── NOTES PANEL ────────────────────────────────── */
+#notes-panel { display: none; flex: 1; background: #070d17; border-left: 1px solid rgba(255,255,255,.07); overflow-y: auto; padding: 28px 24px; }
+#player.notes-open #notes-panel { display: block; }
+#notes-panel h3 { font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 700; color: var(--sub); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 14px; }
+#notes-text { font-size: 14.5px; color: #c0ccdc; line-height: 1.85; }
+#notes-text p { margin-bottom: 12px; }
+#notes-text strong { color: var(--text); }
+
+/* ── SPACE HINT ─────────────────────────────────── */
+#space-hint {
+  position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
+  font-size: 12px; color: rgba(255,255,255,.25); pointer-events: none;
+  transition: opacity .3s; white-space: nowrap;
+}
+
+/* ── CHAPTER NUMBER DECOR ───────────────────────── */
+.ch-bg-num {
+  position: absolute; bottom: -30px; right: 40px;
+  font-family: 'Space Grotesk', sans-serif; font-size: 200px; font-weight: 800;
+  color: rgba(247,223,30,.04); line-height: 1; user-select: none; pointer-events: none;
+}
+</style>
+</head>
+<body>
+
+<div id="player">
+  <div id="prog-bar"><div id="prog-fill"></div></div>
+  <div id="slide-area">
+
+    <!-- ══════════════════════════════════════════════
+         S1 — TITLE
+    ══════════════════════════════════════════════ -->
+    <div class="slide s-title active">
+      <div class="badge">Web Programming · Week 6 · Friday · K0126002</div>
+      <h1>JS Form<br>Validation</h1>
+      <p class="sub">Making forms that talk back in real time</p>
+      <p class="tagline" style="margin-top:30px;font-size:14px;color:rgba(247,223,30,.5)">Press Space or click to advance · ← → navigate · N for notes</p>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         S2 — CHAPTER 1
+    ══════════════════════════════════════════════ -->
+    <div class="slide s-chapter" style="position:relative;overflow:hidden;">
+      <div class="ch-bg-num">1</div>
+      <div class="ch-label">Chapter 1</div>
+      <h2>The Problem with<br><span class="ch-accent">Browser Validation</span></h2>
+      <p>HTML5 gives us required, pattern, type=email — but is that enough?</p>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         S3 — PROBLEM COMPARISON (dark-bg)
+    ══════════════════════════════════════════════ -->
+    <div class="slide s-content dark-bg">
+      <div class="slide-title">HTML5-only vs JS Validation</div>
+      <div class="slide-sub">The browser's built-in UI vs taking control with JavaScript</div>
+      <div class="cols2">
+
+        <!-- Left: HTML5 only -->
+        <div class="compare-card bad">
+          <div class="compare-label">❌ HTML5 Only — Browser Takes Over</div>
+          <div style="background:#0d1117;border-radius:8px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#e6edf3;margin-bottom:10px;">
+            <div style="color:#8b949e;font-style:italic;margin-bottom:6px;">&lt;!-- Browser tooltip bubble --&gt;</div>
+            <div style="position:relative;margin-top:10px;">
+              <div style="background:#fff;border:2px solid #c0c0c0;border-radius:5px;padding:8px 10px;font-family:Inter,sans-serif;font-size:12px;color:#333;">
+                <input type="email" style="width:100%;border:2px solid #d1d5db;padding:5px 8px;border-radius:4px;font-size:12px;outline:none;" placeholder="Enter email" readonly>
+              </div>
+              <!-- Browser tooltip simulation -->
+              <div style="position:absolute;top:-56px;left:10px;background:#3c4043;color:#fff;font-family:Inter,sans-serif;font-size:12px;padding:8px 12px;border-radius:5px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.5);">
+                ⚠ Please include an '@' in the email address.
+                <div style="position:absolute;bottom:-6px;left:14px;width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:6px solid #3c4043;"></div>
+              </div>
+            </div>
+          </div>
+          <ul style="list-style:none;font-size:12.5px;color:var(--sub);line-height:2;">
+            <li>🚫 Different in Chrome, Firefox, Safari</li>
+            <li>🚫 Cannot be styled with CSS</li>
+            <li>🚫 Only fires on submit — no real-time</li>
+            <li>🚫 Generic, untranslatable messages</li>
+          </ul>
+        </div>
+
+        <!-- Right: JS validation -->
+        <div class="compare-card good">
+          <div class="compare-label">✅ JS Validation — You're in Control</div>
+          <div style="background:#fff;border-radius:8px;padding:14px;font-family:Inter,sans-serif;font-size:13px;color:#1a2340;margin-bottom:10px;">
+            <label style="display:block;font-size:11px;font-weight:700;color:#374151;margin-bottom:3px;">Email address</label>
+            <input type="email" style="width:100%;padding:7px 10px;border:2px solid #ef4444;border-radius:6px;font-size:13px;background:#fef2f2;outline:none;" value="kim@" readonly>
+            <div style="font-size:11px;color:#ef4444;margin-top:4px;font-weight:600;">⚠ Please enter a valid email address</div>
+          </div>
+          <ul style="list-style:none;font-size:12.5px;color:var(--sub);line-height:2;">
+            <li>✅ Consistent across all browsers</li>
+            <li>✅ Fully custom CSS styling</li>
+            <li>✅ Real-time: fires on every keystroke</li>
+            <li>✅ Your message, your language</li>
+          </ul>
+        </div>
+      </div>
+      <span id="space-hint">Press Space to advance</span>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         S4 — CHAPTER 2
+    ══════════════════════════════════════════════ -->
+    <div class="slide s-chapter" style="position:relative;overflow:hidden;">
+      <div class="ch-bg-num">2</div>
+      <div class="ch-label">Chapter 2</div>
+      <h2><span class="ch-accent">novalidate</span> +<br>preventDefault()</h2>
+      <p>Two essential tools to take over from the browser</p>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         S5 — novalidate (code-bg)
+    ══════════════════════════════════════════════ -->
+    <div class="slide s-content code-bg">
+      <div class="slide-title">The novalidate Attribute</div>
+      <div class="slide-sub">Step back, browser — JavaScript is handling this</div>
+      <div class="analogy">
+        <strong>Analogy:</strong> Like telling a restaurant: <em>"Don't use your automatic menu recommendations — I'll order myself."</em> novalidate says: browser, step back. My JS is in charge.
+      </div>
+      <div class="code-label">HTML</div>
+      <div class="code-box" id="cb5">
+        <span class="line"><span class="cm">&lt;!-- WITHOUT novalidate: browser takes over --&gt;</span></span>
+        <span class="line"><span class="kw">&lt;form</span> <span class="at">method</span>=<span class="str">"post"</span><span class="kw">&gt;</span></span>
+        <span class="line">  <span class="kw">&lt;input</span> <span class="at">type</span>=<span class="str">"email"</span> <span class="at">required</span><span class="kw">&gt;</span></span>
+        <span class="line">  <span class="kw">&lt;button&gt;</span>Submit<span class="kw">&lt;/button&gt;</span></span>
+        <span class="line"><span class="kw">&lt;/form&gt;</span></span>
+        <span class="line"> </span>
+        <span class="line"><span class="cm">&lt;!-- WITH novalidate: YOU are in charge --&gt;</span></span>
+        <span class="line"><span class="kw">&lt;form</span> <span class="at">method</span>=<span class="str">"post"</span> <span class="at">novalidate</span></span>
+        <span class="line">      <span class="at">id</span>=<span class="str">"regForm"</span><span class="kw">&gt;</span></span>
+        <span class="line">  <span class="kw">&lt;input</span> <span class="at">type</span>=<span class="str">"email"</span> <span class="at">id</span>=<span class="str">"email"</span></span>
+        <span class="line">         <span class="at">aria-describedby</span>=<span class="str">"err-email"</span><span class="kw">&gt;</span></span>
+        <span class="line">  <span class="kw">&lt;span</span> <span class="at">id</span>=<span class="str">"err-email"</span><span class="kw">&gt;&lt;/span&gt;</span></span>
+        <span class="line">  <span class="kw">&lt;button&gt;</span>Submit<span class="kw">&lt;/button&gt;</span></span>
+        <span class="line"><span class="kw">&lt;/form&gt;</span></span>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         S6 — preventDefault() (code-bg)
+    ══════════════════════════════════════════════ -->
+    <div class="slide s-content code-bg">
+      <div class="slide-title">preventDefault() — Pause the Form</div>
+      <div class="slide-sub">The single most important line in form validation</div>
+      <div class="analogy">
+        <strong>Analogy:</strong> Like a receptionist who intercepts every call — <em>they</em> decide what happens, not the phone. preventDefault() catches the submit event before the browser acts on it.
+      </div>
+      <div class="cols2">
+        <div>
+          <div class="code-label">❌ Without preventDefault</div>
+          <div class="code-box" id="cb6a">
+            <span class="line"><span class="nm">form</span>.<span class="fn">addEventListener</span>(<span class="str">'submit'</span>, (<span class="nm">e</span>) =&gt; {</span>
+            <span class="line">  <span class="cm">// Page reloads immediately!</span></span>
+            <span class="line">  <span class="cm">// This code never runs.</span></span>
+            <span class="line">  console.<span class="fn">log</span>(<span class="str">'Never executes'</span>);</span>
+            <span class="line">});</span>
+          </div>
+        </div>
+        <div>
+          <div class="code-label">✅ Correct Approach</div>
+          <div class="code-box" id="cb6b">
+            <span class="line"><span class="nm">form</span>.<span class="fn">addEventListener</span>(<span class="str">'submit'</span>, (<span class="nm">e</span>) =&gt; {</span>
+            <span class="line">  <span class="nm">e</span>.<span class="fn">preventDefault</span>(); <span class="cm">// PAUSE the form</span></span>
+            <span class="line"> </span>
+            <span class="line">  <span class="kw">if</span> (<span class="fn">validateAll</span>()) {</span>
+            <span class="line">    <span class="fn">showSuccess</span>();   <span class="cm">// All valid → done!</span></span>
+            <span class="line">  } <span class="kw">else</span> {</span>
+            <span class="line">    <span class="fn">highlightErrors</span>(); <span class="cm">// Show what's wrong</span></span>
+            <span class="line">  }</span>
+            <span class="line">});</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         S7 — CHAPTER 3
+    ══════════════════════════════════════════════ -->
+    <div class="slide s-chapter" style="position:relative;overflow:hidden;">
+      <div class="ch-bg-num">3</div>
+      <div class="ch-label">Chapter 3</div>
+      <h2>The <span class="ch-accent">input</span> Event</h2>
+      <p>Real-time feedback on every keystroke</p>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         S8 — submit vs input events (code-bg)
+    ══════════════════════════════════════════════ -->
+    <div class="slide s-content code-bg">
+      <div class="slide-title">submit vs input — Two Different UX Worlds</div>
+      <div class="slide-sub">When does the user see the error? The answer changes everything.</div>
+      <div class="cols2" style="margin-bottom:14px;">
+        <div>
+          <div class="code-label">❌ submit only — user waits until the end</div>
+          <div class="code-box" id="cb8a">
+            <span class="line"><span class="cm">// Only validates when Submit is clicked</span></span>
+            <span class="line"><span class="nm">form</span>.<span class="fn">addEventListener</span>(<span class="str">'submit'</span>, (<span class="nm">e</span>) =&gt; {</span>
+            <span class="line">  <span class="nm">e</span>.<span class="fn">preventDefault</span>();</span>
+            <span class="line">  <span class="kw">if</span> (!<span class="nm">sid</span>.value.<span class="fn">match</span>(<span class="rx">/^\d{9}$/</span>)) {</span>
+            <span class="line">    <span class="fn">showError</span>(<span class="str">'Must be 9 digits'</span>);</span>
+            <span class="line">    <span class="cm">// User typed 8 fields before seeing this!</span></span>
+            <span class="line">  }</span>
+            <span class="line">});</span>
+          </div>
+        </div>
+        <div>
+          <div class="code-label">✅ input event — instant feedback per key</div>
+          <div class="code-box" id="cb8b">
+            <span class="line"><span class="cm">// Validates on EVERY keystroke</span></span>
+            <span class="line"><span class="nm">sid</span>.<span class="fn">addEventListener</span>(<span class="str">'input'</span>, <span class="kw">function</span>() {</span>
+            <span class="line">  <span class="kw">if</span> (<span class="rx">/^\d{9}$/</span>.<span class="fn">test</span>(<span class="kw">this</span>.value)) {</span>
+            <span class="line">    <span class="fn">markValid</span>(<span class="kw">this</span>);   <span class="cm">// ✅ green border</span></span>
+            <span class="line">  } <span class="kw">else</span> {</span>
+            <span class="line">    <span class="fn">markInvalid</span>(<span class="kw">this</span>,  <span class="cm">// ❌ red border</span></span>
+            <span class="line">      <span class="str">'Must be exactly 9 digits'</span>);</span>
+            <span class="line">  }</span>
+            <span class="line">}); <span class="cm">// User sees feedback as they type!</span></span>
+          </div>
+        </div>
+      </div>
+      <!-- Simulated output box -->
+      <div class="output-box" style="background:#1a1f2e;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:14px 16px;color:var(--text);">
+        <div class="ob-label" style="color:var(--sub);">
+          <span class="ob-dot r"></span><span class="ob-dot y"></span><span class="ob-dot g"></span>
+          &nbsp;Live Demo — Type in Student ID:
+        </div>
+        <div class="ob-field" style="display:flex;align-items:center;gap:10px;">
+          <label style="font-size:12px;font-weight:600;color:var(--sub);min-width:80px;">Student ID:</label>
+          <div style="flex:1;">
+            <input type="text" id="demo-sid" maxlength="9"
+              style="width:100%;padding:7px 10px;border:2px solid #334155;border-radius:6px;font-size:13px;font-family:'JetBrains Mono',monospace;background:#0d1117;color:var(--text);outline:none;"
+              placeholder="Type 9 digits...">
+            <div id="demo-msg" style="font-size:12px;margin-top:4px;min-height:18px;font-weight:500;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         S9 — CHAPTER 4
+    ══════════════════════════════════════════════ -->
+    <div class="slide s-chapter" style="position:relative;overflow:hidden;">
+      <div class="ch-bg-num">4</div>
+      <div class="ch-label">Chapter 4</div>
+      <h2>The <span class="ch-accent">validity</span> Object<br>+ Regex</h2>
+      <p>Checking not just IF a field is invalid — but WHY</p>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         S10 — validity API (code-bg)
+    ══════════════════════════════════════════════ -->
+    <div class="slide s-content code-bg">
+      <div class="slide-title">The validity Object — Built-in Constraint Checks</div>
+      <div class="slide-sub">Every input element has a <code style="font-size:inherit;color:#a5d6ff;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:3px;">.validity</code> property — it tells you exactly WHY a field is invalid</div>
+      <div class="cols2">
+        <div>
+          <div class="code-label">JavaScript — validity API</div>
+          <div class="code-box" id="cb10a">
+            <span class="line"><span class="kw">const</span> <span class="nm">email</span> = document.<span class="fn">getElementById</span>(<span class="str">'email'</span>);</span>
+            <span class="line"> </span>
+            <span class="line"><span class="cm">// HTML5 validity API — built-in checks:</span></span>
+            <span class="line"><span class="nm">email</span>.validity.<span class="fn">valueMissing</span>   <span class="cm">// required + empty</span></span>
+            <span class="line"><span class="nm">email</span>.validity.<span class="fn">typeMismatch</span>   <span class="cm">// bad email format</span></span>
+            <span class="line"><span class="nm">email</span>.validity.<span class="fn">tooShort</span>       <span class="cm">// below minlength</span></span>
+            <span class="line"><span class="nm">email</span>.validity.<span class="fn">patternMismatch</span> <span class="cm">// pattern fails</span></span>
+            <span class="line"> </span>
+            <span class="line"><span class="cm">// Check if ALL constraints pass:</span></span>
+            <span class="line"><span class="nm">email</span>.validity.<span class="fn">valid</span>  <span class="cm">// true only if everything OK</span></span>
+            <span class="line"> </span>
+            <span class="line"><span class="cm">// For custom patterns — regex .test():</span></span>
+            <span class="line"><span class="kw">const</span> <span class="nm">sid</span> = document.<span class="fn">getElementById</span>(<span class="str">'sid'</span>);</span>
+            <span class="line"><span class="rx">/^\d{9}$/</span>.<span class="fn">test</span>(<span class="nm">sid</span>.value) <span class="cm">// 9 digits? true/false</span></span>
+          </div>
+        </div>
+        <div>
+          <div class="code-label">validity Properties — At a Glance</div>
+          <table class="validity-table">
+            <thead><tr><th>Property</th><th>True when…</th></tr></thead>
+            <tbody>
+              <tr class="vrow"><td>.valueMissing</td><td>required but empty</td></tr>
+              <tr class="vrow"><td>.typeMismatch</td><td>type check fails (e.g. email)</td></tr>
+              <tr class="vrow"><td>.tooShort</td><td>below minlength</td></tr>
+              <tr class="vrow"><td>.tooLong</td><td>above maxlength</td></tr>
+              <tr class="vrow"><td>.rangeUnderflow</td><td>below min= value</td></tr>
+              <tr class="vrow"><td>.rangeOverflow</td><td>above max= value</td></tr>
+              <tr class="vrow"><td>.patternMismatch</td><td>pattern= fails</td></tr>
+              <tr class="vrow"><td>.customError</td><td>setCustomValidity() set</td></tr>
+              <tr class="vrow"><td style="color:#4ade80;font-weight:700;">.valid</td><td>ALL checks pass ✅</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         S11 — CHAPTER 5
+    ══════════════════════════════════════════════ -->
+    <div class="slide s-chapter" style="position:relative;overflow:hidden;">
+      <div class="ch-bg-num">5</div>
+      <div class="ch-label">Chapter 5</div>
+      <h2>Making Errors<br><span class="ch-accent">Accessible</span></h2>
+      <p>ARIA attributes ensure every user — including screen reader users — gets the error</p>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         S12 — ARIA attributes (code-bg)
+    ══════════════════════════════════════════════ -->
+    <div class="slide s-content code-bg">
+      <div class="slide-title">ARIA — aria-invalid, aria-describedby, role=alert</div>
+      <div class="slide-sub">Three attributes that make your validation screen-reader ready</div>
+      <div class="analogy" style="margin-bottom:14px;">
+        <strong>Analogy:</strong> <code style="font-size:inherit;color:#a5d6ff;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px;">aria-describedby</code> is like a footnote number — it points the screen reader from the input to its error note, without changing the visual layout.
+      </div>
+      <div class="cols2">
+        <div>
+          <div class="code-label">HTML — structure</div>
+          <div class="code-box" id="cb12a">
+            <span class="line"><span class="kw">&lt;label</span> <span class="at">for</span>=<span class="str">"sid"</span><span class="kw">&gt;</span>Student ID<span class="kw">&lt;/label&gt;</span></span>
+            <span class="line"> </span>
+            <span class="line"><span class="kw">&lt;input</span> <span class="at">type</span>=<span class="str">"text"</span> <span class="at">id</span>=<span class="str">"sid"</span></span>
+            <span class="line">  <span class="at">aria-describedby</span>=<span class="str">"err-sid"</span></span>
+            <span class="line">  <span class="at">aria-invalid</span>=<span class="str">"false"</span><span class="kw">&gt;</span></span>
+            <span class="line"><span class="cm">&lt;!-- ↑ links to error span   ↑ valid state --&gt;</span></span>
+            <span class="line"> </span>
+            <span class="line"><span class="kw">&lt;span</span> <span class="at">id</span>=<span class="str">"err-sid"</span></span>
+            <span class="line">      <span class="at">role</span>=<span class="str">"alert"</span><span class="kw">&gt;</span></span>
+            <span class="line">  <span class="cm">&lt;!-- role="alert" → reads immediately --&gt;</span></span>
+            <span class="line"><span class="kw">&lt;/span&gt;</span></span>
+          </div>
+        </div>
+        <div>
+          <div class="code-label">JavaScript — set &amp; clear</div>
+          <div class="code-box" id="cb12b">
+            <span class="line"><span class="kw">function</span> <span class="fn">markInvalid</span>(<span class="nm">input</span>, <span class="nm">errSpan</span>, <span class="nm">msg</span>) {</span>
+            <span class="line">  <span class="nm">input</span>.<span class="fn">setAttribute</span>(</span>
+            <span class="line">    <span class="str">'aria-invalid'</span>, <span class="str">'true'</span>); <span class="cm">// notify AT</span></span>
+            <span class="line">  <span class="nm">errSpan</span>.textContent = <span class="nm">msg</span>;</span>
+            <span class="line">  <span class="cm">// role=alert fires → screen reader reads it</span></span>
+            <span class="line">}</span>
+            <span class="line"> </span>
+            <span class="line"><span class="kw">function</span> <span class="fn">markValid</span>(<span class="nm">input</span>, <span class="nm">errSpan</span>) {</span>
+            <span class="line">  <span class="nm">input</span>.<span class="fn">setAttribute</span>(</span>
+            <span class="line">    <span class="str">'aria-invalid'</span>, <span class="str">'false'</span>);</span>
+            <span class="line">  <span class="nm">errSpan</span>.textContent = <span class="str">''</span>;</span>
+            <span class="line">}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         S13 — setCustomValidity() (code-bg)
+    ══════════════════════════════════════════════ -->
+    <div class="slide s-content code-bg">
+      <div class="slide-title">setCustomValidity() — Cross-field Checks</div>
+      <div class="slide-sub">HTML5 has no built-in password confirmation check — setCustomValidity bridges the gap</div>
+      <div class="analogy green" style="margin-bottom:14px;">
+        <strong>Key idea:</strong> A non-empty string makes the field <em>invalid</em>. An empty string clears the error. Without this, <code style="font-size:inherit;color:#4ade80;background:rgba(34,197,94,.1);padding:1px 5px;border-radius:3px;">form.checkValidity()</code> won't know about your custom logic.
+      </div>
+      <div class="code-label">JavaScript — password confirmation pattern</div>
+      <div class="code-box" id="cb13">
+        <span class="line"><span class="kw">const</span> <span class="nm">pw</span>  = document.<span class="fn">getElementById</span>(<span class="str">'pw'</span>);</span>
+        <span class="line"><span class="kw">const</span> <span class="nm">pw2</span> = document.<span class="fn">getElementById</span>(<span class="str">'pw2'</span>);</span>
+        <span class="line"> </span>
+        <span class="line"><span class="nm">pw2</span>.<span class="fn">addEventListener</span>(<span class="str">'input'</span>, <span class="kw">function</span>() {</span>
+        <span class="line">  <span class="kw">if</span> (<span class="kw">this</span>.value !== <span class="nm">pw</span>.value) {</span>
+        <span class="line">    <span class="cm">// Non-empty string = this field is INVALID</span></span>
+        <span class="line">    <span class="kw">this</span>.<span class="fn">setCustomValidity</span>(<span class="str">'Passwords do not match'</span>);</span>
+        <span class="line">    <span class="fn">markInvalid</span>(<span class="kw">this</span>, err, <span class="str">'Passwords do not match'</span>);</span>
+        <span class="line">  } <span class="kw">else</span> {</span>
+        <span class="line">    <span class="cm">// Empty string = this field is VALID again</span></span>
+        <span class="line">    <span class="kw">this</span>.<span class="fn">setCustomValidity</span>(<span class="str">''</span>);</span>
+        <span class="line">    <span class="fn">markValid</span>(<span class="kw">this</span>, err);</span>
+        <span class="line">  }</span>
+        <span class="line">});</span>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         S14 — SUMMARY
+    ══════════════════════════════════════════════ -->
+    <div class="slide s-content" style="background:linear-gradient(135deg,#0f1b2d 0%,#0d2040 100%);">
+      <div class="slide-title" style="font-size:22px;">Summary — JS Form Validation Pattern</div>
+      <div class="slide-sub">Everything you need to build production-quality forms</div>
+      <ul class="checklist" id="cl14">
+        <li id="cl1"><span class="ck-icon">✅</span><div class="ck-body"><strong>novalidate</strong> disables browser UI — JS takes over validation entirely</div></li>
+        <li id="cl2"><span class="ck-icon">✅</span><div class="ck-body"><span class="ck-code">e.preventDefault()</span> pauses the submit — prevents page reload so your code can run</div></li>
+        <li id="cl3"><span class="ck-icon">✅</span><div class="ck-body"><strong>input event</strong> gives real-time feedback on every keystroke, paste, and delete</div></li>
+        <li id="cl4"><span class="ck-icon">✅</span><div class="ck-body"><span class="ck-code">validity</span> API tells you exactly WHY a field is invalid — not just that it is</div></li>
+        <li id="cl5"><span class="ck-icon">✅</span><div class="ck-body"><strong>Regex</strong> for custom format checks — <span class="ck-code">/^\d{9}$/</span> for student ID, etc.</div></li>
+        <li id="cl6"><span class="ck-icon">✅</span><div class="ck-body"><strong>ARIA</strong> — <span class="ck-code">aria-invalid</span>, <span class="ck-code">aria-describedby</span>, <span class="ck-code">role=alert</span> — for screen reader users</div></li>
+        <li id="cl7"><span class="ck-icon">✅</span><div class="ck-body"><span class="ck-code">setCustomValidity()</span> for cross-field checks like password confirmation</div></li>
+      </ul>
+      <div class="hw-box">
+        <div class="hw-title">📚 Homework — hw_fri</div>
+        <div class="hw-body">Upgrade Monday's registration form with JS validation — implement all the patterns above: real-time input event, novalidate, preventDefault, ARIA attributes, and setCustomValidity for password confirmation. Bonus: disable the Submit button dynamically using <span style="font-family:'JetBrains Mono',monospace;font-size:12px;background:rgba(255,255,255,.1);padding:1px 6px;border-radius:3px;color:#fbbf24;">form.checkValidity()</span> on every input event.</div>
+      </div>
+    </div>
+
+  </div><!-- end slide-area -->
+
+  <!-- Controls bar -->
+  <div class="controls">
+    <button class="btn-ctrl" onclick="prevSlide()">← Prev</button>
+    <button class="btn-ctrl" onclick="nextSlide()">Next →</button>
+    <span class="slide-counter" id="counter">1 / 14</span>
+    <div class="progress-track" id="track" onclick="jumpTo(event)">
+      <div class="progress-fill" id="pfill" style="width:7.14%"></div>
+    </div>
+    <button class="btn-ctrl" id="btn-notes" onclick="toggleNotes()">📝 Notes</button>
+    <button class="btn-ctrl" onclick="goFullscreen()">⛶ Full</button>
+  </div>
+
+  <!-- Notes panel -->
+  <div id="notes-panel">
+    <h3>Speaker Notes</h3>
+    <div id="notes-text"></div>
+  </div>
+</div>
+
+<script>
+/* ─── SPEAKER NOTES ─────────────────────────────── */
+const NOTES = [
+  /* 1 — Title */
+  `<p>Welcome to Week 6 Friday — JS Form Validation. Today is the logical continuation of Monday's class. Monday you learned the HTML structure: input types, required, pattern, HTML5 validation attributes. Today we go further: we take control away from the browser and handle everything in JavaScript. Press Space or click to advance one reveal at a time. Arrow keys jump between slides. N toggles these notes.</p>`,
+
+  /* 2 — Chapter 1 */
+  `<p>We already know HTML5 gives us <strong>required</strong>, <strong>pattern</strong>, <strong>type=email</strong> — but today we see why that's not enough for real products. The core problem: every browser shows a different validation UI. Chrome's tooltip looks different from Firefox's, which looks different from Safari's. You cannot style them with CSS. And critically — they only fire when the user clicks Submit, not while they're typing.</p>`,
+
+  /* 3 — Problem comparison */
+  `<p>This slide shows the two worlds side by side. The left shows Chrome's default validation tooltip — that gray bubble. You cannot change its font, color, position, or wording. It's in English only — a Korean user sees English. The right shows what JS validation gives you: a red-bordered input, an inline error message in your font and language, instantly visible as the user types. Gmail, Airbnb, Gachon's own portal — all use JS validation for exactly this reason.</p>`,
+
+  /* 4 — Chapter 2 */
+  `<p>Chapter 2 introduces the two tools that hand control to JavaScript: <strong>novalidate</strong> on the form element, and <strong>e.preventDefault()</strong> inside the submit handler. These two always come as a pair. One silences the browser's built-in validation UI. The other stops the HTTP request from firing before your JS has checked everything.</p>`,
+
+  /* 5 — novalidate */
+  `<p><strong>novalidate</strong> is a boolean attribute — just writing the word is enough; it takes no value. Without it: you get the browser's validation bubble AND your JavaScript errors — double messages, confusing the user. With it: the browser steps back completely. Notice the code also shows <strong>aria-describedby</strong> on the input — we'll explain that in Chapter 5. For now, notice that each error field gets a companion span to hold the error message. Reveal the code lines one at a time with Space.</p>`,
+
+  /* 6 — preventDefault */
+  `<p><strong>e.preventDefault()</strong> is the single most important line in form validation. Without it, the browser immediately fires an HTTP POST or GET request and reloads the page — your JavaScript never gets to run its checks. The left column shows what happens: the submit fires, the page reloads, your console.log never executes. The right column shows the correct pattern: preventDefault first, then run your validation logic, then either show success or highlight errors. Reveal each column's lines in order.</p>`,
+
+  /* 7 — Chapter 3 */
+  `<p>The <strong>input event</strong> is the key to real-time feedback. Unlike the submit event, which fires once when the user clicks submit, the input event fires on every character typed, every paste, every delete. This means you can tell the user "you need 9 digits" after the 8th digit, not after they've filled all 10 fields and clicked submit. This changes the user experience from reactive to proactive.</p>`,
+
+  /* 8 — submit vs input */
+  `<p>Compare the two code patterns. Left: submit-only validation — the user fills in all fields, clicks Submit, and only THEN sees the error. Imagine a 10-field registration form. The user gets to the end and finds out field 3 was wrong. Frustrating. Right: input event — the student ID field turns green the instant the 9th digit is typed, or red the instant the user goes back to 8. The live demo at the bottom of the slide lets students try this right now. Type 8 digits → red. Type the 9th → green.</p>`,
+
+  /* 9 — Chapter 4 */
+  `<p>Chapter 4 covers two tools for checking values: the <strong>validity object</strong> — a built-in API on every input element — and <strong>regex .test()</strong> for patterns HTML5 doesn't cover natively. The validity object is more precise than checking .value directly. Instead of asking "is this field OK?", you can ask "is this field empty?" or "does it fail the type check?" or "is it too short?" — separate questions, each with a boolean answer.</p>`,
+
+  /* 10 — validity API */
+  `<p>Every input has a .validity property — it's a ValidityState object. Its properties are all booleans. Reveal each row of the table one by one. Key points: <strong>valueMissing</strong> is true only if required is set AND the field is empty. <strong>typeMismatch</strong> catches bad email, URL, or number formats. <strong>patternMismatch</strong> catches a failed pattern= attribute. <strong>valid</strong> is true only when ALL individual checks pass. For custom formats not covered by HTML5 — like a 9-digit Korean student ID or a Korean phone number — use regex .test(). The pattern /^\d{9}$/ means: start, exactly 9 digit characters, end.</p>`,
+
+  /* 11 — Chapter 5 */
+  `<p>Accessibility is not optional. In Korea, web accessibility for government and public services is legally required. Even for private sites, making errors accessible to screen reader users is good practice and good ethics. Chapter 5 covers three ARIA attributes — think of them as metadata that screen readers use to understand your validation state.</p>`,
+
+  /* 12 — ARIA */
+  `<p>Three ARIA tools: <strong>aria-describedby</strong> creates a link between the input and its error span — when a screen reader user focuses the input, the reader says both the label AND the error message. <strong>aria-invalid</strong> signals the error state — 'true' when invalid, 'false' when valid. <strong>role=alert</strong> on the span makes it announce its content immediately when the textContent changes — so when you set errSpan.textContent = 'Must be 9 digits', the screen reader reads it right away without the user having to refocus the field. Reveal the HTML and JS sides in order.</p>`,
+
+  /* 13 — setCustomValidity */
+  `<p><strong>setCustomValidity()</strong> is the bridge between your custom JavaScript logic and the HTML5 validity system. A non-empty string makes the field invalid — form.checkValidity() returns false, the field's .validity.customError becomes true. An empty string clears the custom error — field returns to being valid. Without calling setCustomValidity(), form.checkValidity() would return true even though the passwords don't match, because HTML5 has no built-in password confirmation constraint. This is how you tell the browser about your custom rule. Reveal line by line.</p>`,
+
+  /* 14 — Summary */
+  `<p>Today's complete pattern: novalidate + preventDefault + input event + validity checks + ARIA + setCustomValidity. This is what every serious web form uses — Gmail, Naver, Kakao, Gachon's portal. The homework asks you to apply all of it to Monday's registration form. For the bonus: on every input event, call form.checkValidity() and set the submit button's disabled property accordingly — so the button only becomes clickable when every field is valid. This is the polished UX that users expect from professional web applications.</p>`
+];
+
+/* ─── SLIDE ENGINE ──────────────────────────────── */
+const slides = Array.from(document.querySelectorAll('.slide'));
+let cur = 0;
+
+/* Collect revealable items for a slide */
+function getRevealItems(idx) {
+  const slide = slides[idx];
+  const items = [];
+  // Code box lines
+  slide.querySelectorAll('.code-box .line').forEach(l => items.push(l));
+  // Validity table rows
+  slide.querySelectorAll('.validity-table tr.vrow').forEach(r => items.push(r));
+  // Checklist items
+  slide.querySelectorAll('.checklist li').forEach(l => items.push(l));
+  return items;
+}
+
+function showAll(idx) {
+  getRevealItems(idx).forEach(el => el.classList.add('show'));
+}
+
+function resetAll(idx) {
+  getRevealItems(idx).forEach(el => el.classList.remove('show'));
+}
+
+function revealNext(idx) {
+  const items = getRevealItems(idx);
+  const hidden = items.filter(el => !el.classList.contains('show'));
+  if (hidden.length === 0) return false;
+  hidden[0].classList.add('show');
+  return true;
+}
+
+function updateProgress() {
+  document.getElementById('counter').textContent = `${cur + 1} / ${slides.length}`;
+  document.getElementById('pfill').style.width = ((cur + 1) / slides.length * 100) + '%';
+  document.getElementById('notes-text').innerHTML = NOTES[cur] || '';
+}
+
+function updateHint() {
+  const hint = document.getElementById('space-hint');
+  if (!hint) return;
+  const items = getRevealItems(cur);
+  const hiddenCount = items.filter(el => !el.classList.contains('show')).length;
+  if (hiddenCount > 0) {
+    hint.textContent = `Space to reveal (${hiddenCount} left)`;
+    hint.style.opacity = '1';
+  } else {
+    hint.style.opacity = '0';
+  }
+}
+
+function showSlide(n, revealAll) {
+  slides[cur].classList.remove('active');
+  cur = Math.max(0, Math.min(n, slides.length - 1));
+  slides[cur].classList.add('active');
+  if (revealAll) showAll(cur);
+  else resetAll(cur);
+  updateProgress();
+  updateHint();
+}
+
+function advanceSpace() {
+  if (!revealNext(cur)) {
+    if (cur < slides.length - 1) showSlide(cur + 1, false);
+  } else {
+    updateHint();
+  }
+}
+
+function nextSlide() { if (cur < slides.length - 1) showSlide(cur + 1, false); }
+function prevSlide() { showSlide(cur - 1, true); }
+
+function toggleNotes() {
+  document.getElementById('player').classList.toggle('notes-open');
+  document.getElementById('btn-notes').classList.toggle('active');
+}
+
+function goFullscreen() { document.documentElement.requestFullscreen?.(); }
+
+function jumpTo(e) {
+  const rect = document.getElementById('track').getBoundingClientRect();
+  const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  showSlide(Math.round(pct * (slides.length - 1)), true);
+}
+
+/* Key bindings */
+document.addEventListener('keydown', e => {
+  if (e.key === ' ')          { e.preventDefault(); advanceSpace(); }
+  else if (e.key === 'ArrowRight') nextSlide();
+  else if (e.key === 'ArrowLeft')  prevSlide();
+  else if (e.key === 'n' || e.key === 'N') toggleNotes();
+  else if (e.key === 'f' || e.key === 'F') goFullscreen();
+});
+
+/* Click on slide area = advance */
+document.getElementById('slide-area').addEventListener('click', e => {
+  if (e.target.closest('.controls')) return;
+  if (e.target.closest('#demo-sid')) return;   // let demo input receive clicks
+  advanceSpace();
+});
+
+/* ─── LIVE DEMO (Slide 8) ────────────────────────── */
+const demoSid = document.getElementById('demo-sid');
+const demoMsg = document.getElementById('demo-msg');
+if (demoSid) {
+  demoSid.addEventListener('input', function() {
+    const val = this.value;
+    if (/^\d{9}$/.test(val)) {
+      this.style.borderColor = '#22c55e';
+      this.style.background = 'rgba(34,197,94,.06)';
+      demoMsg.style.color = '#4ade80';
+      demoMsg.textContent = '✅ Valid — exactly 9 digits';
+    } else if (val.length === 0) {
+      this.style.borderColor = '#334155';
+      this.style.background = '#0d1117';
+      demoMsg.textContent = '';
+    } else if (/\D/.test(val)) {
+      this.style.borderColor = '#ef4444';
+      this.style.background = 'rgba(239,68,68,.06)';
+      demoMsg.style.color = '#f87171';
+      demoMsg.textContent = '❌ Digits only (0–9)';
+    } else {
+      this.style.borderColor = '#ef4444';
+      this.style.background = 'rgba(239,68,68,.06)';
+      demoMsg.style.color = '#f87171';
+      demoMsg.textContent = `❌ ${val.length}/9 digits — need ${9 - val.length} more`;
+    }
+  });
+}
+
+/* ─── INIT ──────────────────────────────────────── */
+showSlide(0, false);
+</script>
+</body>
+</html>

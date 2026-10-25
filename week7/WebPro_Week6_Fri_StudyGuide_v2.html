@@ -1,0 +1,1972 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JS Form Validation — Week 6 Friday · Study Guide v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ─── Design Tokens ─── */
+:root {
+  --bg: #0f1b2d;
+  --nav-bg: #1a2e45;
+  --content-bg: #f8fafc;
+  --surf: #162537;
+  --surf2: #1e3350;
+  --brd: #2a4060;
+  --tx: #e2ecf8;
+  --mu: #7a9bbf;
+  --ac: #60a5fa;
+  --acl: #0c2040;
+  --ac2: #93c5fd;
+  --red: #dc2626;
+  --redl: #450a0a;
+  --lime: #22c55e;
+  --limel: #052e16;
+  --warn: #f59e0b;
+  --warnl: #1a1200;
+  --cyan: #22d3ee;
+  --cyanl: #042f2e;
+  --purple: #a78bfa;
+  --purplel: #2e1065;
+  --jsyel: #f7df1e;
+  --jsdk: #1a1400;
+  --cb: #0a1628;
+  --ct: #c8e0f8;
+  --progress: #f59e0b;
+  --badge-bg: #dc2626;
+  --badge-tx: #fff;
+}
+[data-theme="light"] {
+  --bg: #f0f4ff;
+  --nav-bg: #1a2e45;
+  --content-bg: #f8fafc;
+  --surf: #fff;
+  --surf2: #e8eefa;
+  --brd: #c8d4f0;
+  --tx: #1a2340;
+  --mu: #5a6a8a;
+  --ac: #1a56db;
+  --acl: #e0eaff;
+  --ac2: #1240b0;
+  --red: #dc2626;
+  --redl: #fee2e2;
+  --lime: #16a34a;
+  --limel: #dcfce7;
+  --warn: #d97706;
+  --warnl: #fef3c7;
+  --cyan: #0891b2;
+  --cyanl: #e0f2fe;
+  --purple: #7c3aed;
+  --purplel: #ede9fe;
+  --jsyel: #f7df1e;
+  --jsdk: #3a3000;
+  --cb: #1a2540;
+  --ct: #c8daf8;
+  --progress: #dc2626;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--tx);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+}
+a { color: var(--ac); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  background: var(--surf2);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--ac2);
+}
+
+/* ─── Scroll Progress Bar ─── */
+#progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: var(--progress);
+  width: 0%;
+  z-index: 200;
+  transition: width .1s linear;
+}
+
+/* ─── Site Header ─── */
+#site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--nav-bg);
+  border-bottom: 2px solid var(--badge-bg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  gap: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.4);
+}
+.hdr-left { display: flex; align-items: center; gap: 14px; }
+.badge-pill {
+  background: var(--badge-bg);
+  color: var(--badge-tx);
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.v2-pill {
+  background: var(--ac);
+  color: #0a1628;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+.hdr-info { display: flex; flex-direction: column; gap: 1px; }
+.hdr-course { font-size: 11px; color: rgba(255,255,255,.5); font-weight: 500; letter-spacing: .05em; text-transform: uppercase; }
+.hdr-title { font-size: 15px; font-weight: 700; color: #fff; font-family: 'Space Grotesk', sans-serif; }
+.hdr-right { display: flex; align-items: center; gap: 10px; }
+.theme-btn {
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.2);
+  color: #fff;
+  padding: 5px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+  transition: all .15s;
+}
+.theme-btn:hover { background: rgba(255,255,255,.2); }
+.sandwich {
+  display: none;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.2);
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+/* ─── Layout ─── */
+#layout { display: flex; min-height: calc(100vh - 53px); }
+
+/* ─── Sidebar ─── */
+#sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--nav-bg);
+  border-right: 1px solid rgba(255,255,255,.08);
+  position: sticky;
+  top: 53px;
+  height: calc(100vh - 53px);
+  overflow-y: auto;
+  padding: 12px 0;
+}
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-track { background: transparent; }
+#sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 2px; }
+#sidebar nav a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  color: rgba(255,255,255,.55);
+  border-left: 3px solid transparent;
+  transition: all .15s;
+}
+#sidebar nav a:hover { color: #fff; background: rgba(255,255,255,.06); text-decoration: none; }
+#sidebar nav a.active { color: var(--ac); border-left-color: var(--ac); background: rgba(96,165,250,.08); font-weight: 600; }
+.nav-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--ac);
+  min-width: 26px;
+  font-weight: 700;
+}
+.nav-num.red { color: var(--red); }
+.nav-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255,255,255,.3);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 14px 14px 4px;
+}
+
+/* ─── Main Content ─── */
+#main {
+  flex: 1;
+  background: var(--content-bg);
+  padding: 36px 44px;
+  max-width: 980px;
+  color: #1a2340;
+}
+[data-theme="dark"] #main { background: #10202e; color: var(--tx); }
+
+/* ─── Section Headings ─── */
+.section { margin-bottom: 60px; padding-bottom: 48px; border-bottom: 1px solid #dde5f0; }
+[data-theme="dark"] .section { border-bottom-color: var(--brd); }
+.section:last-child { border-bottom: none; }
+.sec-hdr { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+.sec-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--red);
+  padding: 3px 10px;
+  border-radius: 5px;
+}
+.sec-hdr h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: #1a2340;
+}
+[data-theme="dark"] .sec-hdr h2 { color: var(--tx); }
+.sec-sub { font-size: 14px; color: #64748b; margin-top: 2px; }
+[data-theme="dark"] .sec-sub { color: var(--mu); }
+
+/* ─── Quick Reference Table ─── */
+.ref-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 16px 0; border-radius: 10px; overflow: hidden; border: 1px solid #dde5f0; }
+[data-theme="dark"] .ref-table { border-color: var(--brd); }
+.ref-table thead { background: #1a2e45; color: #fff; }
+.ref-table th { padding: 10px 14px; text-align: left; font-weight: 700; font-size: 12px; letter-spacing: .05em; text-transform: uppercase; font-family: 'Space Grotesk', sans-serif; }
+.ref-table td { padding: 9px 14px; border-bottom: 1px solid #eef0f6; vertical-align: top; line-height: 1.5; }
+[data-theme="dark"] .ref-table td { border-bottom-color: var(--brd); }
+.ref-table tr:last-child td { border-bottom: none; }
+.ref-table tr:nth-child(even) td { background: #f8fafc; }
+[data-theme="dark"] .ref-table tr:nth-child(even) td { background: rgba(255,255,255,.03); }
+.ref-table td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #dc2626; font-weight: 700; }
+[data-theme="dark"] .ref-table td:first-child { color: #f87171; }
+.ref-table td:nth-child(2) { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #1a56db; white-space: nowrap; }
+[data-theme="dark"] .ref-table td:nth-child(2) { color: var(--ac); }
+.ref-table td:nth-child(3) { font-size: 13px; color: #5a6a8a; }
+[data-theme="dark"] .ref-table td:nth-child(3) { color: var(--mu); }
+
+/* ─── Code Blocks ─── */
+.code-wrap { margin: 16px 0; border-radius: 10px; overflow: hidden; border: 1px solid #dde5f0; }
+[data-theme="dark"] .code-wrap { border-color: var(--brd); }
+.code-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1a2e45;
+  padding: 7px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.code-lang { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #93c5fd; font-weight: 700; }
+.copy-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.2);
+  color: rgba(255,255,255,.6);
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.copy-btn:hover { color: #fff; border-color: rgba(255,255,255,.5); }
+.code-block { background: var(--cb); padding: 18px 20px; overflow-x: auto; margin: 0; }
+.code-block code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--ct);
+  white-space: pre;
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+.sk { color: #c084fc; }
+.sf { color: #f7df1e; }
+.ss { color: #86efac; }
+.sc { color: #64748b; font-style: italic; }
+.sn { color: #fb923c; }
+.sp { color: #60a5fa; }
+.sr { color: #f87171; }
+
+/* ─── Alert Boxes ─── */
+.alert { display: flex; gap: 12px; padding: 14px 16px; border-radius: 8px; margin: 14px 0; font-size: 14px; }
+.alert-info { background: #e0f2fe; border-left: 4px solid #0891b2; color: #0c4a6e; }
+[data-theme="dark"] .alert-info { background: #042f2e; border-left-color: var(--cyan); color: var(--ct); }
+.alert-ok { background: #dcfce7; border-left: 4px solid #16a34a; color: #052e16; }
+[data-theme="dark"] .alert-ok { background: var(--limel); border-left-color: var(--lime); color: #bbf7d0; }
+.alert-warn { background: #fef3c7; border-left: 4px solid #d97706; color: #78350f; }
+[data-theme="dark"] .alert-warn { background: var(--warnl); border-left-color: var(--warn); color: #fde68a; }
+.alert-icon { font-size: 18px; flex-shrink: 0; line-height: 1.5; }
+
+/* ─── Subsection Headers ─── */
+.sub-hdr {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #1a2340;
+  margin: 28px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #e2e8f0;
+}
+[data-theme="dark"] .sub-hdr { color: var(--tx); border-bottom-color: var(--brd); }
+.sub-hdr .sh-num {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  background: #dc2626;
+  color: #fff;
+  padding: 1px 7px;
+  border-radius: 4px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+/* ─── Validity Properties Table ─── */
+.val-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0; }
+.val-table th { padding: 8px 12px; text-align: left; font-weight: 700; font-size: 11px; color: #5a6a8a; border-bottom: 2px solid #dde5f0; text-transform: uppercase; letter-spacing: .05em; }
+[data-theme="dark"] .val-table th { color: var(--mu); border-bottom-color: var(--brd); }
+.val-table td { padding: 8px 12px; border-bottom: 1px solid #eef0f6; vertical-align: top; }
+[data-theme="dark"] .val-table td { border-bottom-color: var(--brd); }
+.val-table tr:last-child td { border-bottom: none; }
+.val-table td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #f59e0b; font-weight: 700; }
+[data-theme="dark"] .val-table td:first-child { color: var(--warn); }
+.val-table td:nth-child(2) { color: #5a6a8a; font-size: 13px; }
+[data-theme="dark"] .val-table td:nth-child(2) { color: var(--mu); }
+
+/* ─── Live Comparison Section ─── */
+.comparison-wrapper {
+  background: #1a2e45;
+  border-radius: 14px;
+  overflow: hidden;
+  margin: 20px 0;
+  box-shadow: 0 8px 32px rgba(0,0,0,.3);
+}
+.comparison-title {
+  background: #0f1b2d;
+  padding: 14px 20px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.comparison-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+.comp-panel {
+  padding: 20px;
+  background: #f8fafc;
+  color: #1a2340;
+}
+[data-theme="dark"] .comp-panel { background: #162537; color: var(--tx); }
+.comp-panel:first-child { border-right: 2px solid rgba(255,255,255,.1); }
+.panel-label {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.panel-label.bad { background: #fee2e2; color: #b91c1c; }
+.panel-label.good { background: #dcfce7; color: #166534; }
+
+/* ─── Form Styles (in-page forms) ─── */
+.demo-form { font-family: 'Inter', sans-serif; }
+.demo-form .form-group { margin-bottom: 16px; }
+.demo-form label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #374151;
+}
+[data-theme="dark"] .demo-form label { color: #93c5fd; }
+.demo-form input[type="text"],
+.demo-form input[type="email"],
+.demo-form input[type="password"] {
+  width: 100%;
+  padding: 9px 13px;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s, background .2s;
+  background: #fff;
+  color: #1a2340;
+}
+[data-theme="dark"] .demo-form input[type="text"],
+[data-theme="dark"] .demo-form input[type="email"],
+[data-theme="dark"] .demo-form input[type="password"] {
+  background: #0a1628;
+  color: var(--tx);
+  border-color: var(--brd);
+}
+.demo-form input:focus { border-color: #60a5fa; box-shadow: 0 0 0 3px rgba(96,165,250,.15); }
+.demo-form input.field-valid { border-color: #22c55e; background: #f0fdf4; }
+[data-theme="dark"] .demo-form input.field-valid { background: #052e16; border-color: #22c55e; }
+.demo-form input.field-error { border-color: #ef4444; background: #fef2f2; }
+[data-theme="dark"] .demo-form input.field-error { background: #450a0a; border-color: #ef4444; }
+.demo-form .err-msg { font-size: 12px; color: #dc2626; margin-top: 4px; min-height: 16px; font-weight: 600; }
+[data-theme="dark"] .demo-form .err-msg { color: #f87171; }
+.demo-form .btn-submit {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .15s;
+  font-family: 'Space Grotesk', sans-serif;
+}
+.btn-submit-bad { background: #3b82f6; color: #fff; }
+.btn-submit-bad:hover { background: #2563eb; }
+.btn-submit-good { background: #22c55e; color: #fff; }
+.btn-submit-good:hover { background: #16a34a; }
+.success-msg {
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  display: none;
+}
+[data-theme="dark"] .success-msg { background: #052e16; color: #86efac; }
+
+/* ─── Playground Section ─── */
+.playground-wrapper {
+  background: #0f1b2d;
+  border-radius: 14px;
+  overflow: hidden;
+  margin: 20px 0;
+  box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  border: 1px solid rgba(255,255,255,.08);
+}
+.playground-header {
+  background: #162537;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.playground-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+}
+.preset-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.preset-btn {
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.15);
+  color: rgba(255,255,255,.8);
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all .15s;
+  font-family: 'JetBrains Mono', monospace;
+}
+.preset-btn:hover { background: rgba(96,165,250,.2); border-color: #60a5fa; color: #60a5fa; }
+.preset-btn.active { background: rgba(96,165,250,.15); border-color: #60a5fa; color: #60a5fa; }
+.playground-panes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  min-height: 380px;
+}
+.pg-pane-label {
+  background: #1a2e45;
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,255,255,.5);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+}
+.pg-pane-label.preview-label { border-left: 1px solid rgba(255,255,255,.08); }
+.pg-textarea {
+  width: 100%;
+  height: 340px;
+  background: var(--cb);
+  color: var(--ct);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  line-height: 1.65;
+  padding: 14px;
+  border: none;
+  resize: none;
+  outline: none;
+  tab-size: 2;
+}
+.pg-preview {
+  width: 100%;
+  height: 340px;
+  border: none;
+  border-left: 1px solid rgba(255,255,255,.08);
+  background: #fff;
+}
+
+/* ─── Practice Challenges ─── */
+.challenge {
+  background: var(--surf);
+  border: 1px solid #dde5f0;
+  border-radius: 12px;
+  margin-bottom: 28px;
+  overflow: hidden;
+}
+[data-theme="dark"] .challenge { border-color: var(--brd); }
+.challenge-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: #1a2e45;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  color: #fff;
+}
+.ch-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--warn);
+  color: #000;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.ch-difficulty {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 10px;
+  margin-left: auto;
+}
+.diff-easy { background: #dcfce7; color: #166534; }
+.diff-med { background: #fef3c7; color: #92400e; }
+.diff-hard { background: #fee2e2; color: #b91c1c; }
+.challenge-header h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+}
+.challenge-body { padding: 20px; background: #f8fafc; color: #1a2340; }
+[data-theme="dark"] .challenge-body { background: #0f1e30; color: var(--tx); }
+.task-box {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  font-size: 14px;
+  color: #374151;
+}
+[data-theme="dark"] .task-box { background: #162537; border-color: var(--brd); color: var(--tx); }
+.task-box ul { padding-left: 18px; margin-top: 6px; }
+.task-box li { margin-bottom: 4px; }
+.ch-btns { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.btn-reveal {
+  background: #f8fafc;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  padding: 7px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn-reveal:hover { border-color: #22c55e; color: #16a34a; }
+[data-theme="dark"] .btn-reveal { background: var(--surf2); color: var(--tx); border-color: var(--brd); }
+.sol-box { margin-top: 12px; display: none; }
+.sol-box.open { display: block; }
+
+/* ─── Info cards ─── */
+.info-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin: 14px 0;
+  font-size: 14px;
+}
+[data-theme="dark"] .info-card { background: var(--surf); border-color: var(--brd); }
+.info-card h4 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #1a2340;
+}
+[data-theme="dark"] .info-card h4 { color: var(--tx); }
+
+/* ─── Comparison JS Code Section ─── */
+.comp-code-section {
+  margin: 20px 0;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+[data-theme="dark"] .comp-code-section { background: var(--surf); border-color: var(--brd); }
+.comp-code-header {
+  padding: 10px 16px;
+  background: #1a2e45;
+  color: #fff;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ─── Page Intro ─── */
+.page-intro {
+  margin-bottom: 48px;
+}
+.page-intro h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 34px;
+  font-weight: 800;
+  color: #1a2340;
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+[data-theme="dark"] .page-intro h1 { color: var(--tx); }
+.page-intro .v2-tag {
+  display: inline-block;
+  background: var(--red);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-left: 10px;
+  vertical-align: middle;
+  font-family: 'JetBrains Mono', monospace;
+}
+.page-intro .subtitle { color: #64748b; font-size: 15px; margin-bottom: 16px; }
+[data-theme="dark"] .page-intro .subtitle { color: var(--mu); }
+
+/* ─── Footer ─── */
+#site-footer {
+  text-align: center;
+  padding: 24px;
+  color: #64748b;
+  font-size: 13px;
+  border-top: 1px solid #e2e8f0;
+  margin-top: 40px;
+  background: #f8fafc;
+}
+[data-theme="dark"] #site-footer { background: var(--nav-bg); color: var(--mu); border-top-color: var(--brd); }
+
+/* ─── Mobile ─── */
+@media (max-width: 768px) {
+  #sidebar {
+    display: none;
+    position: fixed;
+    top: 53px;
+    left: 0;
+    height: calc(100vh - 53px);
+    z-index: 90;
+    box-shadow: 4px 0 20px rgba(0,0,0,.4);
+  }
+  #sidebar.open { display: block; }
+  #main { padding: 20px 16px; }
+  .sandwich { display: block !important; }
+  .comparison-panels { grid-template-columns: 1fr; }
+  .playground-panes { grid-template-columns: 1fr; }
+  .pg-preview { border-left: none; border-top: 1px solid rgba(255,255,255,.08); }
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<header id="site-header">
+  <div class="hdr-left">
+    <button class="sandwich" onclick="toggleSidebar()" aria-label="Toggle navigation">☰</button>
+    <span class="badge-pill">JS Validation</span>
+    <span class="v2-pill">v2</span>
+    <div class="hdr-info">
+      <span class="hdr-course">K0126002 · Web Programming · Week 6 Friday</span>
+      <span class="hdr-title">JavaScript Form Validation — Study Guide</span>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <button class="theme-btn" id="theme-toggle" onclick="toggleTheme()">☀️ Light</button>
+  </div>
+</header>
+
+<div id="layout">
+
+<!-- ─── Sidebar ─── -->
+<aside id="sidebar">
+  <nav id="nav-menu">
+    <div class="nav-label">Overview</div>
+    <a href="#sec-quickref"><span class="nav-num">01</span>Quick Reference</a>
+    <div class="nav-label">Deep Dives</div>
+    <a href="#sec-novalidate"><span class="nav-num">2.1</span>novalidate + structure</a>
+    <a href="#sec-events"><span class="nav-num">2.2</span>submit + input events</a>
+    <a href="#sec-validity"><span class="nav-num">2.3</span>validity API</a>
+    <a href="#sec-regex"><span class="nav-num">2.4</span>Regex patterns</a>
+    <a href="#sec-aria"><span class="nav-num">2.5</span>ARIA & a11y</a>
+    <a href="#sec-custom"><span class="nav-num">2.6</span>setCustomValidity()</a>
+    <div class="nav-label">Interactive</div>
+    <a href="#sec-comparison"><span class="nav-num red">★</span>Live Comparison</a>
+    <a href="#sec-playground"><span class="nav-num">PG</span>Playground</a>
+    <div class="nav-label">Practice</div>
+    <a href="#sec-challenges"><span class="nav-num red">C1</span>Challenges</a>
+  </nav>
+</aside>
+
+<!-- ─── Main Content ─── -->
+<main id="main">
+
+<!-- Page Intro -->
+<div class="page-intro" id="top">
+  <h1>JavaScript Form Validation <span class="v2-tag">v2 · Interactive</span></h1>
+  <p class="subtitle">Quick reference · Deep-dive explanations · Live comparison forms · Editable code playground · 3 practice challenges</p>
+  <div class="alert alert-info">
+    <span class="alert-icon">✨</span>
+    <div><strong>What's new in v2</strong>
+    This edition adds a <strong>live side-by-side comparison</strong> of HTML5-only vs JS validation (Section 3), plus a <strong>code playground</strong> where you edit code on the left and see the live preview on the right. Everything in v1 is preserved as concise deep-dives in Section 2.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 1 — QUICK REFERENCE -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="section" id="sec-quickref">
+  <div class="sec-hdr">
+    <span class="sec-num">01</span>
+    <div>
+      <h2>Quick Reference</h2>
+      <p class="sec-sub">All JS validation concepts at a glance</p>
+    </div>
+  </div>
+
+  <table class="ref-table">
+    <thead>
+      <tr>
+        <th>Concept</th>
+        <th>Syntax</th>
+        <th>What it does</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Disable browser UI</td>
+        <td>novalidate on &lt;form&gt;</td>
+        <td>Lets JS handle all validation; browser popups suppressed</td>
+      </tr>
+      <tr>
+        <td>Stop page reload</td>
+        <td>event.preventDefault()</td>
+        <td>Pauses default form submission so JS can check first</td>
+      </tr>
+      <tr>
+        <td>Real-time check</td>
+        <td>el.addEventListener('input', fn)</td>
+        <td>Fires on every keystroke — gives instant feedback</td>
+      </tr>
+      <tr>
+        <td>Check email format</td>
+        <td>el.validity.typeMismatch</td>
+        <td>True when type="email" value isn't a valid email</td>
+      </tr>
+      <tr>
+        <td>Check if empty</td>
+        <td>el.validity.valueMissing</td>
+        <td>True when required field is empty</td>
+      </tr>
+      <tr>
+        <td>Check too short</td>
+        <td>el.validity.tooShort</td>
+        <td>True when value shorter than minlength attribute</td>
+      </tr>
+      <tr>
+        <td>Custom regex</td>
+        <td>/^\d{9}$/.test(el.value)</td>
+        <td>Pattern match — use when validity API can't help</td>
+      </tr>
+      <tr>
+        <td>Set custom error</td>
+        <td>el.setCustomValidity('msg')</td>
+        <td>Marks field invalid with your message (cross-field checks)</td>
+      </tr>
+      <tr>
+        <td>Clear custom error</td>
+        <td>el.setCustomValidity('')</td>
+        <td>Clears custom error — field can become valid again</td>
+      </tr>
+      <tr>
+        <td>ARIA link</td>
+        <td>aria-describedby="err-id"</td>
+        <td>Links input to its error span for screen readers</td>
+      </tr>
+      <tr>
+        <td>ARIA state</td>
+        <td>aria-invalid="true"/"false"</td>
+        <td>Signals whether field is valid to assistive technology</td>
+      </tr>
+      <tr>
+        <td>Announce changes</td>
+        <td>role="alert" on span</td>
+        <td>Screen reader reads error text as soon as it appears</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 2 — CONCEPT DEEP-DIVES -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="section" id="sec-deepdives">
+  <div class="sec-hdr">
+    <span class="sec-num">02</span>
+    <div>
+      <h2>Concept Deep-Dives</h2>
+      <p class="sec-sub">Static explanations with copy-able code blocks</p>
+    </div>
+  </div>
+
+  <!-- 2.1 novalidate -->
+  <h3 class="sub-hdr" id="sec-novalidate"><span class="sh-num">2.1</span>novalidate + form structure</h3>
+  <p style="font-size:14px;color:inherit;margin-bottom:12px">Adding <code>novalidate</code> to a form completely disables the browser's built-in validation UI. The browser still maintains the <code>validity</code> object on each field — we just handle showing errors ourselves. Each field needs a sibling error <code>&lt;span&gt;</code> linked with ARIA.</p>
+  <div class="code-wrap">
+    <div class="code-bar">
+      <span class="code-lang">HTML — novalidate form skeleton</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <div class="code-block"><code><span class="sc">&lt;!-- novalidate = JS handles ALL validation --&gt;</span>
+<span class="sp">&lt;form</span> <span class="sk">id</span>=<span class="ss">"reg-form"</span> <span class="sk">novalidate</span><span class="sp">&gt;</span>
+
+  <span class="sp">&lt;div</span> <span class="sk">class</span>=<span class="ss">"field-group"</span><span class="sp">&gt;</span>
+    <span class="sp">&lt;label</span> <span class="sk">for</span>=<span class="ss">"email"</span><span class="sp">&gt;</span>Email<span class="sp">&lt;/label&gt;</span>
+
+    <span class="sp">&lt;input</span>
+      <span class="sk">type</span>=<span class="ss">"email"</span>
+      <span class="sk">id</span>=<span class="ss">"email"</span>
+      <span class="sk">name</span>=<span class="ss">"email"</span>
+      <span class="sk">required</span>
+      <span class="sk">aria-describedby</span>=<span class="ss">"email-err"</span>
+      <span class="sk">aria-invalid</span>=<span class="ss">"false"</span>
+    <span class="sp">/&gt;</span>
+
+    <span class="sc">&lt;!-- role="alert" → screen readers announce text changes --&gt;</span>
+    <span class="sp">&lt;span</span>
+      <span class="sk">id</span>=<span class="ss">"email-err"</span>
+      <span class="sk">class</span>=<span class="ss">"error-msg"</span>
+      <span class="sk">role</span>=<span class="ss">"alert"</span>
+      <span class="sk">aria-live</span>=<span class="ss">"polite"</span>
+    <span class="sp">&gt;&lt;/span&gt;</span>
+  <span class="sp">&lt;/div&gt;</span>
+
+  <span class="sp">&lt;button</span> <span class="sk">type</span>=<span class="ss">"submit"</span><span class="sp">&gt;</span>Register<span class="sp">&lt;/button&gt;</span>
+<span class="sp">&lt;/form&gt;</span></code></div>
+  </div>
+
+  <!-- 2.2 Events -->
+  <h3 class="sub-hdr" id="sec-events"><span class="sh-num">2.2</span>The submit + input events</h3>
+  <p style="font-size:14px;margin-bottom:12px">Use <strong>submit</strong> to check everything before the form goes. Use <strong>input</strong> for real-time per-field feedback as the user types.</p>
+  <div class="code-wrap">
+    <div class="code-bar">
+      <span class="code-lang">JavaScript — two event patterns</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <div class="code-block"><code><span class="sc">// ── Pattern 1: validate-on-submit ──</span>
+<span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'reg-form'</span>)
+  .<span class="sf">addEventListener</span>(<span class="ss">'submit'</span>, <span class="sk">function</span>(e) {
+    e.<span class="sf">preventDefault</span>();         <span class="sc">// stop reload</span>
+    <span class="sk">const</span> ok = <span class="sf">validateAll</span>();
+    <span class="sk">if</span> (ok) <span class="sf">submitForm</span>();        <span class="sc">// only send if valid</span>
+  });
+
+<span class="sc">// ── Pattern 2: validate-on-input (real-time) ──</span>
+<span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'email'</span>)
+  .<span class="sf">addEventListener</span>(<span class="ss">'input'</span>, <span class="sk">function</span>() {
+    <span class="sf">validateEmail</span>(<span class="sk">this</span>);         <span class="sc">// runs every keystroke</span>
+  });
+
+<span class="sc">// ── Usually combine both ──</span>
+<span class="sc">// input → real-time feedback while typing</span>
+<span class="sc">// submit → final guard before sending</span></code></div>
+  </div>
+
+  <!-- 2.3 Validity API -->
+  <h3 class="sub-hdr" id="sec-validity"><span class="sh-num">2.3</span>The validity API</h3>
+  <p style="font-size:14px;margin-bottom:12px">Every input element has a <code>.validity</code> object with boolean flags. Check these instead of writing regex for common cases.</p>
+  <table class="val-table">
+    <thead>
+      <tr><th>Property</th><th>True when…</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>valueMissing</td><td>Field has <code>required</code> and is empty</td></tr>
+      <tr><td>typeMismatch</td><td>Value doesn't match the input type (e.g. not an email)</td></tr>
+      <tr><td>patternMismatch</td><td>Value doesn't match the <code>pattern</code> attribute regex</td></tr>
+      <tr><td>tooShort</td><td>Value is shorter than <code>minlength</code></td></tr>
+      <tr><td>tooLong</td><td>Value is longer than <code>maxlength</code></td></tr>
+      <tr><td>rangeUnderflow</td><td>Number input below <code>min</code></td></tr>
+      <tr><td>rangeOverflow</td><td>Number input above <code>max</code></td></tr>
+      <tr><td>customError</td><td><code>setCustomValidity()</code> was called with a non-empty string</td></tr>
+      <tr><td>valid</td><td>All other flags are false — field is valid</td></tr>
+    </tbody>
+  </table>
+  <div class="code-wrap" style="margin-top:14px">
+    <div class="code-bar">
+      <span class="code-lang">JavaScript — using validity flags</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <div class="code-block"><code><span class="sk">function</span> <span class="sf">validateEmail</span>(input) {
+  <span class="sk">const</span> err = <span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'email-err'</span>);
+
+  <span class="sk">if</span> (input.validity.<span class="sp">valueMissing</span>) {
+    err.textContent = <span class="ss">'Email is required.'</span>;
+    input.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>, <span class="ss">'true'</span>);
+  } <span class="sk">else if</span> (input.validity.<span class="sp">typeMismatch</span>) {
+    err.textContent = <span class="ss">'Please enter a valid email address.'</span>;
+    input.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>, <span class="ss">'true'</span>);
+  } <span class="sk">else</span> {
+    err.textContent = <span class="ss">''</span>;
+    input.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>, <span class="ss">'false'</span>);
+  }
+}</code></div>
+  </div>
+
+  <!-- 2.4 Regex patterns -->
+  <h3 class="sub-hdr" id="sec-regex"><span class="sh-num">2.4</span>Regex patterns used in this course</h3>
+  <table class="ref-table">
+    <thead>
+      <tr><th>Pattern</th><th>Validates</th><th>Example match</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>/^\d{9}$/</td>
+        <td>Exactly 9 digits</td>
+        <td>202312345 (Student ID)</td>
+      </tr>
+      <tr>
+        <td>/^\d{3}-\d{4}-\d{4}$/</td>
+        <td>Korean phone format</td>
+        <td>010-1234-5678</td>
+      </tr>
+      <tr>
+        <td>/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/</td>
+        <td>Email (manual regex)</td>
+        <td>Use validity.typeMismatch instead — shorter!</td>
+      </tr>
+      <tr>
+        <td>/^[a-zA-Z0-9]{3,}$/</td>
+        <td>Username ≥ 3 alphanumeric</td>
+        <td>gachon42</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="code-wrap">
+    <div class="code-bar">
+      <span class="code-lang">JavaScript — regex test example</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <div class="code-block"><code><span class="sk">const</span> studentIdPattern = <span class="sr">/^\d{9}$/</span>;
+
+<span class="sk">function</span> <span class="sf">validateStudentId</span>(input) {
+  <span class="sk">const</span> err = <span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'id-err'</span>);
+  <span class="sk">if</span> (!studentIdPattern.<span class="sf">test</span>(input.value)) {
+    err.textContent = <span class="ss">'Student ID must be exactly 9 digits.'</span>;
+    input.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>, <span class="ss">'true'</span>);
+    input.classList.<span class="sf">remove</span>(<span class="ss">'valid-ok'</span>);
+    input.classList.<span class="sf">add</span>(<span class="ss">'valid-err'</span>);
+  } <span class="sk">else</span> {
+    err.textContent = <span class="ss">''</span>;
+    input.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>, <span class="ss">'false'</span>);
+    input.classList.<span class="sf">remove</span>(<span class="ss">'valid-err'</span>);
+    input.classList.<span class="sf">add</span>(<span class="ss">'valid-ok'</span>);
+  }
+}</code></div>
+  </div>
+
+  <!-- 2.5 ARIA -->
+  <h3 class="sub-hdr" id="sec-aria"><span class="sh-num">2.5</span>ARIA for form validation</h3>
+  <p style="font-size:14px;margin-bottom:12px">Accessible forms connect each field to its error message and announce state changes to screen readers. Three attributes do the work:</p>
+  <div class="info-card">
+    <h4>Three ARIA attributes for form validation</h4>
+    <ul style="font-size:14px;padding-left:18px;line-height:2">
+      <li><code>aria-describedby="err-id"</code> — on the input: links it to the error span</li>
+      <li><code>aria-invalid="true|false"</code> — on the input: changes dynamically in JS</li>
+      <li><code>role="alert"</code> — on the error span: screen reader announces changes immediately</li>
+    </ul>
+  </div>
+  <div class="code-wrap">
+    <div class="code-bar">
+      <span class="code-lang">HTML + JS — complete ARIA pattern</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <div class="code-block"><code><span class="sc">&lt;!-- HTML: wire the field to its error span --&gt;</span>
+<span class="sp">&lt;input</span>
+  <span class="sk">id</span>=<span class="ss">"email"</span>
+  <span class="sk">type</span>=<span class="ss">"email"</span>
+  <span class="sk">required</span>
+  <span class="sk">aria-describedby</span>=<span class="ss">"email-err"</span>
+  <span class="sk">aria-invalid</span>=<span class="ss">"false"</span>
+<span class="sp">/&gt;</span>
+<span class="sp">&lt;span</span> <span class="sk">id</span>=<span class="ss">"email-err"</span> <span class="sk">role</span>=<span class="ss">"alert"</span> <span class="sk">aria-live</span>=<span class="ss">"polite"</span><span class="sp">&gt;&lt;/span&gt;</span>
+
+<span class="sc">// JS: update both attributes on every validation</span>
+<span class="sk">function</span> <span class="sf">setError</span>(input, errId, msg) {
+  <span class="sp">document</span>.<span class="sf">getElementById</span>(errId).textContent = msg;
+  input.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>, msg ? <span class="ss">'true'</span> : <span class="ss">'false'</span>);
+  input.classList.<span class="sf">toggle</span>(<span class="ss">'valid-err'</span>, !!msg);
+  input.classList.<span class="sf">toggle</span>(<span class="ss">'valid-ok'</span>, !msg);
+}</code></div>
+  </div>
+
+  <!-- 2.6 setCustomValidity -->
+  <h3 class="sub-hdr" id="sec-custom"><span class="sh-num">2.6</span>setCustomValidity() — password confirmation</h3>
+  <p style="font-size:14px;margin-bottom:12px"><code>setCustomValidity()</code> is the only way to mark a field invalid based on another field's value. Always clear it (pass empty string) when the condition is not met, or the field will be permanently invalid.</p>
+  <div class="alert alert-warn">
+    <span class="alert-icon">⚠️</span>
+    <div><strong>Common mistake</strong> — only calling setCustomValidity when passwords mismatch. You must also call <code>setCustomValidity('')</code> when they match, otherwise the field stays invalid forever.</div>
+  </div>
+  <div class="code-wrap">
+    <div class="code-bar">
+      <span class="code-lang">JavaScript — password confirmation pattern</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <div class="code-block"><code><span class="sk">const</span> pw   = <span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'password'</span>);
+<span class="sk">const</span> pw2  = <span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'confirm'</span>);
+<span class="sk">const</span> err2 = <span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'confirm-err'</span>);
+
+<span class="sk">function</span> <span class="sf">checkConfirm</span>() {
+  <span class="sk">if</span> (pw2.value === <span class="ss">''</span>) {
+    pw2.<span class="sf">setCustomValidity</span>(<span class="ss">''</span>);   <span class="sc">// not yet typed — no error yet</span>
+    err2.textContent = <span class="ss">''</span>;
+    pw2.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>, <span class="ss">'false'</span>);
+  } <span class="sk">else if</span> (pw2.value !== pw.value) {
+    pw2.<span class="sf">setCustomValidity</span>(<span class="ss">'Passwords do not match'</span>);
+    err2.textContent = <span class="ss">'Passwords do not match.'</span>;
+    pw2.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>, <span class="ss">'true'</span>);
+  } <span class="sk">else</span> {
+    pw2.<span class="sf">setCustomValidity</span>(<span class="ss">''</span>);   <span class="sc">// ← MUST clear, or stays invalid!</span>
+    err2.textContent = <span class="ss">'✓ Passwords match'</span>;
+    pw2.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>, <span class="ss">'false'</span>);
+  }
+}
+
+pw2.<span class="sf">addEventListener</span>(<span class="ss">'input'</span>, checkConfirm);
+pw.<span class="sf">addEventListener</span>(<span class="ss">'input'</span>,  checkConfirm); <span class="sc">// re-check if PW1 changes</span></code></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 3 — LIVE COMPARISON -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="section" id="sec-comparison">
+  <div class="sec-hdr">
+    <span class="sec-num">03</span>
+    <div>
+      <h2>Feel the Difference</h2>
+      <p class="sec-sub">HTML5-only vs JS validation — interact with both forms directly</p>
+    </div>
+  </div>
+
+  <div class="alert alert-ok">
+    <span class="alert-icon">🎯</span>
+    <div><strong>How to use this section</strong> — Try submitting both forms with empty fields, then with bad data. Feel how the left form uses ugly browser tooltips and gives zero feedback while you type. The right form shows red/green borders and helpful messages on every keystroke.</div>
+  </div>
+
+  <div class="comparison-wrapper">
+    <div class="comparison-title">
+      <span>⚡ Interactive Comparison — Submit both forms and feel the difference</span>
+    </div>
+    <div class="comparison-panels">
+
+      <!-- LEFT: No JS -->
+      <div class="comp-panel">
+        <div class="panel-label bad">⚠️ HTML5 Only — browser popups, no real-time feedback</div>
+        <form id="form-no-js" class="demo-form" method="post" action="#" onsubmit="return false;">
+          <div class="form-group">
+            <label for="nj-sid">Student ID</label>
+            <input type="text" id="nj-sid" name="sid"
+              pattern="\d{9}" required
+              placeholder="9-digit number"
+              title="Must be exactly 9 digits">
+          </div>
+          <div class="form-group">
+            <label for="nj-email">Email</label>
+            <input type="email" id="nj-email" name="email"
+              required placeholder="your@email.com">
+          </div>
+          <div class="form-group">
+            <label for="nj-pw">Password</label>
+            <input type="password" id="nj-pw" name="pw"
+              minlength="8" required placeholder="Min. 8 characters">
+          </div>
+          <button type="submit" class="btn-submit btn-submit-bad">Submit (HTML5 only)</button>
+          <p style="font-size:12px;color:#64748b;margin-top:8px">↑ Click submit to see browser's default validation popups</p>
+        </form>
+      </div>
+
+      <!-- RIGHT: With JS -->
+      <div class="comp-panel">
+        <div class="panel-label good">✅ JS Validation — real-time, custom messages, accessible</div>
+        <form id="form-with-js" class="demo-form" novalidate>
+          <div class="form-group">
+            <label for="wj-sid">Student ID</label>
+            <input type="text" id="wj-sid" name="sid"
+              required placeholder="9-digit number"
+              aria-describedby="wj-sid-err"
+              aria-invalid="false">
+            <span id="wj-sid-err" class="err-msg" role="alert" aria-live="polite"></span>
+          </div>
+          <div class="form-group">
+            <label for="wj-email">Email</label>
+            <input type="email" id="wj-email" name="email"
+              required placeholder="your@email.com"
+              aria-describedby="wj-email-err"
+              aria-invalid="false">
+            <span id="wj-email-err" class="err-msg" role="alert" aria-live="polite"></span>
+          </div>
+          <div class="form-group">
+            <label for="wj-pw">Password</label>
+            <input type="password" id="wj-pw" name="pw"
+              minlength="8" required placeholder="Min. 8 characters"
+              aria-describedby="wj-pw-err"
+              aria-invalid="false">
+            <span id="wj-pw-err" class="err-msg" role="alert" aria-live="polite"></span>
+          </div>
+          <button type="submit" class="btn-submit btn-submit-good" id="wj-submit">Submit (JS Validation)</button>
+          <div id="wj-success" class="success-msg">✓ Form submitted successfully! Great job.</div>
+        </form>
+      </div>
+
+    </div><!-- /comparison-panels -->
+  </div><!-- /comparison-wrapper -->
+
+  <!-- The JS code that powers the right panel -->
+  <div class="comp-code-section">
+    <div class="comp-code-header">
+      <span>The JS code powering the right-panel form above</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <div class="code-block"><code><span class="sc">// ── Helper: set or clear an error on a field ──</span>
+<span class="sk">function</span> <span class="sf">setFieldError</span>(input, errId, msg) {
+  <span class="sk">const</span> span = <span class="sp">document</span>.<span class="sf">getElementById</span>(errId);
+  span.textContent = msg;
+  input.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>, msg ? <span class="ss">'true'</span> : <span class="ss">'false'</span>);
+  input.classList.<span class="sf">toggle</span>(<span class="ss">'field-error'</span>, !!msg);
+  input.classList.<span class="sf">toggle</span>(<span class="ss">'field-valid'</span>, !msg &amp;&amp; input.value !== <span class="ss">''</span>);
+}
+
+<span class="sc">// ── Student ID: must match /^\d{9}$/ ──</span>
+<span class="sk">function</span> <span class="sf">validateSid</span>(input) {
+  <span class="sk">if</span> (input.validity.valueMissing)
+    <span class="sf">setFieldError</span>(input, <span class="ss">'wj-sid-err'</span>, <span class="ss">'Student ID is required.'</span>);
+  <span class="sk">else if</span> (!<span class="sr">/^\d{9}$/</span>.<span class="sf">test</span>(input.value))
+    <span class="sf">setFieldError</span>(input, <span class="ss">'wj-sid-err'</span>, <span class="ss">'Must be exactly 9 digits.'</span>);
+  <span class="sk">else</span>
+    <span class="sf">setFieldError</span>(input, <span class="ss">'wj-sid-err'</span>, <span class="ss">''</span>);
+}
+
+<span class="sc">// ── Email: use built-in typeMismatch ──</span>
+<span class="sk">function</span> <span class="sf">validateEmail</span>(input) {
+  <span class="sk">if</span> (input.validity.valueMissing)
+    <span class="sf">setFieldError</span>(input, <span class="ss">'wj-email-err'</span>, <span class="ss">'Email is required.'</span>);
+  <span class="sk">else if</span> (input.validity.typeMismatch)
+    <span class="sf">setFieldError</span>(input, <span class="ss">'wj-email-err'</span>, <span class="ss">'Enter a valid email address.'</span>);
+  <span class="sk">else</span>
+    <span class="sf">setFieldError</span>(input, <span class="ss">'wj-email-err'</span>, <span class="ss">''</span>);
+}
+
+<span class="sc">// ── Password: minlength check ──</span>
+<span class="sk">function</span> <span class="sf">validatePassword</span>(input) {
+  <span class="sk">if</span> (input.validity.valueMissing)
+    <span class="sf">setFieldError</span>(input, <span class="ss">'wj-pw-err'</span>, <span class="ss">'Password is required.'</span>);
+  <span class="sk">else if</span> (input.validity.tooShort)
+    <span class="sf">setFieldError</span>(input, <span class="ss">'wj-pw-err'</span>, <span class="ss">'Min. 8 characters required.'</span>);
+  <span class="sk">else</span>
+    <span class="sf">setFieldError</span>(input, <span class="ss">'wj-pw-err'</span>, <span class="ss">''</span>);
+}
+
+<span class="sc">// ── Attach input events (real-time feedback) ──</span>
+<span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'wj-sid'</span>)
+  .<span class="sf">addEventListener</span>(<span class="ss">'input'</span>, e =&gt; <span class="sf">validateSid</span>(e.target));
+<span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'wj-email'</span>)
+  .<span class="sf">addEventListener</span>(<span class="ss">'input'</span>, e =&gt; <span class="sf">validateEmail</span>(e.target));
+<span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'wj-pw'</span>)
+  .<span class="sf">addEventListener</span>(<span class="ss">'input'</span>, e =&gt; <span class="sf">validatePassword</span>(e.target));
+
+<span class="sc">// ── Final guard on submit ──</span>
+<span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'form-with-js'</span>)
+  .<span class="sf">addEventListener</span>(<span class="ss">'submit'</span>, <span class="sk">function</span>(e) {
+    e.<span class="sf">preventDefault</span>();
+    <span class="sk">const</span> sid   = <span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'wj-sid'</span>);
+    <span class="sk">const</span> email = <span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'wj-email'</span>);
+    <span class="sk">const</span> pw    = <span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'wj-pw'</span>);
+    <span class="sf">validateSid</span>(sid); <span class="sf">validateEmail</span>(email); <span class="sf">validatePassword</span>(pw);
+    <span class="sk">if</span> (sid.validity.valid &amp;&amp; email.validity.valid &amp;&amp; pw.validity.valid) {
+      <span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'wj-success'</span>).style.display = <span class="ss">'block'</span>;
+    }
+  });</code></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 4 — LIVE PLAYGROUND -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="section" id="sec-playground">
+  <div class="sec-hdr">
+    <span class="sec-num">04</span>
+    <div>
+      <h2>Live Playground</h2>
+      <p class="sec-sub">Edit the code on the left — see it run on the right in real-time</p>
+    </div>
+  </div>
+
+  <div class="alert alert-info">
+    <span class="alert-icon">🧪</span>
+    <div><strong>How it works</strong> — Type in the editor on the left. The preview iframe on the right updates automatically (300ms after you stop typing). Load a preset to start from a working example, then experiment!</div>
+  </div>
+
+  <div class="playground-wrapper">
+    <div class="playground-header">
+      <span class="playground-title">🧪 Live Playground — Edit the code, see it run</span>
+      <div class="preset-btns">
+        <button class="preset-btn active" onclick="loadPreset(0, this)">Load: Basic Form</button>
+        <button class="preset-btn" onclick="loadPreset(1, this)">Load: Real-time Validation</button>
+        <button class="preset-btn" onclick="loadPreset(2, this)">Load: Full Pattern</button>
+      </div>
+    </div>
+    <div class="playground-panes">
+      <div>
+        <div class="pg-pane-label">◀ Code Editor</div>
+        <textarea class="pg-textarea" id="pg-editor" spellcheck="false"></textarea>
+      </div>
+      <div>
+        <div class="pg-pane-label preview-label">▶ Live Preview</div>
+        <iframe id="pg-preview" class="pg-preview" title="Live preview"></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- SECTION 5 — PRACTICE CHALLENGES -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<section class="section" id="sec-challenges">
+  <div class="sec-hdr">
+    <span class="sec-num">05</span>
+    <div>
+      <h2>Practice Challenges</h2>
+      <p class="sec-sub">Three challenges — Easy → Medium → Hard. Try before revealing the solution!</p>
+    </div>
+  </div>
+
+  <!-- Challenge 1 -->
+  <div class="challenge" id="c1">
+    <div class="challenge-header">
+      <span class="ch-num">C1</span>
+      <h3>Real-time Username Validation</h3>
+      <span class="ch-difficulty diff-easy">Easy</span>
+    </div>
+    <div class="challenge-body">
+      <div class="task-box">
+        <strong>Task:</strong> Add real-time validation to a username field.<br>
+        <ul>
+          <li>Minimum 3 characters, alphanumeric only</li>
+          <li>Regex pattern: <code>/^[a-zA-Z0-9]{3,}$/</code></li>
+          <li>Show red border + error message while invalid, green when valid</li>
+          <li>Use the <code>input</code> event for real-time feedback</li>
+        </ul>
+      </div>
+
+      <p style="font-size:13px;font-weight:600;margin-bottom:8px;color:#64748b">Starter code — add the validation function:</p>
+      <div class="code-wrap">
+        <div class="code-bar">
+          <span class="code-lang">HTML — starter</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <div class="code-block"><code>&lt;div class="field-group"&gt;
+  &lt;label for="username"&gt;Username&lt;/label&gt;
+  &lt;input type="text" id="username" required
+    aria-describedby="username-err"
+    aria-invalid="false"
+    placeholder="At least 3 alphanumeric chars"&gt;
+  &lt;span id="username-err" role="alert"
+    style="color:red;font-size:12px"&gt;&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+  const usernameInput = document.getElementById('username');
+  const usernamePattern = /^[a-zA-Z0-9]{3,}$/;
+
+  // TODO: write validateUsername(input) here
+  // TODO: add event listener for 'input' event
+&lt;/script&gt;</code></div>
+      </div>
+
+      <div class="ch-btns">
+        <button class="btn-reveal" onclick="toggleSolution('sol1', this)">Reveal Solution</button>
+      </div>
+
+      <div class="sol-box" id="sol1">
+        <div class="code-wrap">
+          <div class="code-bar">
+            <span class="code-lang">JavaScript — solution</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <div class="code-block"><code><span class="sk">const</span> usernameInput   = <span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'username'</span>);
+<span class="sk">const</span> usernamePattern = <span class="sr">/^[a-zA-Z0-9]{3,}$/</span>;
+
+<span class="sk">function</span> <span class="sf">validateUsername</span>(input) {
+  <span class="sk">const</span> err = <span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'username-err'</span>);
+  <span class="sk">if</span> (input.validity.valueMissing) {
+    err.textContent = <span class="ss">'Username is required.'</span>;
+    input.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>, <span class="ss">'true'</span>);
+    input.style.borderColor = <span class="ss">'#ef4444'</span>;
+  } <span class="sk">else if</span> (!usernamePattern.<span class="sf">test</span>(input.value)) {
+    err.textContent = <span class="ss">'Min. 3 chars, letters and numbers only.'</span>;
+    input.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>, <span class="ss">'true'</span>);
+    input.style.borderColor = <span class="ss">'#ef4444'</span>;
+  } <span class="sk">else</span> {
+    err.textContent = <span class="ss">''</span>;
+    input.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>, <span class="ss">'false'</span>);
+    input.style.borderColor = <span class="ss">'#22c55e'</span>;
+  }
+}
+
+usernameInput.<span class="sf">addEventListener</span>(<span class="ss">'input'</span>, e =&gt; <span class="sf">validateUsername</span>(e.target));</code></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Challenge 2 -->
+  <div class="challenge" id="c2">
+    <div class="challenge-header">
+      <span class="ch-num">C2</span>
+      <h3>Password + Confirm Password with setCustomValidity()</h3>
+      <span class="ch-difficulty diff-med">Medium</span>
+    </div>
+    <div class="challenge-body">
+      <div class="task-box">
+        <strong>Task:</strong> Build a password + confirm-password pair.<br>
+        <ul>
+          <li>Password: required, minimum 8 characters</li>
+          <li>Confirm: must match the password field exactly</li>
+          <li>Use <code>setCustomValidity()</code> on the confirm field</li>
+          <li>Re-validate confirm when password changes</li>
+          <li>Include ARIA attributes on both fields</li>
+        </ul>
+      </div>
+
+      <div class="ch-btns">
+        <button class="btn-reveal" onclick="toggleSolution('sol2', this)">Reveal Solution</button>
+      </div>
+
+      <div class="sol-box" id="sol2">
+        <div class="code-wrap">
+          <div class="code-bar">
+            <span class="code-lang">HTML + JavaScript — full solution</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <div class="code-block"><code><span class="sc">&lt;!-- HTML --&gt;</span>
+<span class="sp">&lt;form</span> <span class="sk">novalidate</span><span class="sp">&gt;</span>
+  <span class="sp">&lt;div</span> <span class="sk">class</span>=<span class="ss">"field-group"</span><span class="sp">&gt;</span>
+    <span class="sp">&lt;label</span> <span class="sk">for</span>=<span class="ss">"pw"</span><span class="sp">&gt;</span>Password<span class="sp">&lt;/label&gt;</span>
+    <span class="sp">&lt;input</span> <span class="sk">type</span>=<span class="ss">"password"</span> <span class="sk">id</span>=<span class="ss">"pw"</span> <span class="sk">minlength</span>=<span class="ss">"8"</span> <span class="sk">required</span>
+      <span class="sk">aria-describedby</span>=<span class="ss">"pw-err"</span> <span class="sk">aria-invalid</span>=<span class="ss">"false"</span><span class="sp">/&gt;</span>
+    <span class="sp">&lt;span</span> <span class="sk">id</span>=<span class="ss">"pw-err"</span> <span class="sk">role</span>=<span class="ss">"alert"</span><span class="sp">&gt;&lt;/span&gt;</span>
+  <span class="sp">&lt;/div&gt;</span>
+  <span class="sp">&lt;div</span> <span class="sk">class</span>=<span class="ss">"field-group"</span><span class="sp">&gt;</span>
+    <span class="sp">&lt;label</span> <span class="sk">for</span>=<span class="ss">"confirm"</span><span class="sp">&gt;</span>Confirm Password<span class="sp">&lt;/label&gt;</span>
+    <span class="sp">&lt;input</span> <span class="sk">type</span>=<span class="ss">"password"</span> <span class="sk">id</span>=<span class="ss">"confirm"</span> <span class="sk">required</span>
+      <span class="sk">aria-describedby</span>=<span class="ss">"confirm-err"</span> <span class="sk">aria-invalid</span>=<span class="ss">"false"</span><span class="sp">/&gt;</span>
+    <span class="sp">&lt;span</span> <span class="sk">id</span>=<span class="ss">"confirm-err"</span> <span class="sk">role</span>=<span class="ss">"alert"</span><span class="sp">&gt;&lt;/span&gt;</span>
+  <span class="sp">&lt;/div&gt;</span>
+<span class="sp">&lt;/form&gt;</span>
+
+<span class="sc">// JavaScript</span>
+<span class="sk">const</span> pw      = <span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'pw'</span>);
+<span class="sk">const</span> confirm = <span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'confirm'</span>);
+
+<span class="sk">function</span> <span class="sf">validatePw</span>() {
+  <span class="sk">const</span> err = <span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'pw-err'</span>);
+  <span class="sk">if</span> (pw.validity.valueMissing) { err.textContent = <span class="ss">'Required.'</span>; pw.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>,<span class="ss">'true'</span>); }
+  <span class="sk">else if</span> (pw.validity.tooShort) { err.textContent = <span class="ss">'Min. 8 chars.'</span>; pw.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>,<span class="ss">'true'</span>); }
+  <span class="sk">else</span> { err.textContent = <span class="ss">''</span>; pw.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>,<span class="ss">'false'</span>); }
+}
+
+<span class="sk">function</span> <span class="sf">validateConfirm</span>() {
+  <span class="sk">const</span> err = <span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'confirm-err'</span>);
+  <span class="sk">if</span> (confirm.value === <span class="ss">''</span>) {
+    confirm.<span class="sf">setCustomValidity</span>(<span class="ss">''</span>);
+    err.textContent = <span class="ss">''</span>;
+    confirm.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>, <span class="ss">'false'</span>);
+  } <span class="sk">else if</span> (confirm.value !== pw.value) {
+    confirm.<span class="sf">setCustomValidity</span>(<span class="ss">'Passwords do not match'</span>);
+    err.textContent = <span class="ss">'Passwords do not match.'</span>;
+    confirm.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>, <span class="ss">'true'</span>);
+  } <span class="sk">else</span> {
+    confirm.<span class="sf">setCustomValidity</span>(<span class="ss">''</span>); <span class="sc">// ← must clear!</span>
+    err.textContent = <span class="ss">'✓ Passwords match'</span>;
+    confirm.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>, <span class="ss">'false'</span>);
+  }
+}
+
+pw.<span class="sf">addEventListener</span>(<span class="ss">'input'</span>, () => { <span class="sf">validatePw</span>(); <span class="sf">validateConfirm</span>(); });
+confirm.<span class="sf">addEventListener</span>(<span class="ss">'input'</span>, <span class="sf">validateConfirm</span>);</code></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Challenge 3 -->
+  <div class="challenge" id="c3">
+    <div class="challenge-header">
+      <span class="ch-num">C3</span>
+      <h3>Full 4-Field Form with Disable-Submit-Until-Valid</h3>
+      <span class="ch-difficulty diff-hard">Hard</span>
+    </div>
+    <div class="challenge-body">
+      <div class="task-box">
+        <strong>Task:</strong> Build a complete registration form with 4 validated fields, plus a <strong>bonus</strong>: the submit button stays disabled until all fields are valid.<br>
+        <ul>
+          <li><strong>Student ID:</strong> exactly 9 digits (<code>/^\d{9}$/</code>)</li>
+          <li><strong>Email:</strong> required, valid format (use <code>typeMismatch</code>)</li>
+          <li><strong>Password:</strong> required, min 8 chars</li>
+          <li><strong>Phone:</strong> format 010-XXXX-XXXX (<code>/^\d{3}-\d{4}-\d{4}$/</code>)</li>
+          <li><strong>Bonus:</strong> check all fields after each input event; if all valid, enable submit button</li>
+        </ul>
+      </div>
+
+      <div class="ch-btns">
+        <button class="btn-reveal" onclick="toggleSolution('sol3', this)">Reveal Solution</button>
+      </div>
+
+      <div class="sol-box" id="sol3">
+        <div class="code-wrap">
+          <div class="code-bar">
+            <span class="code-lang">JavaScript — full solution (HTML structure as in Section 2.1)</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+          </div>
+          <div class="code-block"><code><span class="sc">// Field references</span>
+<span class="sk">const</span> sid   = <span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'sid'</span>);
+<span class="sk">const</span> email = <span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'email'</span>);
+<span class="sk">const</span> pw    = <span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'pw'</span>);
+<span class="sk">const</span> phone = <span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'phone'</span>);
+<span class="sk">const</span> submitBtn = <span class="sp">document</span>.<span class="sf">getElementById</span>(<span class="ss">'submit-btn'</span>);
+
+<span class="sc">// Patterns</span>
+<span class="sk">const</span> SID_PATTERN   = <span class="sr">/^\d{9}$/</span>;
+<span class="sk">const</span> PHONE_PATTERN = <span class="sr">/^\d{3}-\d{4}-\d{4}$/</span>;
+
+<span class="sc">// Start disabled</span>
+submitBtn.disabled = <span class="sk">true</span>;
+
+<span class="sc">// Generic helper</span>
+<span class="sk">function</span> <span class="sf">setErr</span>(input, errId, msg) {
+  <span class="sp">document</span>.<span class="sf">getElementById</span>(errId).textContent = msg;
+  input.<span class="sf">setAttribute</span>(<span class="ss">'aria-invalid'</span>, msg ? <span class="ss">'true'</span> : <span class="ss">'false'</span>);
+  input.style.borderColor = msg ? <span class="ss">'#ef4444'</span> : (input.value ? <span class="ss">'#22c55e'</span> : <span class="ss">''</span>);
+}
+
+<span class="sk">function</span> <span class="sf">validateSid</span>() {
+  <span class="sk">if</span> (sid.validity.valueMissing)        <span class="sf">setErr</span>(sid, <span class="ss">'sid-err'</span>, <span class="ss">'Required.'</span>);
+  <span class="sk">else if</span> (!SID_PATTERN.<span class="sf">test</span>(sid.value)) <span class="sf">setErr</span>(sid, <span class="ss">'sid-err'</span>, <span class="ss">'Exactly 9 digits.'</span>);
+  <span class="sk">else</span>                                   <span class="sf">setErr</span>(sid, <span class="ss">'sid-err'</span>, <span class="ss">''</span>);
+}
+
+<span class="sk">function</span> <span class="sf">validateEmail</span>() {
+  <span class="sk">if</span> (email.validity.valueMissing)      <span class="sf">setErr</span>(email, <span class="ss">'email-err'</span>, <span class="ss">'Required.'</span>);
+  <span class="sk">else if</span> (email.validity.typeMismatch) <span class="sf">setErr</span>(email, <span class="ss">'email-err'</span>, <span class="ss">'Valid email required.'</span>);
+  <span class="sk">else</span>                                  <span class="sf">setErr</span>(email, <span class="ss">'email-err'</span>, <span class="ss">''</span>);
+}
+
+<span class="sk">function</span> <span class="sf">validatePw</span>() {
+  <span class="sk">if</span> (pw.validity.valueMissing) <span class="sf">setErr</span>(pw, <span class="ss">'pw-err'</span>, <span class="ss">'Required.'</span>);
+  <span class="sk">else if</span> (pw.validity.tooShort) <span class="sf">setErr</span>(pw, <span class="ss">'pw-err'</span>, <span class="ss">'Min. 8 characters.'</span>);
+  <span class="sk">else</span>                           <span class="sf">setErr</span>(pw, <span class="ss">'pw-err'</span>, <span class="ss">''</span>);
+}
+
+<span class="sk">function</span> <span class="sf">validatePhone</span>() {
+  <span class="sk">if</span> (!PHONE_PATTERN.<span class="sf">test</span>(phone.value))
+    <span class="sf">setErr</span>(phone, <span class="ss">'phone-err'</span>, <span class="ss">'Format: 010-1234-5678'</span>);
+  <span class="sk">else</span>
+    <span class="sf">setErr</span>(phone, <span class="ss">'phone-err'</span>, <span class="ss">''</span>);
+}
+
+<span class="sc">// Bonus: check all valid → enable submit</span>
+<span class="sk">function</span> <span class="sf">updateSubmitState</span>() {
+  <span class="sk">const</span> allValid = [sid, email, pw].<span class="sf">every</span>(f => f.validity.valid)
+    &amp;&amp; PHONE_PATTERN.<span class="sf">test</span>(phone.value);
+  submitBtn.disabled = !allValid;
+  submitBtn.style.opacity = allValid ? <span class="ss">'1'</span> : <span class="ss">'0.4'</span>;
+}
+
+<span class="sc">// Wire up events</span>
+[
+  [sid,   <span class="sf">validateSid</span>],
+  [email, <span class="sf">validateEmail</span>],
+  [pw,    <span class="sf">validatePw</span>],
+  [phone, <span class="sf">validatePhone</span>]
+].<span class="sf">forEach</span>(([el, fn]) => {
+  el.<span class="sf">addEventListener</span>(<span class="ss">'input'</span>, () => { <span class="sf">fn</span>(); <span class="sf">updateSubmitState</span>(); });
+});</code></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+</div><!-- /layout -->
+
+<footer id="site-footer">
+  K0126002 Web Programming · Week 6 Friday · Study Guide v2 · Interactive Edition
+</footer>
+
+<script>
+/* ── Theme Toggle ── */
+function toggleTheme() {
+  const root = document.documentElement;
+  const btn = document.getElementById('theme-toggle');
+  if (root.getAttribute('data-theme') === 'dark') {
+    root.setAttribute('data-theme', 'light');
+    btn.textContent = '🌙 Dark';
+  } else {
+    root.setAttribute('data-theme', 'dark');
+    btn.textContent = '☀️ Light';
+  }
+  // Refresh playground iframe after theme change
+  updatePreview();
+}
+
+/* ── Sidebar Toggle (mobile) ── */
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+/* ── Progress Bar ── */
+window.addEventListener('scroll', function() {
+  const scrolled = window.scrollY;
+  const total = document.body.scrollHeight - window.innerHeight;
+  const pct = total > 0 ? (scrolled / total) * 100 : 0;
+  document.getElementById('progress-bar').style.width = pct + '%';
+});
+
+/* ── IntersectionObserver for sidebar nav active state ── */
+(function() {
+  const sections = document.querySelectorAll('.section, .page-intro');
+  const navLinks = document.querySelectorAll('#nav-menu a');
+
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navLinks.forEach(function(link) {
+          link.classList.remove('active');
+          const href = link.getAttribute('href');
+          if (href && href === '#' + id) {
+            link.classList.add('active');
+          }
+        });
+      }
+    });
+  }, { threshold: 0.2, rootMargin: '-53px 0px 0px 0px' });
+
+  // Observe section elements and subsection anchors
+  document.querySelectorAll('[id]').forEach(function(el) {
+    observer.observe(el);
+  });
+})();
+
+/* ── Copy Button ── */
+function copyCode(btn) {
+  let text = '';
+  // Walk up to code-wrap or comp-code-section, find code-block
+  let parent = btn.closest('.code-wrap, .comp-code-section');
+  if (parent) {
+    const codeEl = parent.querySelector('.code-block code');
+    if (codeEl) text = codeEl.innerText || codeEl.textContent;
+  }
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(function() {
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(function() { btn.textContent = orig; }, 1800);
+  }).catch(function() {
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(function() { btn.textContent = orig; }, 1800);
+  });
+}
+
+/* ── Challenge solution reveal ── */
+function toggleSolution(id, btn) {
+  const box = document.getElementById(id);
+  box.classList.toggle('open');
+  btn.textContent = box.classList.contains('open') ? 'Hide Solution' : 'Reveal Solution';
+}
+
+/* ─────────────────────────────────────────────── */
+/* ── JS Validation for the RIGHT comparison form ─ */
+/* ─────────────────────────────────────────────── */
+(function() {
+  function setFieldError(input, errId, msg) {
+    const span = document.getElementById(errId);
+    if (!span) return;
+    span.textContent = msg;
+    input.setAttribute('aria-invalid', msg ? 'true' : 'false');
+    input.classList.toggle('field-error', !!msg);
+    input.classList.toggle('field-valid', !msg && input.value !== '');
+  }
+
+  function validateSid(input) {
+    if (input.validity.valueMissing)
+      setFieldError(input, 'wj-sid-err', 'Student ID is required.');
+    else if (!/^\d{9}$/.test(input.value))
+      setFieldError(input, 'wj-sid-err', 'Must be exactly 9 digits.');
+    else
+      setFieldError(input, 'wj-sid-err', '');
+  }
+
+  function validateEmail(input) {
+    if (input.validity.valueMissing)
+      setFieldError(input, 'wj-email-err', 'Email is required.');
+    else if (input.validity.typeMismatch)
+      setFieldError(input, 'wj-email-err', 'Enter a valid email address.');
+    else
+      setFieldError(input, 'wj-email-err', '');
+  }
+
+  function validatePassword(input) {
+    if (input.validity.valueMissing)
+      setFieldError(input, 'wj-pw-err', 'Password is required.');
+    else if (input.validity.tooShort)
+      setFieldError(input, 'wj-pw-err', 'Min. 8 characters required.');
+    else
+      setFieldError(input, 'wj-pw-err', '');
+  }
+
+  const wjSid   = document.getElementById('wj-sid');
+  const wjEmail = document.getElementById('wj-email');
+  const wjPw    = document.getElementById('wj-pw');
+  const wjForm  = document.getElementById('form-with-js');
+  const wjSucc  = document.getElementById('wj-success');
+
+  if (wjSid)   wjSid.addEventListener('input',   function() { validateSid(this); });
+  if (wjEmail) wjEmail.addEventListener('input',  function() { validateEmail(this); });
+  if (wjPw)    wjPw.addEventListener('input',     function() { validatePassword(this); });
+
+  if (wjForm) {
+    wjForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      validateSid(wjSid);
+      validateEmail(wjEmail);
+      validatePassword(wjPw);
+      if (wjSid.validity.valid && wjEmail.validity.valid && wjPw.validity.valid) {
+        wjSucc.style.display = 'block';
+      } else {
+        wjSucc.style.display = 'none';
+      }
+    });
+  }
+})();
+
+/* ─────────────────────────────────── */
+/* ── Live Playground ── */
+/* ─────────────────────────────────── */
+const PRESETS = [
+  // 0: Basic Form
+  `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  body { font-family: system-ui, sans-serif; padding: 20px; background: #f8fafc; color: #1a2340; }
+  .field { margin-bottom: 14px; }
+  label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #374151; }
+  input { width: 100%; padding: 9px 12px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 14px; box-sizing: border-box; }
+  input:focus { border-color: #3b82f6; outline: none; }
+  button { background: #3b82f6; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; }
+  button:hover { background: #2563eb; }
+  h2 { font-size: 18px; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+<h2>Basic Form (novalidate)</h2>
+<form novalidate>
+  <div class="field">
+    <label for="name">Name</label>
+    <input type="text" id="name" placeholder="Your name" required>
+  </div>
+  <div class="field">
+    <label for="email">Email</label>
+    <input type="email" id="email" placeholder="email@example.com" required>
+  </div>
+  <button type="submit">Submit</button>
+</form>
+<script>
+  document.querySelector('form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    alert('Form submitted! (Add JS validation here)');
+  });
+<\/script>
+</body>
+</html>`,
+
+  // 1: Real-time Validation
+  `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  body { font-family: system-ui, sans-serif; padding: 20px; background: #f8fafc; color: #1a2340; }
+  .field { margin-bottom: 14px; }
+  label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  input { width: 100%; padding: 9px 12px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none; transition: border-color .2s; }
+  input.ok  { border-color: #22c55e; background: #f0fdf4; }
+  input.err { border-color: #ef4444; background: #fef2f2; }
+  .msg { font-size: 12px; margin-top: 3px; min-height: 16px; color: #dc2626; font-weight: 600; }
+  button { background: #22c55e; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 4px; }
+  h2 { font-size: 18px; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+<h2>Real-time Validation</h2>
+<form novalidate id="f">
+  <div class="field">
+    <label>Email</label>
+    <input type="email" id="email" required placeholder="you@example.com"
+      aria-describedby="email-err" aria-invalid="false">
+    <span id="email-err" class="msg" role="alert"></span>
+  </div>
+  <div class="field">
+    <label>Password (min 8 chars)</label>
+    <input type="password" id="pw" minlength="8" required
+      aria-describedby="pw-err" aria-invalid="false">
+    <span id="pw-err" class="msg" role="alert"></span>
+  </div>
+  <button type="submit">Submit</button>
+</form>
+<script>
+  function validate(input, errId) {
+    const err = document.getElementById(errId);
+    let msg = '';
+    if (input.validity.valueMissing)  msg = 'This field is required.';
+    else if (input.validity.typeMismatch) msg = 'Enter a valid email.';
+    else if (input.validity.tooShort) msg = 'Too short (min 8 chars).';
+    err.textContent = msg;
+    input.setAttribute('aria-invalid', msg ? 'true' : 'false');
+    input.className = input.value ? (msg ? 'err' : 'ok') : '';
+  }
+  document.getElementById('email').addEventListener('input', function() { validate(this, 'email-err'); });
+  document.getElementById('pw').addEventListener('input',    function() { validate(this, 'pw-err'); });
+  document.getElementById('f').addEventListener('submit', function(e) {
+    e.preventDefault();
+    // Run final validation on submit
+    const em = document.getElementById('email');
+    const pw = document.getElementById('pw');
+    validate(em, 'email-err'); validate(pw, 'pw-err');
+    if (em.validity.valid && pw.validity.valid) alert('All valid! ✓');
+  });
+<\/script>
+</body>
+</html>`,
+
+  // 2: Full Pattern with ARIA + setCustomValidity
+  `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  body { font-family: system-ui, sans-serif; padding: 20px; background: #f8fafc; color: #1a2340; font-size: 14px; }
+  h2 { font-size: 18px; margin-bottom: 16px; }
+  .field { margin-bottom: 14px; }
+  label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; color: #374151; }
+  input { width: 100%; padding: 9px 12px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none; transition: border-color .2s, background .2s; }
+  input.ok  { border-color: #22c55e; background: #f0fdf4; }
+  input.err { border-color: #ef4444; background: #fef2f2; }
+  .msg { font-size: 12px; margin-top: 3px; min-height: 16px; font-weight: 600; }
+  .msg.error { color: #dc2626; }
+  .msg.good  { color: #16a34a; }
+  button { background: #6366f1; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 8px; }
+  #success { display:none; margin-top:12px; padding:10px 14px; background:#dcfce7; color:#166534; border-radius:8px; font-weight:600; }
+</style>
+</head>
+<body>
+<h2>Full Pattern: ARIA + setCustomValidity</h2>
+<form novalidate id="full-form">
+  <div class="field">
+    <label for="sid">Student ID (9 digits)</label>
+    <input type="text" id="sid" required placeholder="202312345"
+      aria-describedby="sid-err" aria-invalid="false">
+    <span id="sid-err" class="msg" role="alert"></span>
+  </div>
+  <div class="field">
+    <label for="email">Email</label>
+    <input type="email" id="email" required placeholder="you@gachon.ac.kr"
+      aria-describedby="email-err" aria-invalid="false">
+    <span id="email-err" class="msg" role="alert"></span>
+  </div>
+  <div class="field">
+    <label for="pw">Password (min 8)</label>
+    <input type="password" id="pw" minlength="8" required
+      aria-describedby="pw-err" aria-invalid="false">
+    <span id="pw-err" class="msg" role="alert"></span>
+  </div>
+  <div class="field">
+    <label for="confirm">Confirm Password</label>
+    <input type="password" id="confirm" required
+      aria-describedby="confirm-err" aria-invalid="false">
+    <span id="confirm-err" class="msg" role="alert"></span>
+  </div>
+  <button type="submit">Register</button>
+  <div id="success">✓ Registration successful!</div>
+</form>
+<script>
+  const SID = /^\\d{9}$/;
+  function setErr(input, errId, msg, isGood) {
+    const s = document.getElementById(errId);
+    s.textContent = msg;
+    s.className = 'msg ' + (isGood ? 'good' : (msg ? 'error' : ''));
+    input.setAttribute('aria-invalid', (!isGood && msg) ? 'true' : 'false');
+    input.className = input.value ? ((!isGood && msg) ? 'err' : 'ok') : '';
+  }
+  function vSid() {
+    const i = document.getElementById('sid');
+    if (i.validity.valueMissing) setErr(i,'sid-err','Required.');
+    else if (!SID.test(i.value)) setErr(i,'sid-err','Exactly 9 digits only.');
+    else setErr(i,'sid-err','✓ Valid',true);
+  }
+  function vEmail() {
+    const i = document.getElementById('email');
+    if (i.validity.valueMissing) setErr(i,'email-err','Required.');
+    else if (i.validity.typeMismatch) setErr(i,'email-err','Enter a valid email.');
+    else setErr(i,'email-err','✓ Valid',true);
+  }
+  function vPw() {
+    const i = document.getElementById('pw');
+    if (i.validity.valueMissing) setErr(i,'pw-err','Required.');
+    else if (i.validity.tooShort) setErr(i,'pw-err','Min. 8 characters.');
+    else setErr(i,'pw-err','✓ Strong',true);
+    vConfirm(); // re-check confirm when pw changes
+  }
+  function vConfirm() {
+    const pw = document.getElementById('pw');
+    const c  = document.getElementById('confirm');
+    if (!c.value) { c.setCustomValidity(''); setErr(c,'confirm-err',''); return; }
+    if (c.value !== pw.value) {
+      c.setCustomValidity('mismatch');
+      setErr(c,'confirm-err','Passwords do not match.');
+    } else {
+      c.setCustomValidity('');
+      setErr(c,'confirm-err','✓ Match',true);
+    }
+  }
+  ['sid','email','pw','confirm'].forEach(function(id) {
+    const fns = {sid:vSid,email:vEmail,pw:vPw,confirm:vConfirm};
+    document.getElementById(id).addEventListener('input', fns[id]);
+  });
+  document.getElementById('full-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    vSid(); vEmail(); vPw(); vConfirm();
+    const allOk = ['sid','email','pw','confirm'].every(function(id) {
+      return document.getElementById(id).validity.valid;
+    });
+    document.getElementById('success').style.display = allOk ? 'block' : 'none';
+  });
+<\/script>
+</body>
+</html>`
+];
+
+let debounceTimer = null;
+
+function updatePreview() {
+  const textarea = document.getElementById('pg-editor');
+  const iframe   = document.getElementById('pg-preview');
+  if (!textarea || !iframe) return;
+  iframe.srcdoc = textarea.value;
+}
+
+function loadPreset(idx, btn) {
+  const textarea = document.getElementById('pg-editor');
+  if (!textarea) return;
+  textarea.value = PRESETS[idx];
+  updatePreview();
+  // Update active button
+  document.querySelectorAll('.preset-btn').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+}
+
+// Initialize playground with preset 0
+document.addEventListener('DOMContentLoaded', function() {
+  loadPreset(0, document.querySelector('.preset-btn'));
+
+  // Debounced update on textarea input
+  const textarea = document.getElementById('pg-editor');
+  if (textarea) {
+    textarea.addEventListener('input', function() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(updatePreview, 300);
+      // Remove active from presets since user is editing
+      document.querySelectorAll('.preset-btn').forEach(function(b) { b.classList.remove('active'); });
+    });
+    // Tab key support in textarea
+    textarea.addEventListener('keydown', function(e) {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const start = this.selectionStart;
+        const end   = this.selectionEnd;
+        this.value  = this.value.substring(0, start) + '  ' + this.value.substring(end);
+        this.selectionStart = this.selectionEnd = start + 2;
+      }
+    });
+  }
+});
+</script>
+</body>
+</html>
