@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Project Proposal Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #0f1b2d;
+      --navy-mid: #1a2e45;
+      --blue: #2563eb;
+      --green: #16a34a;
+      --yellow: #f59e0b;
+      --red: #dc2626;
+      --purple: #7c3aed;
+      --bg: #f8fafc;
+      --surf: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --brd: #e2e8f0;
+      --code-bg: #1e293b;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0d1117; --surf: #161b22; --text: #e6edf3;
+        --muted: #8b949e; --brd: #30363d;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #0d1117; --surf: #161b22; --text: #e6edf3;
+      --muted: #8b949e; --brd: #30363d;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.65; }
+
+    /* ── Header ── */
+    header {
+      background: var(--navy);
+      color: #fff;
+      padding: 3rem 1.5rem 2.5rem;
+      text-align: center;
+      position: relative;
+    }
+    .badge {
+      display: inline-block;
+      background: #f7df1e;
+      color: #0f1b2d;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.3rem 0.9rem;
+      border-radius: 999px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    header h1 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.6rem; }
+    header p { color: #94a3b8; max-width: 520px; margin: 0 auto; font-size: 0.95rem; }
+
+    /* ── Due banner ── */
+    .due-banner {
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+      color: #fff;
+      text-align: center;
+      padding: 0.9rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .due-banner span { opacity: 0.8; font-weight: 400; margin-left: 0.5rem; font-size: 0.9rem; }
+
+    /* ── Main ── */
+    main { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
+    section { margin-bottom: 3rem; }
+    h2 {
+      font-size: 1.3rem; font-weight: 700; margin-bottom: 1.25rem;
+      padding-bottom: 0.5rem; border-bottom: 2px solid var(--brd);
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    /* ── Quick Answers ── */
+    .qa-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+    .qa-card {
+      background: var(--surf); border-radius: 12px;
+      padding: 1.25rem 1.5rem; border-left: 4px solid var(--blue);
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+    .qa-card.c-green  { border-color: var(--green); }
+    .qa-card.c-yellow { border-color: var(--yellow); }
+    .qa-card.c-red    { border-color: var(--red); }
+    .qa-q { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 0.45rem; }
+    .qa-a { font-weight: 600; font-size: 0.95rem; }
+
+    /* ── Slide list ── */
+    .slide-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .slide-item {
+      background: var(--surf); border-radius: 10px; padding: 1rem 1.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06); border: 1px solid var(--brd);
+      display: grid; grid-template-columns: 2.6rem 1fr; gap: 1rem; align-items: start;
+    }
+    .slide-num {
+      width: 2.6rem; height: 2.6rem; background: var(--navy); color: #f7df1e;
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.9rem; flex-shrink: 0; margin-top: 0.05rem;
+    }
+    .slide-content h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.35rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+    .slide-content ul { margin: 0.1rem 0 0 1.1rem; color: var(--muted); font-size: 0.88rem; }
+    .slide-content li { margin: 0.2rem 0; }
+
+    /* ── Tags ── */
+    .tag { display: inline-block; padding: 0.15rem 0.55rem; border-radius: 999px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.03em; }
+    .tag-req  { background: #fee2e2; color: #991b1b; }
+    .tag-opt  { background: #dcfce7; color: #166534; }
+    .tag-good { background: #dbeafe; color: #1e40af; }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .tag-req  { background: #450a0a; color: #fca5a5; }
+      :root:not([data-theme="light"]) .tag-opt  { background: #052e16; color: #86efac; }
+      :root:not([data-theme="light"]) .tag-good { background: #172554; color: #93c5fd; }
+    }
+
+    /* ── Note boxes ── */
+    .note {
+      background: #eff6ff; border-left: 4px solid var(--blue);
+      border-radius: 8px; padding: 1rem 1.25rem; font-size: 0.9rem; color: #1e40af; margin: 0.75rem 0;
+    }
+    .note strong { display: block; margin-bottom: 0.3rem; font-size: 0.95rem; }
+    .note.green  { background: #f0fdf4; border-color: var(--green); color: #14532d; }
+    .note.yellow { background: #fefce8; border-color: var(--yellow); color: #78350f; }
+    .note.red    { background: #fff1f2; border-color: var(--red); color: #9f1239; }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .note       { background: #1e3a5f; color: #93c5fd; }
+      :root:not([data-theme="light"]) .note.green  { background: #052e16; color: #86efac; }
+      :root:not([data-theme="light"]) .note.yellow { background: #451a03; color: #fcd34d; }
+      :root:not([data-theme="light"]) .note.red    { background: #450a0a; color: #fca5a5; }
+    }
+
+    /* ── Code inline ── */
+    code {
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      background: var(--code-bg); color: #93c5fd;
+      padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.85em;
+    }
+
+    /* ── Timeline ── */
+    .timeline { display: flex; flex-direction: column; gap: 0.6rem; }
+    .tl-item {
+      display: grid; grid-template-columns: 8rem 1fr; gap: 0.75rem; align-items: start;
+    }
+    .tl-week {
+      background: var(--navy); color: #f7df1e; padding: 0.45rem 0.75rem;
+      border-radius: 6px; font-size: 0.78rem; font-weight: 700; text-align: center; line-height: 1.3;
+    }
+    .tl-detail {
+      background: var(--surf); border-radius: 8px; padding: 0.7rem 1rem;
+      border: 1px solid var(--brd); font-size: 0.88rem;
+    }
+    .tl-detail strong { display: block; font-size: 0.92rem; margin-bottom: 0.15rem; }
+    .tl-detail.highlight { border-color: var(--yellow); border-width: 2px; }
+    .tl-detail.highlight strong::before { content: "⭐ "; }
+
+    /* ── Checklist ── */
+    .checklist { background: var(--surf); border-radius: 12px; padding: 1.25rem 1.5rem; border: 1px solid var(--brd); }
+    .check-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.55rem 0; border-bottom: 1px solid var(--brd); }
+    .check-item:last-child { border-bottom: none; }
+    .check-box { width: 18px; height: 18px; border: 2px solid var(--brd); border-radius: 4px; flex-shrink: 0; margin-top: 0.15rem; background: var(--surf); }
+    .check-text { font-size: 0.9rem; }
+    .check-text em { color: var(--muted); font-size: 0.83rem; }
+
+    /* ── Grade table ── */
+    .grade-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; border-radius: 10px; overflow: hidden; }
+    .grade-table thead tr { background: var(--navy); color: #fff; }
+    .grade-table th { padding: 0.65rem 1rem; text-align: left; font-weight: 600; }
+    .grade-table td { padding: 0.65rem 1rem; border-bottom: 1px solid var(--brd); background: var(--surf); }
+    .grade-table tr:last-child td { border-bottom: none; font-weight: 700; background: #f1f5f9; }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .grade-table td { background: var(--surf); }
+      :root:not([data-theme="light"]) .grade-table tr:last-child td { background: #1e293b; }
+    }
+    .pts { font-weight: 700; color: var(--blue); }
+
+    /* ── FAQ ── */
+    .faq { display: flex; flex-direction: column; gap: 0.75rem; }
+    .faq-item { background: var(--surf); border: 1px solid var(--brd); border-radius: 10px; overflow: hidden; }
+    .faq-q {
+      padding: 0.9rem 1.25rem; font-weight: 600; font-size: 0.92rem;
+      cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+      user-select: none;
+    }
+    .faq-q::after { content: '+'; font-size: 1.2rem; color: var(--muted); transition: transform 0.2s; }
+    .faq-item.open .faq-q::after { transform: rotate(45deg); }
+    .faq-a { padding: 0 1.25rem 0.9rem; font-size: 0.88rem; color: var(--muted); display: none; }
+    .faq-item.open .faq-a { display: block; }
+
+    /* ── Footer ── */
+    footer { text-align: center; padding: 2rem 1.5rem; color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--brd); margin-top: 2rem; }
+    footer a { color: var(--blue); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      header h1 { font-size: 1.6rem; }
+      .qa-grid { grid-template-columns: 1fr; }
+      .slide-item { grid-template-columns: 1fr; }
+      .slide-num { display: none; }
+      .tl-item { grid-template-columns: 1fr; }
+      .tl-week { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="badge">K0126002 · Web Programming · Fall 2026</div>
+  <h1>Team Project Proposal</h1>
+  <p>Everything your team needs to prepare for November 3. Read this carefully — all student questions are answered here.</p>
+</header>
+
+<div class="due-banner">
+  ⏰ Submission deadline: Sunday, October 25, 2026 — midnight
+  <span>In-class presentation: Monday, November 3 (Week 10)</span>
+</div>
+
+<main>
+
+  <!-- Quick Answers -->
+  <section>
+    <h2>🎯 Quick Answers</h2>
+    <div class="qa-grid">
+      <div class="qa-card">
+        <div class="qa-q">What does the proposal need?</div>
+        <div class="qa-a">5–7 slides covering your team, concept, features, tech stack, wireframes &amp; timeline</div>
+      </div>
+      <div class="qa-card c-green">
+        <div class="qa-q">Is it just slides we submit?</div>
+        <div class="qa-a">No — four deliverables: slides (PDF), video, source code, and a deployed page that links everything. All inside your GitHub repo.</div>
+      </div>
+      <div class="qa-card c-yellow">
+        <div class="qa-q">Must there be a video presentation?</div>
+        <div class="qa-a">YES — mandatory. Record a 2–3 min video walking through your proposal. We may not have time for every team to present live in class.</div>
+      </div>
+      <div class="qa-card c-red">
+        <div class="qa-q">When is it due?</div>
+        <div class="qa-a">Sunday October 25 — midnight. That's this Sunday. In-class presentations are Monday Nov 3 (Week 10).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Required slide contents -->
+  <section>
+    <h2>📋 Required Slide Contents</h2>
+    <p style="margin-bottom:1.25rem; color:var(--muted); font-size:.9rem;">You need to cover all 7 items below. You can combine some onto one slide — quality matters more than quantity.</p>
+    <div class="slide-list">
+
+      <div class="slide-item">
+        <div class="slide-num">01</div>
+        <div class="slide-content">
+          <h3>Team Introduction <span class="tag tag-req">Required</span></h3>
+          <ul>
+            <li>Team name (creative but professional)</li>
+            <li>All member names + student IDs</li>
+            <li>GitHub username of every member</li>
+            <li>Role per person: <em>Designer / Lead Developer / API Integration / QA &amp; Testing</em></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="slide-item">
+        <div class="slide-num">02</div>
+        <div class="slide-content">
+          <h3>Project Concept <span class="tag tag-req">Required</span></h3>
+          <ul>
+            <li>Project title</li>
+            <li>2–3 sentence description — what does it do?</li>
+            <li>What problem does it solve?</li>
+            <li>Who are the target users?</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="slide-item">
+        <div class="slide-num">03</div>
+        <div class="slide-content">
+          <h3>Core Features <span class="tag tag-req">Required</span></h3>
+          <ul>
+            <li>List <strong>3–5 specific features</strong> — be concrete, not vague</li>
+            <li>Mark each as <span class="tag tag-req" style="font-size:.65rem">MVP</span> (must-have) or <span class="tag tag-opt" style="font-size:.65rem">Bonus</span></li>
+            <li>❌ Bad: "good UI" &nbsp;✅ Good: "filter results by genre using a dropdown"</li>
+            <li>❌ Bad: "fast loading" &nbsp;✅ Good: "lazy-load search results with fetch()"</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="slide-item">
+        <div class="slide-num">04</div>
+        <div class="slide-content">
+          <h3>Technology Stack <span class="tag tag-req">Required</span></h3>
+          <ul>
+            <li>HTML / CSS / JavaScript (always required)</li>
+            <li>External API name + base URL (e.g. OpenLibrary, OpenWeatherMap, TMDB)</li>
+            <li>Any libraries: Bootstrap, Chart.js, Axios, etc.</li>
+            <li>Your team GitHub repository URL — <strong>must exist before Nov 3</strong></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="slide-item">
+        <div class="slide-num">05</div>
+        <div class="slide-content">
+          <h3>UI Wireframes / Mockups <span class="tag tag-req">Required</span></h3>
+          <ul>
+            <li>At least <strong>2 key screens</strong>: homepage + one main feature page</li>
+            <li>Hand-drawn is fine — take a photo and insert it</li>
+            <li>Figma, draw.io, or Canva are also fine</li>
+            <li>Show: where is the search bar? where do results appear? what does a card look like?</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="slide-item">
+        <div class="slide-num">06</div>
+        <div class="slide-content">
+          <h3>Project Timeline <span class="tag tag-req">Required</span></h3>
+          <ul>
+            <li>Week 10 (Nov 3–9): Finalize design, connect API, basic page structure</li>
+            <li>Week 11 (Nov 10–16): Core features development</li>
+            <li>Week 12 (Nov 17–23): Complete all MVP features, start polishing</li>
+            <li>Week 13 (Nov 24–30): Code review, bug fixing, prepare presentation</li>
+            <li>Week 14 (Dec 1–7): Final presentation &amp; demo</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="slide-item">
+        <div class="slide-num">07</div>
+        <div class="slide-content">
+          <h3>GitHub Repository Setup <span class="tag tag-opt">Bonus +5 pts</span></h3>
+          <ul>
+            <li>Create the team repo before Nov 3 (get extra credit)</li>
+            <li>Add a <code>README.md</code> with project name, team, and description</li>
+            <li>Invite all team members as collaborators</li>
+            <li>Add a <code>.gitignore</code> that excludes <code>.env</code> files (protect API keys!)</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Repo structure + deployed page -->
+  <section>
+    <h2>📁 Repository Structure &amp; Deployed Page</h2>
+    <p style="margin-bottom:1.25rem; color:var(--muted); font-size:.9rem;">
+      Everything lives inside your team's GitHub repo and is accessible from your deployed GitHub Pages site.
+      The professor evaluates your proposal by visiting <strong>one URL</strong> — your deployed page — where every file must be reachable.
+    </p>
+
+    <div class="note red">
+      <strong>⚠️ Your deployed page is the submission portal</strong>
+      From <code>https://[username].github.io/[repo-name]/</code> the professor must be able to:
+      watch your video, open your PDF slides, and browse your source code — all in the browser, no downloads required.
+    </div>
+
+    <p style="margin: 1.25rem 0 0.75rem; font-weight: 600; font-size: .95rem;">Required folder structure inside your repo:</p>
+    <div style="background:var(--code-bg); border-radius:10px; padding:1.25rem 1.5rem; font-family:'JetBrains Mono','Courier New',monospace; font-size:.83rem; color:#e2e8f0; overflow-x:auto; line-height:1.8;">
+<span style="color:#f7df1e">your-webpro-repo/</span><br>
+├── <span style="color:#4ade80">index.html</span>          <span style="color:#64748b">&lt;!-- main deployed page — links to everything below --&gt;</span><br>
+├── <span style="color:#4ade80">style.css</span><br>
+├── <span style="color:#4ade80">app.js</span>             <span style="color:#64748b">&lt;!-- your project source code (can be subfolders) --&gt;</span><br>
+├── <span style="color:#fb923c">proposal/</span><br>
+│   ├── <span style="color:#4ade80">index.html</span>      <span style="color:#64748b">&lt;!-- proposal landing page (embedded video + PDF + links) --&gt;</span><br>
+│   ├── <span style="color:#93c5fd">proposal_[TeamName].pdf</span>   <span style="color:#64748b">&lt;!-- PDF of your slides --&gt;</span><br>
+│   └── <span style="color:#93c5fd">proposal_[TeamName].pptx</span>  <span style="color:#64748b">&lt;!-- original PPTX (optional if PDF is present) --&gt;</span><br>
+└── <span style="color:#f472b6">README.md</span>          <span style="color:#64748b">&lt;!-- team name, members, project description, live URL --&gt;</span>
+    </div>
+
+    <p style="margin: 1.5rem 0 0.75rem; font-weight: 600; font-size: .95rem;">What <code>proposal/index.html</code> must show:</p>
+    <div class="slide-list" style="gap:.6rem">
+      <div class="slide-item" style="padding:.85rem 1.25rem">
+        <div class="slide-num" style="background:#7c3aed; font-size:.75rem">▶</div>
+        <div class="slide-content">
+          <h3 style="font-size:.95rem">Embedded video <span class="tag tag-req">Required</span></h3>
+          <ul>
+            <li>Upload your video to <strong>YouTube (Unlisted)</strong> or Google Drive (Anyone with link)</li>
+            <li>Embed it with an <code>&lt;iframe&gt;</code> — the professor watches it directly on the page</li>
+            <li>Do not require a download or sign-in to watch</li>
+          </ul>
+        </div>
+      </div>
+      <div class="slide-item" style="padding:.85rem 1.25rem">
+        <div class="slide-num" style="background:#0369a1; font-size:.75rem">📄</div>
+        <div class="slide-content">
+          <h3 style="font-size:.95rem">Embedded PDF slides <span class="tag tag-req">Required</span></h3>
+          <ul>
+            <li>Use <code>&lt;iframe src="proposal_TeamName.pdf"&gt;</code> or a link that opens the PDF in-browser</li>
+            <li>The PDF must be committed inside the <code>proposal/</code> folder</li>
+            <li>Also export slides as PDF from PowerPoint / Google Slides before committing</li>
+          </ul>
+        </div>
+      </div>
+      <div class="slide-item" style="padding:.85rem 1.25rem">
+        <div class="slide-num" style="background:#0f766e; font-size:.75rem">🔗</div>
+        <div class="slide-content">
+          <h3 style="font-size:.95rem">Navigation links <span class="tag tag-req">Required</span></h3>
+          <ul>
+            <li>Link back to your main project page (<code>../index.html</code>)</li>
+            <li>Link to the GitHub repository (source code)</li>
+            <li>List team member names and GitHub profiles</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="note green" style="margin-top:1.25rem">
+      <strong>💡 Minimal proposal/index.html template</strong>
+      Copy this as a starting point and fill in your team's details:
+      <pre style="margin-top:.6rem; background:#0d2818; border-radius:6px; padding:.75rem; overflow-x:auto; font-size:.78rem; color:#86efac; line-height:1.6">&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8"&gt;
+  &lt;title&gt;[Team Name] — Project Proposal&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;[Team Name] — Web Programming Project Proposal&lt;/h1&gt;
+  &lt;p&gt;K0126002 · Fall 2026 · Members: [names]&lt;/p&gt;
+
+  &lt;h2&gt;📹 Video Presentation&lt;/h2&gt;
+  &lt;iframe width="720" height="405"
+    src="https://www.youtube.com/embed/[VIDEO_ID]"
+    allowfullscreen&gt;&lt;/iframe&gt;
+
+  &lt;h2&gt;📄 Proposal Slides (PDF)&lt;/h2&gt;
+  &lt;iframe src="proposal_[TeamName].pdf"
+    width="100%" height="600px"&gt;&lt;/iframe&gt;
+
+  &lt;h2&gt;🔗 Links&lt;/h2&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href="../"&gt;← Back to Project Main Page&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="https://github.com/[org]/[repo]"&gt;GitHub Repository&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+    </div>
+  </section>
+
+  <!-- Video requirements -->
+  <section>
+    <h2>🎬 Video Presentation Requirements</h2>
+    <div class="note red">
+      <strong>Video is mandatory — not optional</strong>
+      Class time may not allow every team to present live. Your video ensures the professor can evaluate your proposal regardless of in-class time.
+    </div>
+    <div class="slide-list" style="gap:.6rem; margin-top:1rem">
+      <div class="slide-item" style="padding:.85rem 1.25rem; grid-template-columns: 6rem 1fr">
+        <div style="font-weight:700; font-size:.85rem; color:var(--muted)">LENGTH</div>
+        <div class="slide-content"><h3 style="font-size:.9rem; font-weight:500">2–3 minutes (minimum 2 min, maximum 3 min 30 sec)</h3></div>
+      </div>
+      <div class="slide-item" style="padding:.85rem 1.25rem; grid-template-columns: 6rem 1fr">
+        <div style="font-weight:700; font-size:.85rem; color:var(--muted)">CONTENT</div>
+        <div class="slide-content">
+          <h3 style="font-size:.9rem; font-weight:500">Walk through your proposal slides while speaking — cover all 6 required sections</h3>
+          <ul style="margin-top:.3rem">
+            <li>Introduce team members and roles (30 sec)</li>
+            <li>Explain the project concept and target users (45 sec)</li>
+            <li>Walk through features and tech stack (45 sec)</li>
+            <li>Show wireframes briefly (30 sec)</li>
+            <li>Close with your timeline (15 sec)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="slide-item" style="padding:.85rem 1.25rem; grid-template-columns: 6rem 1fr">
+        <div style="font-weight:700; font-size:.85rem; color:var(--muted)">FORMAT</div>
+        <div class="slide-content">
+          <h3 style="font-size:.9rem; font-weight:500">Screen recording of your slides + voice narration (face-cam optional)</h3>
+          <ul style="margin-top:.3rem">
+            <li>Tools: OBS Studio (free), Loom (free), PowerPoint Record Slide Show, Zoom local recording</li>
+            <li>Language: English preferred, Korean acceptable</li>
+          </ul>
+        </div>
+      </div>
+      <div class="slide-item" style="padding:.85rem 1.25rem; grid-template-columns: 6rem 1fr">
+        <div style="font-weight:700; font-size:.85rem; color:var(--muted)">HOSTING</div>
+        <div class="slide-content">
+          <h3 style="font-size:.9rem; font-weight:500">Upload to YouTube (Unlisted) or Google Drive (Anyone with link can view)</h3>
+          <ul style="margin-top:.3rem">
+            <li>Do NOT set to Private — the professor must be able to watch without signing in</li>
+            <li>Embed the video in your <code>proposal/index.html</code> page</li>
+            <li>Do not commit the raw .mp4 file to GitHub (large files slow down the repo)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Submission instructions -->
+  <section>
+    <h2>📤 What to Submit — Full Package</h2>
+    <div class="note yellow">
+      <strong>📋 Everything due by Sunday October 25, midnight — this Sunday</strong>
+      The professor evaluates your proposal by visiting your deployed GitHub Pages URL.
+      All four items below must be accessible from that one URL before the deadline.
+    </div>
+    <div class="slide-list" style="gap:.6rem; margin-top:1rem">
+      <div class="slide-item" style="padding:.85rem 1.25rem">
+        <div class="slide-num">①</div>
+        <div class="slide-content">
+          <h3 style="font-size:.95rem">Proposal PDF <span class="tag tag-req">Required</span></h3>
+          <ul><li>Export your slides as PDF and commit to <code>proposal/proposal_[TeamName].pdf</code></li></ul>
+        </div>
+      </div>
+      <div class="slide-item" style="padding:.85rem 1.25rem">
+        <div class="slide-num">②</div>
+        <div class="slide-content">
+          <h3 style="font-size:.95rem">Video presentation <span class="tag tag-req">Required</span></h3>
+          <ul><li>YouTube/Google Drive link embedded in <code>proposal/index.html</code></li></ul>
+        </div>
+      </div>
+      <div class="slide-item" style="padding:.85rem 1.25rem">
+        <div class="slide-num">③</div>
+        <div class="slide-content">
+          <h3 style="font-size:.95rem">Source code <span class="tag tag-req">Required</span></h3>
+          <ul><li>At minimum: initial <code>index.html</code>, <code>style.css</code>, <code>app.js</code> committed to repo root</li></ul>
+        </div>
+      </div>
+      <div class="slide-item" style="padding:.85rem 1.25rem">
+        <div class="slide-num">④</div>
+        <div class="slide-content">
+          <h3 style="font-size:.95rem">Deployed page <span class="tag tag-req">Required</span></h3>
+          <ul><li>GitHub Pages enabled; both <code>[repo].github.io/</code> and <code>[repo].github.io/proposal/</code> must load</li></ul>
+        </div>
+      </div>
+    </div>
+    <div class="note green" style="margin-top:1rem">
+      <strong>💡 Use Google Slides / PDF as backup for in-class</strong>
+      If PPTX has formatting issues on the classroom projector, the PDF in your deployed page is always the fallback.
+    </div>
+  </section>
+
+  <!-- Timeline -->
+  <section>
+    <h2>🗓 Course Timeline — Weeks 9–14</h2>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-week">Week 9<br>Oct 27–Nov 2</div>
+        <div class="tl-detail">
+          <strong>Git &amp; Deployment</strong>
+          Learn Git workflow + GitHub Pages — skills you'll use for your project. Use this week to plan your idea and set up your team repo.
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-week">Week 10<br>Nov 3–9</div>
+        <div class="tl-detail highlight">
+          <strong>Team Project Kickoff — Proposal Due Monday Nov 3</strong>
+          Present your proposal in class (5 min). After feedback, start building: connect to your API, scaffold your HTML structure.
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-week">Week 11<br>Nov 10–16</div>
+        <div class="tl-detail">
+          <strong>API Integration &amp; Backend Basics</strong>
+          Class covers API concepts + fetch(). Apply directly to your project's API integration.
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-week">Week 12<br>Nov 17–23</div>
+        <div class="tl-detail">
+          <strong>Team Project Development I</strong>
+          Dedicated in-class build time. All MVP features should be complete by end of this week.
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-week">Week 13<br>Nov 24–30</div>
+        <div class="tl-detail">
+          <strong>Development II &amp; Code Review</strong>
+          Polish, fix bugs, peer code review. Push final code to GitHub. ⚠️ Nov 29–Dec 1 = university entrance exam period — classes may be online.
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-week">Week 14<br>Dec 1–7</div>
+        <div class="tl-detail highlight">
+          <strong>Final Presentations — Live Demo Required</strong>
+          10-minute presentation + 2-minute video demo + live Q&amp;A. Deploy your project to GitHub Pages before this week.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Checklist -->
+  <section>
+    <h2>✅ Pre-Presentation Checklist</h2>
+    <p style="margin-bottom:1rem; color:var(--muted); font-size:.9rem;">Go through this before Nov 3. Print it out or open it on your phone during the presentation.</p>
+    <p style="margin-bottom:.6rem; color:var(--muted); font-size:.8rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em">Slides</p>
+    <div class="checklist" style="margin-bottom:1rem">
+      <div class="check-item"><div class="check-box"></div><div class="check-text">Team name, member names, student IDs on slide 1</div></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-text">GitHub usernames and roles listed for every member</div></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-text">Project concept described in 2–3 clear sentences (problem + target users)</div></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-text">3–5 specific features with MVP / Bonus labels</div></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-text">External API named with base URL or endpoint example</div></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-text">At least 2 wireframe screens shown</div></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-text">Timeline slide covers Weeks 10–14 with milestones</div></div>
+    </div>
+    <p style="margin-bottom:.6rem; color:var(--muted); font-size:.8rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em">Video</p>
+    <div class="checklist" style="margin-bottom:1rem">
+      <div class="check-item"><div class="check-box"></div><div class="check-text">Video is 2–3 minutes long <em>(under 2 min = incomplete; over 3:30 = too long)</em></div></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-text">All 6 proposal sections are narrated in the video</div></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-text">Uploaded to YouTube (Unlisted) or Google Drive (Anyone with link)</div></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-text">Video is NOT set to Private — anyone with the link can watch</div></div>
+    </div>
+    <p style="margin-bottom:.6rem; color:var(--muted); font-size:.8rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em">GitHub Repo &amp; Deployed Page</p>
+    <div class="checklist">
+      <div class="check-item"><div class="check-box"></div><div class="check-text"><code>proposal/proposal_[TeamName].pdf</code> committed to repo</div></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-text"><code>proposal/index.html</code> exists with embedded video + PDF + navigation links</div></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-text">GitHub Pages is enabled — <code>https://[user].github.io/[repo]/</code> loads</div></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-text"><code>https://[user].github.io/[repo]/proposal/</code> loads and shows video + slides</div></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-text">Main page (<code>index.html</code>) has a visible link to <code>proposal/</code></div></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-text">All team members added as repo collaborators</div></div>
+      <div class="check-item"><div class="check-box"></div><div class="check-text"><em>(Bonus)</em> README.md has project description + team + live site URL</div></div>
+    </div>
+  </section>
+
+  <!-- Grading -->
+  <section>
+    <h2>📊 Proposal Grading Criteria</h2>
+    <p style="margin-bottom:1rem; color:var(--muted); font-size:.9rem;">The proposal grade is part of your Team Project score — which is 25% of your final grade.</p>
+    <table class="grade-table">
+      <thead>
+        <tr>
+          <th>Criteria</th>
+          <th>Points</th>
+          <th>What the professor looks for</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Clarity of concept</td>
+          <td class="pts">30 pts</td>
+          <td>Is the idea clearly explained? Does it solve a real, specific problem?</td>
+        </tr>
+        <tr>
+          <td>Feature feasibility</td>
+          <td class="pts">25 pts</td>
+          <td>Are features specific and achievable in 4 weeks with HTML/CSS/JS?</td>
+        </tr>
+        <tr>
+          <td>Technical planning</td>
+          <td class="pts">25 pts</td>
+          <td>Is the API identified? Is the tech stack appropriate and realistic?</td>
+        </tr>
+        <tr>
+          <td>Team organization</td>
+          <td class="pts">10 pts</td>
+          <td>Are roles clearly assigned? Is the GitHub repo created?</td>
+        </tr>
+        <tr>
+          <td>Wireframes quality</td>
+          <td class="pts">10 pts</td>
+          <td>Are at least 2 screens shown? Is the UI layout concept clear?</td>
+        </tr>
+        <tr>
+          <td>Video presentation</td>
+          <td class="pts">15 pts</td>
+          <td>2–3 min, covers all sections, clear audio, embedded in deployed proposal page</td>
+        </tr>
+        <tr>
+          <td>Deployed page</td>
+          <td class="pts">10 pts</td>
+          <td>GitHub Pages live, proposal/index.html accessible, video + PDF embedded, links working</td>
+        </tr>
+        <tr>
+          <td>Bonus: README + early repo</td>
+          <td class="pts">+5 pts</td>
+          <td>README.md with project description, collaborators added, initial code committed</td>
+        </tr>
+        <tr>
+          <td><strong>Total</strong></td>
+          <td class="pts"><strong>100 pts</strong></td>
+          <td>Counts toward Team Project (25% of final grade)</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- FAQ -->
+  <section>
+    <h2>❓ Frequently Asked Questions</h2>
+    <div class="faq">
+      <div class="faq-item">
+        <div class="faq-q">Can we use a framework like React or Vue?</div>
+        <div class="faq-a">For the core project: plain HTML / CSS / JavaScript only. You may use CSS libraries like Bootstrap or Tailwind CSS, and JS utility libraries like Chart.js, Axios, or Swiper. No React, Vue, or Angular.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Which APIs are recommended?</div>
+        <div class="faq-a">Any free public API works. Popular choices: <strong>OpenLibrary</strong> (books), <strong>OpenWeatherMap</strong> (weather, free key), <strong>TMDB</strong> (movies), <strong>REST Countries</strong> (countries, no key needed), <strong>NASA APOD</strong> (astronomy, free key), <strong>PokéAPI</strong> (Pokémon, no key). Avoid APIs that require payment or credit card.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do I protect my API key from GitHub?</div>
+        <div class="faq-a">Store the key in a <code>.env</code> file, add <code>.env</code> to your <code>.gitignore</code>, and never commit it. For GitHub Pages (a public server), you can include the key directly in the JS file for now — just use a free-tier key with low rate limits. Never use a paid API key in client-side code.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can we build a game instead of a web app?</div>
+        <div class="faq-a">Yes — as long as it uses an external API for real data and has at least 3 interactive JavaScript features. A trivia game using an API for questions, for example, is completely fine.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What if our idea changes after the proposal?</div>
+        <div class="faq-a">Minor changes (removing a bonus feature, swapping one API for another) are fine — just mention it in your Week 12 progress. Major pivots (completely different concept) require professor approval. The proposal sets expectations, not a binding contract.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can we work alone or in pairs?</div>
+        <div class="faq-a">No — teams must have 3–4 members. If you don't have a team by <strong>October 31</strong>, email the professor and one will be assigned. Pairs will be asked to add a third member.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What tool should we use to record the video?</div>
+        <div class="faq-a"><strong>OBS Studio</strong> (free, Windows/Mac/Linux) — start a new recording, add your screen as a source, hit Record while you advance your slides and speak. <strong>Loom</strong> (free, browser extension) is even simpler. <strong>Zoom</strong> local recording also works — start a meeting alone, share your screen, record, end the meeting. On Mac, QuickTime Player → New Screen Recording is built-in and free.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do I host the video so the professor can watch it on my page?</div>
+        <div class="faq-a">Upload to <strong>YouTube</strong>: set visibility to "Unlisted" (not Private). Copy the embed code (<em>Share → Embed</em>) and paste the <code>&lt;iframe&gt;</code> into your <code>proposal/index.html</code>. OR upload to <strong>Google Drive</strong>, right-click → Share → Anyone with link → Copy link, then use the link in an <code>&lt;iframe src="..."&gt;</code>. Never commit the raw .mp4 to GitHub — video files are large and slow down git.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What happens at the Week 14 final presentation?</div>
+        <div class="faq-a">Each team gets 10 minutes: ~5 min live demo + ~3 min slides + ~2 min Q&amp;A. You also submit a 2-minute screen-recorded video demo before the class. The site must be deployed on GitHub Pages and accessible via a public URL.</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>Questions? Email <a href="mailto:muhiddin@gachon.ac.kr">muhiddin@gachon.ac.kr</a> or ask in Monday class (Nov 3)</p>
+  <p style="margin-top:.4rem">K0126002 Web Programming · Gachon University · Fall 2026</p>
+</footer>
+
+<script>
+  document.querySelectorAll('.faq-q').forEach(q => {
+    q.addEventListener('click', () => {
+      q.closest('.faq-item').classList.toggle('open');
+    });
+  });
+</script>
+</body>
+</html>
