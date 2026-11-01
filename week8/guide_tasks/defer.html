@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html><head>
+  <meta charset="UTF-8">
+  <title>Script Loading Demo</title>
+  <style>
+    body { font-family:system-ui; padding:20px; }
+    #status { padding:12px; border-radius:8px; margin-top:12px; font-size:14px; }
+    .ok { background:#dcfce7; color:#16a34a; }
+    .pending { background:#fef3c7; color:#d97706; }
+  </style>
+
+  <!-- Main app script: uses the DOM, so defer it -->
+  <script src="app.js" defer></script>
+
+  <!-- Analytics: independent of the DOM, so load it async -->
+  <script src="analytics.js" async></script>
+</head>
+<body>
+  <h2>Script Loading Test</h2>
+  <p>With defer, the DOM is ready when scripts run. Without defer, scripts block the page.</p>
+  <div id="status" class="pending">Waiting for script...</div>
+</body></html>

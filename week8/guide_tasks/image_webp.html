@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html><body style="font-family:system-ui;padding:24px;max-width:500px;margin:auto">
+  <h2>Image Format Practice</h2>
+
+  <picture>
+    <!-- WebP versions: chosen by browsers that support WebP -->
+    <source
+      type="image/webp"
+      srcset="https://picsum.photos/seed/practice/400/200.webp 400w,
+              https://picsum.photos/seed/practice/800/400.webp 800w"
+      sizes="(max-width: 548px) calc(100vw - 48px), 500px">
+
+    <!-- JPEG fallback: used only if WebP is not supported -->
+    <img
+      src="https://picsum.photos/seed/practice/800/400.jpg"
+      srcset="https://picsum.photos/seed/practice/400/200.jpg 400w,
+              https://picsum.photos/seed/practice/800/400.jpg 800w"
+      sizes="(max-width: 548px) calc(100vw - 48px), 500px"
+      alt="Sample landscape photo used for practice"
+      width="800" height="400"
+      fetchpriority="high"
+      style="max-width:100%;height:auto;display:block">
+  </picture>
+
+  <p style="margin-top:12px;font-size:13px;color:#666">
+    Open the Network tab, reload, and check which file loaded and its size.
+    You should see a .webp file, typically 25–34% smaller than the JPEG.
+  </p>
+</body></html>

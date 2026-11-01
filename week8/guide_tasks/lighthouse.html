@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Performance Practice Page</title>
+
+<!-- PROBLEM 1: render-blocking script in <head> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+
+<style>
+  body { font-family: system-ui; padding: 24px; max-width: 600px; margin: auto; }
+  img { width: 100%; border-radius: 8px; margin: 12px 0; }
+  h2 { color: #e85d04; }
+</style>
+</head>
+<body>
+  <h1>Performance Test Page</h1>
+  <p>This page has performance issues. Fix them!</p>
+
+  <!-- PROBLEM 2: Large image with no dimensions and no lazy loading -->
+  <img src="https://picsum.photos/1200/800" alt="Random photo from Lorem Picsum" width="1200" height="800">
+  <img src="https://picsum.photos/1200/801" alt="Random photo 2" loading="lazy" width="1200" height="800">
+  <img src="https://picsum.photos/1200/802" alt="Random photo 3" loading="lazy" width="1200" height="800">
+
+  <h2>YOUR FIXES:</h2>
+  <p>Add defer to the script, add loading="lazy" to below-fold images, add width/height attributes.</p>
+</body></html>
