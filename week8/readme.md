@@ -6,3 +6,7 @@
 ### Code sprint https://docs.google.com/forms/d/e/1FAIpQLSdsZ4X8eTyDF1uT3_aYBd0AUDzuNGNjOaEawaE0XATInkmKeQ/viewform
 ### https://docs.google.com/forms/d/e/1FAIpQLSdBHbAoVVITPKUILrX1dK04leMckiDUjSqLRIIyvYa0Pwfhdw/viewform
 
+## Zoom Recording
+### Duration: 00:46:37
+### Shareable link: https://us06web.zoom.us/rec/share/IqaxvFZWuGJIngtuA8lozqhh7iatBPSmKaxJuWC0daIwWFeEplC3Gbsx4JEuQ6M.CriakLnrFwLteS5G
+### Passcode: Pp1J$@LF
