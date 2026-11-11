@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React Components &amp; Props — Week 11 Friday</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f0f9ff;--surf:#fff;--surf2:#e0f2fe;--brd:#bae6fd;
+  --tx:#0c2a40;--mu:#4a7a9b;
+  --ac:#0891b2;--acl:#ecfeff;--ac2:#0e7490;
+  --react:#61dafb;--reactl:#e0faff;
+  --lime:#16a34a;--limel:#dcfce7;
+  --warn:#d97706;--warnl:#fef3c7;
+  --cor:#dc2626;--corl:#fee2e2;
+  --cb:#082032;--ct:#bae6fd;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --bg:#060f16;--surf:#0a1e2e;--surf2:#0d2a40;--brd:#164e70;
+  --tx:#e0f2fe;--mu:#5090b8;
+  --ac:#22d3ee;--acl:#042f2e;--ac2:#67e8f9;
+  --react:#61dafb;--reactl:#04202a;
+  --lime:#4ade80;--limel:#052e16;
+  --warn:#fbbf24;--warnl:#1a1000;
+  --cor:#f87171;--corl:#450a0a;
+  --cb:#060f16;--ct:#bae6fd;
+}}
+:root[data-theme=dark]{
+  --bg:#060f16;--surf:#0a1e2e;--surf2:#0d2a40;--brd:#164e70;
+  --tx:#e0f2fe;--mu:#5090b8;
+  --ac:#22d3ee;--acl:#042f2e;--ac2:#67e8f9;
+  --react:#61dafb;--reactl:#04202a;
+  --lime:#4ade80;--limel:#052e16;
+  --warn:#fbbf24;--warnl:#1a1000;
+  --cor:#f87171;--corl:#450a0a;
+  --cb:#060f16;--ct:#bae6fd;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',system-ui,sans-serif;font-size:16px;line-height:1.75}
+a{color:var(--ac);text-decoration:none}
+a:hover{text-decoration:underline}
+code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--surf2);padding:2px 6px;border-radius:4px;color:var(--ac2)}
+kbd{background:var(--surf2);border:1px solid var(--brd);border-radius:4px;padding:1px 6px;font-size:12px;font-family:'JetBrains Mono',monospace}
+
+/* Header */
+#site-header{position:sticky;top:0;z-index:100;background:var(--surf);border-bottom:3px solid var(--react);display:flex;align-items:center;justify-content:space-between;padding:10px 20px;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.hdr-left{display:flex;align-items:center;gap:14px}
+.react-badge{background:var(--react);color:#111;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px;padding:4px 12px;border-radius:6px}
+.hdr-info .course{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.hdr-info .title{font-size:15px;font-weight:700;color:var(--tx);font-family:'Space Grotesk',sans-serif}
+.theme-btn{background:var(--surf2);border:1px solid var(--brd);color:var(--tx);padding:5px 14px;border-radius:20px;cursor:pointer;font-size:13px}
+
+/* Layout */
+.page-wrap{max-width:900px;margin:0 auto;padding:32px 16px 80px}
+
+/* ToC */
+.toc{background:var(--surf);border:1px solid var(--brd);border-radius:12px;padding:20px 24px;margin-bottom:36px}
+.toc h2{font-family:'Space Grotesk',sans-serif;font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:var(--mu);margin-bottom:12px}
+.toc ol{padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.toc li a{font-size:14px;color:var(--ac)}
+
+/* Sections */
+section{margin-bottom:48px}
+h1{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;line-height:1.25;margin-bottom:8px;color:var(--tx)}
+h2{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:700;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--brd);color:var(--tx)}
+h3{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;margin:20px 0 8px;color:var(--ac2)}
+p{margin-bottom:12px}
+ul,ol{padding-left:22px;margin-bottom:12px}
+li{margin-bottom:4px}
+
+/* Code blocks */
+.code-block{background:var(--cb);color:var(--ct);border-radius:10px;padding:20px;margin:16px 0;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.6;border:1px solid var(--brd)}
+.code-block code{background:none;padding:0;color:var(--ct);font-size:inherit}
+
+/* Concept cards */
+.concept{background:var(--surf);border:1px solid var(--brd);border-radius:12px;padding:24px;margin-bottom:24px}
+.concept-title{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.concept-icon{width:36px;height:36px;border-radius:8px;background:var(--acl);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+
+/* Objectives */
+.obj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:12px}
+.obj-card{background:var(--surf);border:1px solid var(--brd);border-radius:8px;padding:14px 16px;display:flex;align-items:flex-start;gap:10px}
+.obj-card .num{background:var(--ac);color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;font-family:'Space Grotesk',sans-serif}
+.obj-card p{margin:0;font-size:14px}
+
+/* Callouts */
+.callout{border-radius:10px;padding:16px 20px;margin:16px 0;display:flex;gap:12px;align-items:flex-start}
+.callout.info{background:var(--acl);border-left:4px solid var(--ac)}
+.callout.warn{background:var(--warnl);border-left:4px solid var(--warn)}
+.callout.tip{background:var(--limel);border-left:4px solid var(--lime)}
+.callout .icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.callout p{margin:0;font-size:14px}
+
+/* Practice */
+.exercise{background:var(--surf);border:1px solid var(--brd);border-radius:12px;margin-bottom:16px;overflow:hidden}
+.exercise summary{padding:16px 20px;cursor:pointer;font-weight:600;font-family:'Space Grotesk',sans-serif;display:flex;align-items:center;gap:10px;list-style:none;user-select:none}
+.exercise summary::before{content:'▶';font-size:12px;color:var(--ac);transition:transform .2s}
+.exercise[open] summary::before{transform:rotate(90deg)}
+.exercise-body{padding:0 20px 20px;border-top:1px solid var(--brd)}
+
+/* Cheat sheet */
+.cheatsheet{background:var(--surf);border:2px solid var(--react);border-radius:14px;padding:28px}
+.cheatsheet h2{border-bottom-color:var(--react)}
+.cs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:16px}
+.cs-item{background:var(--surf2);border-radius:8px;padding:14px}
+.cs-item h4{font-family:'Space Grotesk',sans-serif;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin-bottom:8px}
+.cs-item pre{margin:0;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+
+.tag{display:inline-block;background:var(--acl);color:var(--ac2);font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:.04em;font-family:'Space Grotesk',sans-serif}
+</style>
+</head>
+<body>
+
+<header id="site-header">
+  <div class="hdr-left">
+    <div class="react-badge">⚛ React</div>
+    <div class="hdr-info">
+      <div class="course">Web Programming · K0126_002 · Week 11 Fri</div>
+      <div class="title">React Components &amp; Props</div>
+    </div>
+  </div>
+  <button class="theme-btn" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">🌙 Theme</button>
+</header>
+
+<div class="page-wrap">
+
+  <section id="intro">
+    <h1>React Components &amp; Props</h1>
+    <p>React is a JavaScript library for building user interfaces by composing small, reusable <strong>components</strong>. This session covers how to build functional components, pass data with <strong>props</strong>, and compose UIs from smaller building blocks.</p>
+  </section>
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#objectives">Learning Objectives</a></li>
+      <li><a href="#what-is-react">What is React &amp; JSX?</a></li>
+      <li><a href="#functional-components">Functional Components</a></li>
+      <li><a href="#props">Props — Passing Data</a></li>
+      <li><a href="#lists-conditional">Lists &amp; Conditional Rendering</a></li>
+      <li><a href="#composition">Component Composition</a></li>
+      <li><a href="#exercises">Practice Exercises</a></li>
+      <li><a href="#cheatsheet">Cheat Sheet</a></li>
+    </ol>
+  </nav>
+
+  <section id="objectives">
+    <h2>Learning Objectives</h2>
+    <div class="obj-grid">
+      <div class="obj-card"><div class="num">1</div><p>Write functional React components using JSX syntax</p></div>
+      <div class="obj-card"><div class="num">2</div><p>Pass and consume props including default values</p></div>
+      <div class="obj-card"><div class="num">3</div><p>Render lists with <code>.map()</code> and proper <code>key</code> props</p></div>
+      <div class="obj-card"><div class="num">4</div><p>Use conditional rendering (ternary &amp; <code>&&</code>)</p></div>
+      <div class="obj-card"><div class="num">5</div><p>Compose large UIs from small, focused components</p></div>
+    </div>
+  </section>
+
+  <section id="what-is-react">
+    <h2>1. What is React &amp; JSX?</h2>
+    <div class="concept">
+      <div class="concept-title">
+        <div class="concept-icon">⚛</div>
+        <h3 style="margin:0">React in one sentence</h3>
+      </div>
+      <p>React lets you describe what your UI should look like for a given state, and it handles updating the DOM efficiently when state changes.</p>
+      <p><strong>JSX</strong> is a syntax extension that lets you write HTML-like markup inside JavaScript. It is compiled to <code>React.createElement()</code> calls by Babel/the bundler.</p>
+      <div class="code-block"><code>// JSX (what you write)
+const element = &lt;h1 className="title"&gt;Hello, {name}!&lt;/h1&gt;;
+
+// What it compiles to (you never write this)
+const element = React.createElement('h1', { className: 'title' }, 'Hello, ' + name + '!');
+</code></div>
+      <div class="callout info">
+        <div class="icon">💡</div>
+        <p><strong>JSX differences from HTML:</strong> Use <code>className</code> instead of <code>class</code>, <code>htmlFor</code> instead of <code>for</code>, and self-close all void elements: <code>&lt;img /&gt;</code>, <code>&lt;input /&gt;</code>, <code>&lt;br /&gt;</code>.</p>
+      </div>
+      <div class="code-block"><code>// JSX rules
+function App() {
+  const user = 'Amir';
+  return (
+    // Must return ONE root element (or use &lt;&gt;...&lt;/&gt; Fragment)
+    &lt;div className="app"&gt;
+      &lt;h1&gt;Welcome, {user}!&lt;/h1&gt;      {/* JS expressions in {} */}
+      &lt;p&gt;Today: {new Date().toDateString()}&lt;/p&gt;
+      &lt;img src="photo.jpg" alt="Profile" /&gt;  {/* self-closed */}
+    &lt;/div&gt;
+  );
+}
+</code></div>
+    </div>
+  </section>
+
+  <section id="functional-components">
+    <h2>2. Functional Components</h2>
+    <div class="concept">
+      <p>A <strong>functional component</strong> is a JavaScript function that returns JSX. Component names must start with a capital letter.</p>
+      <div class="code-block"><code>// Minimal component — a plain JS function
+function Greeting() {
+  return &lt;h2&gt;Hello, World!&lt;/h2&gt;;
+}
+
+// Arrow function syntax — also valid
+const Greeting = () =&gt; &lt;h2&gt;Hello, World!&lt;/h2&gt;;
+
+// Use it like an HTML tag (must be uppercase first letter)
+function App() {
+  return (
+    &lt;div&gt;
+      &lt;Greeting /&gt;
+      &lt;Greeting /&gt;
+    &lt;/div&gt;
+  );
+}
+</code></div>
+      <div class="callout warn">
+        <div class="icon">⚠️</div>
+        <p><strong>Capital letter matters:</strong> <code>&lt;greeting /&gt;</code> renders as a plain HTML element. <code>&lt;Greeting /&gt;</code> calls your function. Always capitalize component names.</p>
+      </div>
+      <h3>Component returning multiple elements</h3>
+      <div class="code-block"><code>// Use a Fragment &lt;&gt;...&lt;/&gt; to avoid an extra wrapper div
+function UserCard() {
+  return (
+    &lt;&gt;
+      &lt;h3&gt;Zulfiya Karimova&lt;/h3&gt;
+      &lt;p&gt;Computer Engineering · Year 3&lt;/p&gt;
+    &lt;/&gt;
+  );
+}
+</code></div>
+    </div>
+  </section>
+
+  <section id="props">
+    <h2>3. Props — Passing Data</h2>
+    <div class="concept">
+      <p><strong>Props</strong> (short for properties) are the mechanism for passing data from a parent component to a child. They are read-only inside the child.</p>
+      <div class="code-block"><code>// Parent passes props like HTML attributes
+function App() {
+  return (
+    &lt;div&gt;
+      &lt;StudentCard name="Amir Tashkentov" year={2} /&gt;
+      &lt;StudentCard name="Gulnora Nazarova" year={3} /&gt;
+    &lt;/div&gt;
+  );
+}
+
+// Child receives props as an object (first argument)
+function StudentCard(props) {
+  return (
+    &lt;div className="card"&gt;
+      &lt;h3&gt;{props.name}&lt;/h3&gt;
+      &lt;p&gt;Year {props.year}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+
+// Destructured — cleaner style (preferred)
+function StudentCard({ name, year }) {
+  return (
+    &lt;div className="card"&gt;
+      &lt;h3&gt;{name}&lt;/h3&gt;
+      &lt;p&gt;Year {year}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+</code></div>
+      <h3>Default props</h3>
+      <div class="code-block"><code>// Default values via destructuring default syntax
+function Button({ label = 'Click me', color = 'blue', disabled = false }) {
+  return (
+    &lt;button style={{ background: color }} disabled={disabled}&gt;
+      {label}
+    &lt;/button&gt;
+  );
+}
+
+// All three are valid:
+&lt;Button /&gt;                            {/* label="Click me", color="blue" */}
+&lt;Button label="Submit" /&gt;             {/* color still "blue" */}
+&lt;Button label="Delete" color="red" /&gt; {/* custom both */}
+</code></div>
+      <h3>props.children</h3>
+      <div class="code-block"><code>// Anything between opening and closing tags becomes props.children
+function Panel({ title, children }) {
+  return (
+    &lt;div className="panel"&gt;
+      &lt;h2&gt;{title}&lt;/h2&gt;
+      &lt;div className="panel-body"&gt;{children}&lt;/div&gt;
+    &lt;/div&gt;
+  );
+}
+
+// Usage — the &lt;p&gt; and &lt;ul&gt; are children
+&lt;Panel title="Week 11"&gt;
+  &lt;p&gt;React session today&lt;/p&gt;
+  &lt;ul&gt;&lt;li&gt;Components&lt;/li&gt;&lt;li&gt;Props&lt;/li&gt;&lt;/ul&gt;
+&lt;/Panel&gt;
+</code></div>
+    </div>
+  </section>
+
+  <section id="lists-conditional">
+    <h2>4. Lists &amp; Conditional Rendering</h2>
+    <div class="concept">
+      <h3>Rendering lists with .map()</h3>
+      <div class="code-block"><code>const courses = [
+  { id: 1, name: 'Web Programming', credits: 3 },
+  { id: 2, name: 'Databases', credits: 3 },
+  { id: 3, name: 'Algorithms', credits: 4 },
+];
+
+function CourseList() {
+  return (
+    &lt;ul&gt;
+      {courses.map(course =&gt; (
+        // key must be unique and stable — use the id, not the index
+        &lt;li key={course.id}&gt;
+          {course.name} — {course.credits} credits
+        &lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}
+</code></div>
+      <div class="callout warn">
+        <div class="icon">⚠️</div>
+        <p><strong>Always add key:</strong> React uses <code>key</code> to identify which items changed. Missing keys causes a console warning and potential rendering bugs. Use a stable unique ID, not the array index.</p>
+      </div>
+      <h3>Conditional rendering</h3>
+      <div class="code-block"><code>function UserGreeting({ isLoggedIn, username }) {
+  // 1. Ternary — renders one of two options
+  return (
+    &lt;div&gt;
+      {isLoggedIn
+        ? &lt;h1&gt;Welcome back, {username}!&lt;/h1&gt;
+        : &lt;h1&gt;Please log in&lt;/h1&gt;
+      }
+
+      {/* 2. && — renders only when condition is truthy */}
+      {isLoggedIn &amp;&amp; &lt;button&gt;Log out&lt;/button&gt;}
+
+      {/* 3. Early return — cleanest for big branches */}
+    &lt;/div&gt;
+  );
+}
+
+// 3. Early return pattern
+function Dashboard({ isAdmin }) {
+  if (!isAdmin) return &lt;p&gt;Access denied&lt;/p&gt;;
+  return &lt;AdminPanel /&gt;;
+}
+</code></div>
+    </div>
+  </section>
+
+  <section id="composition">
+    <h2>5. Component Composition</h2>
+    <div class="concept">
+      <p>Build complex UIs by composing smaller, single-responsibility components. This keeps each component focused, testable, and reusable.</p>
+      <div class="code-block"><code>// Small, focused components
+function Avatar({ src, alt }) {
+  return &lt;img src={src} alt={alt} style={{ borderRadius: '50%', width: 48 }} /&gt;;
+}
+
+function Badge({ text, color = '#0891b2' }) {
+  return (
+    &lt;span style={{ background: color, color: '#fff', padding: '2px 8px', borderRadius: 4 }}&gt;
+      {text}
+    &lt;/span&gt;
+  );
+}
+
+function StudentCard({ name, studentId, year, avatarUrl }) {
+  return (
+    &lt;div className="card"&gt;
+      &lt;Avatar src={avatarUrl} alt={name} /&gt;
+      &lt;h3&gt;{name}&lt;/h3&gt;
+      &lt;p&gt;ID: {studentId}&lt;/p&gt;
+      &lt;Badge text={`Year ${year}`} /&gt;
+    &lt;/div&gt;
+  );
+}
+
+// Composed together in App
+function App() {
+  return (
+    &lt;div className="student-list"&gt;
+      &lt;StudentCard name="Amir" studentId="202011234" year={3} avatarUrl="/img/amir.jpg" /&gt;
+      &lt;StudentCard name="Zulfiya" studentId="202012345" year={2} avatarUrl="/img/zulfiya.jpg" /&gt;
+    &lt;/div&gt;
+  );
+}
+</code></div>
+      <div class="callout tip">
+        <div class="icon">✅</div>
+        <p><strong>Single Responsibility Principle:</strong> Each component should do one thing. If a component grows too large, split it into smaller ones. <code>Avatar</code>, <code>Badge</code>, and <code>StudentCard</code> each have a clear, narrow job.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="exercises">
+    <h2>Practice Exercises</h2>
+
+    <details class="exercise">
+      <summary>Exercise 1 — Build a ProfileCard component</summary>
+      <div class="exercise-body">
+        <p><strong>Task:</strong> Create a <code>ProfileCard</code> component that accepts <code>name</code>, <code>role</code>, <code>email</code>, and optional <code>avatarUrl</code> (default: a placeholder image). Render a card showing all four fields. Use default prop for <code>avatarUrl</code>.</p>
+        <div class="code-block"><code>function ProfileCard({ name, role, email, avatarUrl = 'https://via.placeholder.com/80' }) {
+  return (
+    &lt;div style={{ border: '1px solid #ccc', borderRadius: 8, padding: 16, maxWidth: 300 }}&gt;
+      &lt;img src={avatarUrl} alt={name} style={{ borderRadius: '50%', width: 80 }} /&gt;
+      &lt;h2&gt;{name}&lt;/h2&gt;
+      &lt;p&gt;{role}&lt;/p&gt;
+      &lt;a href={`mailto:${email}`}&gt;{email}&lt;/a&gt;
+    &lt;/div&gt;
+  );
+}
+
+// Usage
+&lt;ProfileCard
+  name="Dr. Toshpulatov"
+  role="Professor"
+  email="muhiddin@gachon.ac.kr"
+/&gt;
+</code></div>
+      </div>
+    </details>
+
+    <details class="exercise">
+      <summary>Exercise 2 — Render a list of notifications</summary>
+      <div class="exercise-body">
+        <p><strong>Task:</strong> Given an array of notification objects <code>[{ id, type, message }]</code>, render each as a styled item. Show a checkmark icon for <code>type === 'success'</code>, a warning icon for <code>type === 'warning'</code>, and a default icon otherwise. Use conditional rendering.</p>
+        <div class="code-block"><code>const notifications = [
+  { id: 1, type: 'success', message: 'Profile updated successfully' },
+  { id: 2, type: 'warning', message: 'Password expires in 3 days' },
+  { id: 3, type: 'info',    message: 'New lecture materials available' },
+];
+
+function NotificationItem({ type, message }) {
+  const icon = type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
+  return (
+    &lt;li&gt;{icon} {message}&lt;/li&gt;
+  );
+}
+
+function NotificationList() {
+  return (
+    &lt;ul&gt;
+      {notifications.map(n =&gt; (
+        &lt;NotificationItem key={n.id} type={n.type} message={n.message} /&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}
+</code></div>
+      </div>
+    </details>
+
+    <details class="exercise">
+      <summary>Exercise 3 — Layout with props.children</summary>
+      <div class="exercise-body">
+        <p><strong>Task:</strong> Create a reusable <code>Card</code> component that accepts a <code>title</code> prop and renders any <code>children</code> inside a styled box. Use it to wrap two different content sections.</p>
+        <div class="code-block"><code>function Card({ title, children }) {
+  return (
+    &lt;div style={{
+      border: '1px solid #bae6fd',
+      borderRadius: 10,
+      padding: '16px 20px',
+      marginBottom: 16
+    }}&gt;
+      &lt;h3 style={{ marginBottom: 10 }}&gt;{title}&lt;/h3&gt;
+      {children}
+    &lt;/div&gt;
+  );
+}
+
+// Usage
+&lt;Card title="Lecture Topics"&gt;
+  &lt;ul&gt;
+    &lt;li&gt;Components&lt;/li&gt;
+    &lt;li&gt;Props&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/Card&gt;
+
+&lt;Card title="Homework"&gt;
+  &lt;p&gt;Build a student portfolio component&lt;/p&gt;
+&lt;/Card&gt;
+</code></div>
+      </div>
+    </details>
+  </section>
+
+  <section id="cheatsheet">
+    <div class="cheatsheet">
+      <h2>⚛ React Components &amp; Props — Cheat Sheet</h2>
+      <div class="cs-grid">
+        <div class="cs-item">
+          <h4>Functional component</h4>
+          <pre>function MyComp() {
+  return &lt;div&gt;Hello&lt;/div&gt;;
+}</pre>
+        </div>
+        <div class="cs-item">
+          <h4>Props (destructured)</h4>
+          <pre>function Hi({ name, age = 0 }) {
+  return &lt;p&gt;{name}, {age}&lt;/p&gt;;
+}</pre>
+        </div>
+        <div class="cs-item">
+          <h4>Render list</h4>
+          <pre>{items.map(item =&gt; (
+  &lt;li key={item.id}&gt;
+    {item.name}
+  &lt;/li&gt;
+))}</pre>
+        </div>
+        <div class="cs-item">
+          <h4>Conditional (ternary)</h4>
+          <pre>{isOn
+  ? &lt;p&gt;On&lt;/p&gt;
+  : &lt;p&gt;Off&lt;/p&gt;
+}</pre>
+        </div>
+        <div class="cs-item">
+          <h4>Short-circuit &&</h4>
+          <pre>{isAdmin &amp;&amp;
+  &lt;button&gt;Delete&lt;/button&gt;
+}</pre>
+        </div>
+        <div class="cs-item">
+          <h4>props.children</h4>
+          <pre>function Panel({ children }) {
+  return (
+    &lt;div&gt;{children}&lt;/div&gt;
+  );
+}</pre>
+        </div>
+        <div class="cs-item">
+          <h4>JSX rules</h4>
+          <pre>• One root element (or &lt;&gt;&lt;/&gt;)
+• className not class
+• self-close: &lt;br /&gt;
+• JS in {expressions}</pre>
+        </div>
+        <div class="cs-item">
+          <h4>Key rule</h4>
+          <pre>/* Use stable unique id */
+key={item.id}  ✅
+key={index}    ⚠️ avoid</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

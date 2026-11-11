@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React Components &amp; Props · Week 11 Fri Video Lecture</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;700&display=swap">
+<style>
+:root{--bg:#0a0f1e;--surf:#111827;--surf2:#1f2937;--brd:#374151;--tx:#f1f5f9;--mu:#94a3b8;--ac:#38bdf8;--ac2:#0ea5e9;--acl:#0c1a2e;--react:#61dafb}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column}
+header{position:sticky;top:0;z-index:100;background:#060b14;border-bottom:2px solid var(--react);display:flex;align-items:center;justify-content:space-between;padding:10px 20px;gap:12px}
+.badge{background:var(--react);color:#1a1a1a;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;padding:4px 12px;border-radius:6px}
+.hdr-info{display:flex;flex-direction:column;gap:1px}
+.hdr-label{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em}
+.hdr-title{font-size:14px;font-weight:600;color:var(--tx)}
+.hdr-right{display:flex;align-items:center;gap:14px}
+#counter{font-family:'Space Grotesk',sans-serif;font-size:14px;color:var(--mu);white-space:nowrap}
+.progress-wrap{position:fixed;bottom:72px;left:0;right:0;height:3px;background:var(--surf2)}
+#progress-bar{height:3px;background:var(--react);transition:width .3s}
+nav{position:fixed;bottom:0;left:0;right:0;background:#060b14;border-top:1px solid var(--brd);display:flex;justify-content:center;gap:12px;padding:14px}
+.btn{background:var(--surf2);border:1px solid var(--brd);color:var(--tx);padding:8px 24px;border-radius:8px;cursor:pointer;font-size:14px;font-family:'Inter',sans-serif;transition:background .2s}
+.btn:hover{background:var(--brd)}
+.btn.primary{background:var(--ac);color:#0a0f1e;border-color:var(--ac);font-weight:600}
+.btn.primary:hover{background:var(--ac2)}
+#slides{flex:1;padding-bottom:120px}
+.slide{display:none;min-height:calc(100vh - 160px);padding:3rem 2rem;max-width:860px;margin:0 auto;animation:fadeIn .25s ease}
+.slide.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+h1{font-family:'Space Grotesk',sans-serif;font-size:2.6rem;font-weight:700;color:var(--react);line-height:1.2;margin-bottom:.6rem}
+h2{font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:700;color:var(--react);margin-bottom:1.2rem;padding-bottom:.5rem;border-bottom:2px solid var(--acl)}
+h3{font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:600;color:var(--ac2);margin:1.2rem 0 .6rem}
+p{color:var(--mu);line-height:1.75;margin-bottom:1rem}
+ul,ol{padding-left:1.4rem;color:var(--mu);line-height:1.9;margin-bottom:1rem}
+li{margin-bottom:.25rem}
+li strong{color:var(--tx)}
+pre{background:var(--surf2);border:1px solid var(--brd);border-radius:10px;padding:1.4rem;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:#e2e8f0;line-height:1.65;margin:1rem 0}
+code{font-family:'JetBrains Mono',monospace;font-size:.82rem;background:var(--surf2);padding:1px 6px;border-radius:4px;color:var(--ac)}
+.subtitle{font-size:1.2rem;color:var(--mu);margin-top:.4rem}
+.instructor{margin-top:1.2rem;font-size:.95rem;color:var(--mu)}
+.agenda-list{list-style:none;padding:0;counter-reset:agenda}
+.agenda-list li{counter-increment:agenda;padding:.7rem 1rem .7rem 3.5rem;position:relative;background:var(--surf);border:1px solid var(--brd);border-radius:8px;margin-bottom:.6rem;color:var(--tx)}
+.agenda-list li::before{content:counter(agenda);position:absolute;left:.9rem;top:.65rem;background:var(--react);color:#1a1a1a;font-weight:700;font-size:.85rem;width:1.6rem;height:1.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif}
+.card{background:var(--surf);border:1px solid var(--brd);border-radius:10px;padding:1.4rem;margin-bottom:1rem}
+.card-title{font-weight:600;color:var(--react);margin-bottom:.5rem;font-family:'Space Grotesk',sans-serif}
+.tip{background:var(--acl);border-left:3px solid var(--ac);border-radius:0 8px 8px 0;padding:.8rem 1rem;margin:1rem 0;color:var(--tx);font-size:.93rem}
+.practice-box{background:#0d1f0d;border:2px dashed #22c55e;border-radius:10px;padding:1.4rem;margin:1rem 0}
+.practice-box h3{color:#4ade80;margin-top:0}
+.key-point{display:flex;align-items:flex-start;gap:.8rem;padding:.6rem 0;border-bottom:1px solid var(--brd)}
+.key-point:last-child{border-bottom:none}
+.kp-num{background:var(--react);color:#1a1a1a;font-weight:700;font-size:.8rem;min-width:1.6rem;height:1.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;flex-shrink:0;margin-top:.1rem}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:600px){.two-col{grid-template-columns:1fr}h1{font-size:1.8rem}h2{font-size:1.4rem}}
+.comment{color:#6b7280;font-style:italic}
+.kw{color:#f97316}
+.fn{color:#a78bfa}
+.str{color:#34d399}
+.num{color:#fb923c}
+.tag{color:#f87171}
+</style>
+</head>
+<body>
+<header>
+  <div style="display:flex;align-items:center;gap:12px">
+    <span class="badge">React</span>
+    <div class="hdr-info">
+      <span class="hdr-label">Web Programming K0126_002 · Week 11 Friday</span>
+      <span class="hdr-title">React Components &amp; Props</span>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <span id="counter">1 / 15</span>
+  </div>
+</header>
+
+<div id="slides">
+
+<!-- Slide 1: Title -->
+<div class="slide active" id="slide-1">
+  <div style="display:flex;flex-direction:column;justify-content:center;min-height:60vh;text-align:center">
+    <div style="font-size:4rem;margin-bottom:1rem">⚛️</div>
+    <h1>React Components<br>&amp; Props</h1>
+    <p class="subtitle">Building UIs from reusable pieces</p>
+    <p class="instructor">Web Programming K0126_002 · Week 11 Friday<br>Dr. Mukhiddin Toshpulatov · Gachon University</p>
+    <div class="tip" style="max-width:500px;margin:2rem auto 0">
+      Use <strong>← →</strong> arrow keys or the buttons below to navigate slides.
+    </div>
+  </div>
+</div>
+
+<!-- Slide 2: Agenda -->
+<div class="slide" id="slide-2">
+  <h2>📋 Today's Agenda</h2>
+  <ol class="agenda-list">
+    <li>What is React and why component-based UI?</li>
+    <li>JSX — the syntax React uses</li>
+    <li>Writing your first functional component</li>
+    <li>Passing data with props</li>
+    <li>Default props &amp; PropTypes</li>
+    <li>Component composition and <code>children</code></li>
+    <li>Rendering lists with <code>.map()</code> and keys</li>
+    <li>Conditional rendering</li>
+    <li>Practice challenge</li>
+  </ol>
+  <div class="tip">By the end of today you can build a small app from independent, reusable components.</div>
+</div>
+
+<!-- Slide 3: What is React -->
+<div class="slide" id="slide-3">
+  <h2>⚛️ What is React?</h2>
+  <p>React is a <strong>JavaScript library</strong> for building user interfaces — created by Meta (Facebook) and open-sourced in 2013.</p>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">The old way (jQuery era)</div>
+      <ul>
+        <li>Find a DOM element</li>
+        <li>Manually change its content</li>
+        <li>Hard to keep UI &amp; data in sync</li>
+        <li>Code becomes "spaghetti"</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title">The React way</div>
+      <ul>
+        <li>Describe <em>what</em> the UI should look like</li>
+        <li>React figures out the <em>how</em></li>
+        <li>UI automatically re-renders when data changes</li>
+        <li>Split into small, reusable components</li>
+      </ul>
+    </div>
+  </div>
+  <div class="tip"><strong>Core idea:</strong> Your UI is a <em>function</em> of your data. <code>UI = f(data)</code></div>
+</div>
+
+<!-- Slide 4: JSX -->
+<div class="slide" id="slide-4">
+  <h2>📝 JSX — JavaScript + XML</h2>
+  <p>JSX lets you write HTML-like syntax inside JavaScript. It's NOT HTML — it compiles to <code>React.createElement()</code> calls.</p>
+  <pre><span class="comment">// JSX (what you write)</span>
+const element = &lt;h1 className="title"&gt;Hello, {'{name}'}&lt;/h1&gt;;
+
+<span class="comment">// What Babel compiles it to</span>
+const element = React.createElement(
+  'h1',
+  { className: 'title' },
+  'Hello, ' + name
+);</pre>
+  <h3>JSX rules</h3>
+  <ul>
+    <li><strong>Use <code>className</code></strong> instead of <code>class</code></li>
+    <li><strong>Use <code>htmlFor</code></strong> instead of <code>for</code> (labels)</li>
+    <li><strong>Self-close empty tags:</strong> <code>&lt;img /&gt;</code>, <code>&lt;input /&gt;</code>, <code>&lt;br /&gt;</code></li>
+    <li><strong>One root element:</strong> wrap siblings in <code>&lt;div&gt;</code> or <code>&lt;&gt;…&lt;/&gt;</code> (Fragment)</li>
+    <li><strong>JavaScript expressions</strong> go inside <code>{'{}'}</code> curly braces</li>
+  </ul>
+</div>
+
+<!-- Slide 5: Functional Components -->
+<div class="slide" id="slide-5">
+  <h2>🧩 Functional Components</h2>
+  <p>A React component is just a <strong>JavaScript function</strong> that returns JSX. The function name must start with a capital letter.</p>
+  <pre><span class="comment">// Simplest possible component</span>
+<span class="kw">function</span> <span class="fn">Greeting</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      &lt;<span class="tag">h1</span>&gt;안녕하세요!&lt;/<span class="tag">h1</span>&gt;
+      &lt;<span class="tag">p</span>&gt;Welcome to Web Programming&lt;/<span class="tag">p</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}
+
+<span class="comment">// Arrow function form (also common)</span>
+<span class="kw">const</span> Greeting = () =&gt; (
+  &lt;<span class="tag">div</span>&gt;
+    &lt;<span class="tag">h1</span>&gt;안녕하세요!&lt;/<span class="tag">h1</span>&gt;
+  &lt;/<span class="tag">div</span>&gt;
+);</pre>
+  <div class="tip">Use components like custom HTML tags: <code>&lt;Greeting /&gt;</code></div>
+</div>
+
+<!-- Slide 6: Props basics -->
+<div class="slide" id="slide-6">
+  <h2>📦 Props — Passing Data to Components</h2>
+  <p>Props (short for <em>properties</em>) are how you pass data from a <strong>parent</strong> component to a <strong>child</strong>. They are read-only inside the child.</p>
+  <pre><span class="comment">// Parent passes name as a prop</span>
+<span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      &lt;<span class="tag">ProfileCard</span> name=<span class="str">"김민준"</span> role=<span class="str">"Frontend Developer"</span> /&gt;
+      &lt;<span class="tag">ProfileCard</span> name=<span class="str">"이서연"</span> role=<span class="str">"UI Designer"</span> /&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}
+
+<span class="comment">// Child receives props as an object</span>
+<span class="kw">function</span> <span class="fn">ProfileCard</span>({ name, role }) {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span> className=<span class="str">"card"</span>&gt;
+      &lt;<span class="tag">h2</span>&gt;{name}&lt;/<span class="tag">h2</span>&gt;
+      &lt;<span class="tag">p</span>&gt;{role}&lt;/<span class="tag">p</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}</pre>
+  <div class="tip">Destructuring <code>&#123; name, role &#125;</code> in the parameter is cleaner than <code>props.name</code> everywhere.</div>
+</div>
+
+<!-- Slide 7: Prop types -->
+<div class="slide" id="slide-7">
+  <h2>🛡️ Default Props &amp; PropTypes</h2>
+  <h3>Default Props</h3>
+  <pre><span class="kw">function</span> <span class="fn">Avatar</span>({ src, size = <span class="num">60</span>, alt = <span class="str">'User avatar'</span> }) {
+  <span class="kw">return</span> &lt;<span class="tag">img</span> src={src} width={size} height={size} alt={alt} /&gt;;
+}
+
+<span class="comment">// size and alt are optional — defaults kick in if omitted</span>
+&lt;<span class="tag">Avatar</span> src=<span class="str">"/kim.jpg"</span> /&gt;         <span class="comment">// size=60, alt='User avatar'</span>
+&lt;<span class="tag">Avatar</span> src=<span class="str">"/lee.jpg"</span> size={<span class="num">120</span>} /&gt; <span class="comment">// size=120, alt='User avatar'</span></pre>
+  <h3>PropTypes (runtime type checking)</h3>
+  <pre><span class="kw">import</span> PropTypes <span class="kw">from</span> <span class="str">'prop-types'</span>;
+
+ProfileCard.propTypes = {
+  name: PropTypes.string.isRequired,
+  role: PropTypes.string,
+  avatarUrl: PropTypes.string,
+};
+
+<span class="comment">// Console warning if a required prop is missing</span></pre>
+  <div class="tip">In TypeScript projects you use interfaces instead of PropTypes — but PropTypes is valuable in plain JS.</div>
+</div>
+
+<!-- Slide 8: Component Composition -->
+<div class="slide" id="slide-8">
+  <h2>🏗️ Component Composition</h2>
+  <p>Build complex UIs by composing small components together — like LEGO bricks.</p>
+  <pre><span class="kw">function</span> <span class="fn">Avatar</span>({ src, name }) {
+  <span class="kw">return</span> &lt;<span class="tag">img</span> src={src} alt={name} className=<span class="str">"avatar"</span> /&gt;;
+}
+
+<span class="kw">function</span> <span class="fn">UserInfo</span>({ name, dept }) {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span> className=<span class="str">"user-info"</span>&gt;
+      &lt;<span class="tag">strong</span>&gt;{name}&lt;/<span class="tag">strong</span>&gt;
+      &lt;<span class="tag">span</span>&gt;{dept}&lt;/<span class="tag">span</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}
+
+<span class="comment">// Compose both into a larger component</span>
+<span class="kw">function</span> <span class="fn">ProfileCard</span>({ user }) {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span> className=<span class="str">"profile-card"</span>&gt;
+      &lt;<span class="tag">Avatar</span> src={user.photo} name={user.name} /&gt;
+      &lt;<span class="tag">UserInfo</span> name={user.name} dept={user.dept} /&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}</pre>
+</div>
+
+<!-- Slide 9: children prop -->
+<div class="slide" id="slide-9">
+  <h2>👶 The <code>children</code> Prop</h2>
+  <p><code>props.children</code> is whatever you put <em>between</em> a component's opening and closing tags.</p>
+  <pre><span class="kw">function</span> <span class="fn">Card</span>({ title, children }) {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span> className=<span class="str">"card"</span>&gt;
+      &lt;<span class="tag">h3</span> className=<span class="str">"card-title"</span>&gt;{title}&lt;/<span class="tag">h3</span>&gt;
+      &lt;<span class="tag">div</span> className=<span class="str">"card-body"</span>&gt;
+        {children}
+      &lt;/<span class="tag">div</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}
+
+<span class="comment">// Usage — anything inside &lt;Card&gt; becomes children</span>
+&lt;<span class="tag">Card</span> title=<span class="str">"Week 11"</span>&gt;
+  &lt;<span class="tag">p</span>&gt;React Components are awesome!&lt;/<span class="tag">p</span>&gt;
+  &lt;<span class="tag">ul</span>&gt;
+    &lt;<span class="tag">li</span>&gt;Reusable&lt;/<span class="tag">li</span>&gt;
+    &lt;<span class="tag">li</span>&gt;Composable&lt;/<span class="tag">li</span>&gt;
+  &lt;/<span class="tag">ul</span>&gt;
+&lt;/<span class="tag">Card</span>&gt;</pre>
+  <div class="tip">The <code>children</code> pattern enables wrapper/layout components — Card, Modal, Sidebar, etc.</div>
+</div>
+
+<!-- Slide 10: Rendering Lists -->
+<div class="slide" id="slide-10">
+  <h2>📋 Rendering Lists with .map()</h2>
+  <p>Use JavaScript's <code>.map()</code> to render an array of items as JSX. Always provide a unique <code>key</code> prop.</p>
+  <pre><span class="kw">const</span> students = [
+  { id: <span class="num">1</span>, name: <span class="str">'김민준'</span>, score: <span class="num">88</span> },
+  { id: <span class="num">2</span>, name: <span class="str">'이서연'</span>, score: <span class="num">95</span> },
+  { id: <span class="num">3</span>, name: <span class="str">'박지호'</span>, score: <span class="num">72</span> },
+];
+
+<span class="kw">function</span> <span class="fn">StudentList</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">ul</span>&gt;
+      {students.<span class="fn">map</span>(student =&gt; (
+        &lt;<span class="tag">li</span> key={student.id}&gt;
+          {student.name} — {student.score}점
+        &lt;/<span class="tag">li</span>&gt;
+      ))}
+    &lt;/<span class="tag">ul</span>&gt;
+  );
+}</pre>
+  <div class="card">
+    <div class="card-title">Why are keys required?</div>
+    <p>React uses keys to identify which items changed, were added, or removed. Without them, React re-renders every item — causing bugs and poor performance. Use unique IDs, never array index (unless the list never re-orders).</p>
+  </div>
+</div>
+
+<!-- Slide 11: Conditional Rendering -->
+<div class="slide" id="slide-11">
+  <h2>🔀 Conditional Rendering</h2>
+  <p>Render different JSX based on a condition using JavaScript operators.</p>
+  <pre><span class="comment">// 1. Ternary operator — renders either A or B</span>
+<span class="kw">function</span> <span class="fn">StatusBadge</span>({ isOnline }) {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">span</span> className={isOnline ? <span class="str">'badge-green'</span> : <span class="str">'badge-grey'</span>}&gt;
+      {isOnline ? <span class="str">'Online'</span> : <span class="str">'Offline'</span>}
+    &lt;/<span class="tag">span</span>&gt;
+  );
+}
+
+<span class="comment">// 2. Short-circuit &amp;&amp; — renders only if condition is true</span>
+<span class="kw">function</span> <span class="fn">Notification</span>({ hasError, message }) {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      {hasError &amp;&amp; &lt;<span class="tag">p</span> className=<span class="str">"error"</span>&gt;{message}&lt;/<span class="tag">p</span>&gt;}
+      &lt;<span class="tag">p</span>&gt;Content always renders here.&lt;/<span class="tag">p</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}
+
+<span class="comment">// 3. if/else before the return (for complex logic)</span>
+<span class="kw">function</span> <span class="fn">Dashboard</span>({ user }) {
+  <span class="kw">if</span> (!user) <span class="kw">return</span> &lt;<span class="tag">p</span>&gt;Please log in.&lt;/<span class="tag">p</span>&gt;;
+  <span class="kw">return</span> &lt;<span class="tag">h1</span>&gt;Welcome, {user.name}!&lt;/<span class="tag">h1</span>&gt;;
+}</pre>
+</div>
+
+<!-- Slide 12: Full Example -->
+<div class="slide" id="slide-12">
+  <h2>🏆 Putting It Together — Grade Card App</h2>
+  <pre><span class="kw">function</span> <span class="fn">GradeCard</span>({ student }) {
+  <span class="kw">const</span> passed = student.score &gt;= <span class="num">60</span>;
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span> className=<span class="str">"grade-card"</span>&gt;
+      &lt;<span class="tag">h3</span>&gt;{student.name}&lt;/<span class="tag">h3</span>&gt;
+      &lt;<span class="tag">p</span>&gt;학번: {student.id}&lt;/<span class="tag">p</span>&gt;
+      &lt;<span class="tag">p</span>&gt;점수: {student.score}점&lt;/<span class="tag">p</span>&gt;
+      &lt;<span class="tag">span</span> className={passed ? <span class="str">'pass'</span> : <span class="str">'fail'</span>}&gt;
+        {passed ? <span class="str">'✅ 합격'</span> : <span class="str">'❌ 불합격'</span>}
+      &lt;/<span class="tag">span</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}
+
+<span class="kw">const</span> roster = [
+  { id: <span class="str">'20231001'</span>, name: <span class="str">'김민준'</span>, score: <span class="num">88</span> },
+  { id: <span class="str">'20231002'</span>, name: <span class="str">'이서연'</span>, score: <span class="num">45</span> },
+];
+
+<span class="kw">function</span> <span class="fn">GradeBoard</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">main</span>&gt;
+      &lt;<span class="tag">h1</span>&gt;성적 현황&lt;/<span class="tag">h1</span>&gt;
+      {roster.<span class="fn">map</span>(s =&gt; &lt;<span class="tag">GradeCard</span> key={s.id} student={s} /&gt;)}
+    &lt;/<span class="tag">main</span>&gt;
+  );
+}</pre>
+</div>
+
+<!-- Slide 13: Practice -->
+<div class="slide" id="slide-13">
+  <h2>💻 Practice Challenge</h2>
+  <div class="practice-box">
+    <h3>🎯 Build a Course Catalog</h3>
+    <p>Create a small React app with the following components:</p>
+    <ol style="color:#86efac;padding-left:1.4rem;line-height:2">
+      <li>A <code>CourseCard</code> component that receives <code>title</code>, <code>instructor</code>, <code>credits</code>, and <code>required</code> (boolean) as props</li>
+      <li>If <code>required</code> is true, show a red <strong>"필수"</strong> badge; otherwise show a grey <strong>"선택"</strong> badge</li>
+      <li>A <code>CourseCatalog</code> component that maps over this array and renders a <code>CourseCard</code> for each:</li>
+    </ol>
+    <pre style="background:#0a1a0a;border-color:#166534;color:#bbf7d0">const courses = [
+  { id: 1, title: 'Web Programming', instructor: 'Dr. Toshpulatov', credits: 3, required: true },
+  { id: 2, title: 'Database Systems', instructor: 'Dr. Kim', credits: 3, required: true },
+  { id: 3, title: 'Mobile App Dev', instructor: 'Dr. Lee', credits: 2, required: false },
+];</pre>
+  </div>
+  <div class="tip">Start with static JSX, then extract into components, then add props.</div>
+</div>
+
+<!-- Slide 14: Common Mistakes -->
+<div class="slide" id="slide-14">
+  <h2>⚠️ Common Mistakes to Avoid</h2>
+  <div class="card">
+    <div class="card-title">❌ Mutating props</div>
+    <pre style="font-size:.78rem">function Bad({ items }) {
+  items.push('new item'); <span class="comment">// WRONG — never mutate props!</span>
+  return &lt;ul&gt;{items.map(i =&gt; &lt;li&gt;{i}&lt;/li&gt;)}&lt;/ul&gt;;
+}</pre>
+  </div>
+  <div class="card">
+    <div class="card-title">❌ Lowercase component names</div>
+    <pre style="font-size:.78rem">function profileCard() { ... } <span class="comment">// Wrong — React treats it as a DOM tag</span>
+function ProfileCard() { ... } <span class="comment">// Correct</span></pre>
+  </div>
+  <div class="card">
+    <div class="card-title">❌ Missing keys in lists</div>
+    <pre style="font-size:.78rem">{items.map(item =&gt; &lt;li&gt;{item}&lt;/li&gt;)}         <span class="comment">// Missing key — warning!</span>
+{items.map((item, i) =&gt; &lt;li key={i}&gt;{item}&lt;/li&gt;)} <span class="comment">// Index key — risky</span>
+{items.map(item =&gt; &lt;li key={item.id}&gt;{item.name}&lt;/li&gt;)} <span class="comment">// Correct</span></pre>
+  </div>
+</div>
+
+<!-- Slide 15: Summary -->
+<div class="slide" id="slide-15">
+  <h2>✅ Summary — Key Takeaways</h2>
+  <div class="key-point"><span class="kp-num">1</span><div><strong>Components</strong> are JavaScript functions that return JSX. Names start with a capital letter.</div></div>
+  <div class="key-point"><span class="kp-num">2</span><div><strong>JSX</strong> looks like HTML but compiles to <code>React.createElement()</code>. Use <code>className</code>, not <code>class</code>.</div></div>
+  <div class="key-point"><span class="kp-num">3</span><div><strong>Props</strong> pass data from parent → child. They are <em>read-only</em> in the child.</div></div>
+  <div class="key-point"><span class="kp-num">4</span><div><strong>Default values</strong> can be set with ES6 destructuring defaults: <code>&#123; size = 60 &#125;</code>.</div></div>
+  <div class="key-point"><span class="kp-num">5</span><div><strong>Composition</strong>: build complex UIs by nesting small components. Use <code>children</code> for wrapper patterns.</div></div>
+  <div class="key-point"><span class="kp-num">6</span><div><strong>Lists</strong>: use <code>.map()</code> + a unique <code>key</code> prop on the outermost element.</div></div>
+  <div class="key-point"><span class="kp-num">7</span><div><strong>Conditional rendering</strong>: ternary for A/B, <code>&amp;&amp;</code> for show/hide, <code>if</code> before <code>return</code> for complex logic.</div></div>
+  <div class="tip" style="margin-top:1.4rem"><strong>Next class (Week 12 Mon):</strong> React State — making components interactive with <code>useState</code>!</div>
+</div>
+
+</div><!-- /slides -->
+
+<div class="progress-wrap"><div id="progress-bar" style="width:6.67%"></div></div>
+
+<nav>
+  <button class="btn" id="prev-btn" onclick="navigate(-1)">← Previous</button>
+  <button class="btn primary" id="next-btn" onclick="navigate(1)">Next →</button>
+</nav>
+
+<script>
+let current = 1;
+const total = 15;
+function show(n) {
+  if (n < 1 || n > total) return;
+  document.getElementById('slide-' + current).classList.remove('active');
+  current = n;
+  document.getElementById('slide-' + current).classList.add('active');
+  document.getElementById('counter').textContent = current + ' / ' + total;
+  document.getElementById('progress-bar').style.width = (current / total * 100) + '%';
+  document.getElementById('prev-btn').disabled = current === 1;
+  document.getElementById('next-btn').textContent = current === total ? '✓ Done' : 'Next →';
+  window.scrollTo(0, 0);
+}
+function navigate(dir) { show(current + dir); }
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   navigate(-1);
+});
+show(1);
+</script>
+</body>
+</html>

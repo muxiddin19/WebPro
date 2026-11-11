@@ -1,0 +1,380 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>React Props ??Task 11</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: task spec with live checker */
+:root{
+  --bg:#F6F8FA;--surface:#FFFFFF;--surface2:#EFF1F3;--border:#D0D7DE;
+  --fg:#1F2328;--fg2:#59636E;--react:#0969DA;--ok:#1A7F37;--warn:#9A6700;--err:#CF222E;
+  --ff-h:'Space Grotesk',sans-serif;--ff-b:'Inter',sans-serif;--ff-c:'JetBrains Mono',monospace;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0D1117;--surface:#161B22;--surface2:#21262D;--border:#30363D;
+  --fg:#E6EDF3;--fg2:#8B949E;--react:#61DAFB;--ok:#3FB950;--warn:#E3B341;--err:#F85149;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0D1117;--surface:#161B22;--surface2:#21262D;--border:#30363D;
+  --fg:#E6EDF3;--fg2:#8B949E;--react:#61DAFB;--ok:#3FB950;--warn:#E3B341;--err:#F85149;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--ff-b);background:var(--bg);color:var(--fg);min-height:100%;padding-bottom:40px}
+a{color:var(--react)}
+
+/* PAGE HEADER */
+.page-hdr{background:var(--surface);border-bottom:1px solid var(--border);padding:14px max(16px,env(safe-area-inset-left,0px))}
+.breadcrumb{font:11px var(--ff-c);color:var(--fg2);text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px}
+.page-title{font:700 22px var(--ff-h)}
+.meta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:6px;font-size:13px;color:var(--fg2)}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:2px 10px;border-radius:12px;font:600 11px var(--ff-c);text-transform:uppercase;letter-spacing:.08em}
+.badge.react{background:color-mix(in srgb,var(--react) 15%,transparent);color:var(--react)}
+.badge.week{background:color-mix(in srgb,var(--warn) 15%,transparent);color:var(--warn)}
+.badge.pts{background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok)}
+
+/* LAYOUT */
+.wrap{max-width:900px;margin:0 auto;padding:24px max(16px,env(safe-area-inset-left,0px))}
+.section{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px 24px;margin-bottom:16px}
+.section-title{font:700 15px var(--ff-h);margin-bottom:14px;display:flex;align-items:center;gap-8px}
+.sec-icon{width:28px;height:28px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;margin-right:8px;flex-shrink:0}
+
+/* STEPS */
+.steps{counter-reset:step;display:flex;flex-direction:column;gap:14px}
+.step{display:flex;gap:14px;align-items:flex-start}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--react);color:#fff;font:700 13px var(--ff-h);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+[data-theme="dark"] .step-num,[prefers-color-scheme="dark"] .step-num{color:var(--bg)}
+.step-body{flex:1;min-width:0}
+.step-body p{font-size:14px;line-height:1.65;color:var(--fg)}
+.step-body p+p{margin-top:6px}
+.step-body code{font-family:var(--ff-c);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px}
+
+/* CODE BLOCKS */
+pre{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px;overflow-x:auto;font:13px var(--ff-c);line-height:1.5;color:var(--fg)}
+pre code{font:inherit;background:none;padding:0;border-radius:0}
+.cmt{color:var(--fg2)}
+.kw{color:var(--react)}
+.str{color:var(--ok)}
+
+/* RUBRIC TABLE */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--surface2);font:600 12px var(--ff-c);text-transform:uppercase;letter-spacing:.1em;padding:8px 12px;text-align:left;border-bottom:2px solid var(--border)}
+td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.5}
+tr:last-child td{border:none}
+.pts-badge{display:inline-block;padding:2px 8px;border-radius:10px;font:600 11px var(--ff-c);background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok)}
+.must{font:600 11px var(--ff-c);color:var(--err);text-transform:uppercase}
+
+/* CHECKER */
+.checker{display:flex;flex-direction:column;gap:12px}
+#student-info-row{display:flex;gap:8px;flex-wrap:wrap}
+#student-info-row input{flex:1;min-width:140px;background:var(--surface2);border:1px solid var(--border);color:var(--fg);padding:8px 12px;border-radius:6px;font:14px var(--ff-b)}
+#student-info-row input::placeholder{color:var(--fg2)}
+#code-input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--fg);padding:12px;border-radius:6px;font:13px var(--ff-c);min-height:180px;resize:vertical}
+#code-input::placeholder{color:var(--fg2)}
+#check-btn{background:var(--react);color:#fff;border:none;border-radius:7px;padding:11px 24px;font:700 14px var(--ff-h);cursor:pointer;transition:opacity .15s}
+#check-btn:hover{opacity:.85}
+.result-panel{display:none;border-radius:8px;padding:14px 16px}
+.result-panel.show{display:block}
+.result-panel.pass{background:color-mix(in srgb,var(--ok) 10%,transparent);border:2px solid var(--ok)}
+.result-panel.fail{background:color-mix(in srgb,var(--err) 10%,transparent);border:2px solid var(--err)}
+.result-panel.warn{background:color-mix(in srgb,var(--warn) 10%,transparent);border:2px solid var(--warn)}
+.result-title{font:700 15px var(--ff-h);margin-bottom:6px}
+.check-items{list-style:none;display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.check-item{display:flex;align-items:flex-start;gap:8px;font-size:13px}
+.ci-icon{flex-shrink:0;font-size:16px}
+.ci-text{line-height:1.5}
+
+/* SUBMISSION */
+.sub-box{background:color-mix(in srgb,var(--react) 8%,transparent);border:2px solid var(--react);border-radius:10px;padding:18px 20px}
+.sub-box ol{padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:14px;line-height:1.6}
+</style>
+
+<header class="page-hdr">
+  <div class="breadcrumb">Web Programming K0126_002 쨌 Dr. Toshpulatov</div>
+  <div class="page-title">Task 11-A: React Components &amp; Props</div>
+  <div class="meta-row">
+    <span class="badge react">React.js</span>
+    <span class="badge week">Week 11 쨌 Friday</span>
+    <span class="badge pts">30 points</span>
+    <span style="display:flex;align-items:center;gap:4px">?뱟 Due: <strong id="due-date">Friday, next week ??start of class</strong></span>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- OBJECTIVE -->
+<div class="section">
+  <div class="section-title"><span class="sec-icon" style="background:color-mix(in srgb,var(--react) 15%,transparent)">?렞</span>Objective</div>
+  <p style="font-size:14px;line-height:1.7">Build a <strong>StudentProfileCard</strong> component that accepts props and renders a formatted profile card. The card must display your <strong>real student ID</strong> so your submission is uniquely yours.</p>
+</div>
+
+<!-- STEPS -->
+<div class="section">
+  <div class="section-title"><span class="sec-icon" style="background:color-mix(in srgb,var(--warn) 15%,transparent)">?뱥</span>Steps</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <p><strong>Create a new Vite + React project</strong></p>
+        <pre>npm create vite@latest task11 -- --template react
+cd task11 &amp;&amp; npm install &amp;&amp; npm run dev</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <p><strong>Create <code>src/StudentProfileCard.jsx</code></strong> with this exact structure:</p>
+        <pre><span class="cmt">// src/StudentProfileCard.jsx</span>
+<span class="kw">function</span> StudentProfileCard({ name, studentId, major, year, gpa }) {
+  <span class="kw">return</span> (
+    &lt;div className=<span class="str">"profile-card"</span>&gt;
+      &lt;div className=<span class="str">"card-header"</span>&gt;
+        &lt;h2 className=<span class="str">"student-name"</span>&gt;{name}&lt;/h2&gt;
+        &lt;span className=<span class="str">"student-id"</span>&gt;ID: {studentId}&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;div className=<span class="str">"card-body"</span>&gt;
+        &lt;p&gt;&lt;strong&gt;Major:&lt;/strong&gt; {major}&lt;/p&gt;
+        &lt;p&gt;&lt;strong&gt;Year:&lt;/strong&gt; {year}&lt;/p&gt;
+        &lt;p&gt;&lt;strong&gt;GPA:&lt;/strong&gt; {gpa}&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}
+
+<span class="kw">export default</span> StudentProfileCard;</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <p><strong>Use the component in <code>src/App.jsx</code></strong> with <em>your real data</em>:</p>
+        <pre><span class="kw">import</span> StudentProfileCard <span class="kw">from</span> <span class="str">'./StudentProfileCard'</span>;
+
+<span class="kw">function</span> App() {
+  <span class="kw">return</span> (
+    &lt;div&gt;
+      &lt;h1&gt;Student Directory&lt;/h1&gt;
+      {<span class="cmt">/* Replace with YOUR information: */</span>}
+      &lt;StudentProfileCard
+        name=<span class="str">"Your Full Name"</span>
+        studentId=<span class="str">"YOUR_STUDENT_ID"</span>  <span class="cmt">{/* ??REQUIRED */}</span>
+        major=<span class="str">"Computer Engineering"</span>
+        year={3}
+        gpa={3.75}
+      /&gt;
+      {<span class="cmt">/* Add 2 more cards for classmates (use their real names): */</span>}
+      &lt;StudentProfileCard name=<span class="str">"Classmate 1"</span> studentId=<span class="str">"..."</span> major=<span class="str">"..."</span> year={2} gpa={3.5} /&gt;
+      &lt;StudentProfileCard name=<span class="str">"Classmate 2"</span> studentId=<span class="str">"..."</span> major=<span class="str">"..."</span> year={4} gpa={3.9} /&gt;
+    &lt;/div&gt;
+  );
+}
+
+<span class="kw">export default</span> App;</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <p><strong>Add CSS</strong> to <code>src/index.css</code> to style the card. At minimum: border, padding, border-radius, and different background from the page. No copied frameworks ??write your own CSS.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <p><strong>Push to GitHub</strong> and deploy to GitHub Pages using Vite's <code>gh-pages</code> method:</p>
+        <pre>npm install --save-dev gh-pages
+<span class="cmt"># Add to vite.config.js: base: '/task11/'</span>
+npm run build
+npx gh-pages -d dist</pre>
+        <p>Submit your GitHub repo URL <strong>and</strong> the live GitHub Pages URL.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REQUIRED OUTPUTS -->
+<div class="section">
+  <div class="section-title"><span class="sec-icon" style="background:color-mix(in srgb,var(--err) 15%,transparent)">??/span>Required Outputs <span style="font-size:12px;color:var(--fg2);font-weight:400">(auto-checked below)</span></div>
+  <ul style="font-size:14px;display:flex;flex-direction:column;gap:8px;list-style:none">
+    <li>??Component file at <code>src/StudentProfileCard.jsx</code> with exactly 5 props: <code>name</code>, <code>studentId</code>, <code>major</code>, <code>year</code>, <code>gpa</code></li>
+    <li>??<strong>Your real student ID</strong> visible in the rendered output (auto-verified)</li>
+    <li>??Exactly <strong>3 cards</strong> rendered in <code>App.jsx</code></li>
+    <li>??Custom CSS ??not Bootstrap, Tailwind, or copied from the internet</li>
+    <li>??GitHub Pages live link that opens the app in a browser</li>
+    <li>??GitHub repo with at least <strong>3 meaningful commits</strong> (not just 1 big commit)</li>
+  </ul>
+</div>
+
+<!-- RUBRIC -->
+<div class="section">
+  <div class="section-title"><span class="sec-icon" style="background:color-mix(in srgb,var(--ok) 15%,transparent)">?뱤</span>Grading Rubric</div>
+  <table>
+    <thead><tr><th>Criterion</th><th>Points</th><th>Auto-check</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Component structure correct</strong><br><small>5 props, JSX matches spec, file name exact</small></td>
+        <td><span class="pts-badge">8 pts</span></td>
+        <td>??Auto</td>
+        <td>All 5 props must be used in the return JSX</td>
+      </tr>
+      <tr>
+        <td><strong>Your student ID in output</strong><br><small>Unique to you ??proves you ran the code</small></td>
+        <td><span class="pts-badge">5 pts</span></td>
+        <td>??Auto</td>
+        <td><span class="must">Required</span> ??0 pts if missing</td>
+      </tr>
+      <tr>
+        <td><strong>3 cards rendered</strong><br><small>Your card + 2 classmates</small></td>
+        <td><span class="pts-badge">4 pts</span></td>
+        <td>??Auto</td>
+        <td>Real names, not "Student1", "Student2"</td>
+      </tr>
+      <tr>
+        <td><strong>CSS styling</strong><br><small>Border, padding, background, hover effect</small></td>
+        <td><span class="pts-badge">6 pts</span></td>
+        <td>??Manual</td>
+        <td>Must look like a "card" ??not plain default HTML</td>
+      </tr>
+      <tr>
+        <td><strong>GitHub Pages live URL</strong><br><small>Link opens the working app</small></td>
+        <td><span class="pts-badge">4 pts</span></td>
+        <td>??Auto (HTTP check)</td>
+        <td>URL must return 200 OK</td>
+      </tr>
+      <tr>
+        <td><strong>Commit history (?? commits)</strong><br><small>Each commit shows one step of work</small></td>
+        <td><span class="pts-badge">3 pts</span></td>
+        <td>??Auto</td>
+        <td>e.g. "Add component", "Add CSS", "Deploy"</td>
+      </tr>
+      <tr style="background:var(--surface2)">
+        <td><strong>Total</strong></td>
+        <td><span class="pts-badge">30 pts</span></td>
+        <td></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- LIVE CHECKER -->
+<div class="section">
+  <div class="section-title"><span class="sec-icon" style="background:color-mix(in srgb,var(--react) 15%,transparent)">?뵇</span>Self-Check Before Submitting</div>
+  <div class="checker">
+    <div id="student-info-row">
+      <input id="inp-id" type="text" placeholder="Your Student ID (e.g. 20231234)" maxlength="12">
+      <input id="inp-gh" type="text" placeholder="GitHub repo URL (github.com/??">
+    </div>
+    <p style="font-size:13px;color:var(--fg2)">Paste your <code>src/App.jsx</code> code below, then click Check:</p>
+    <textarea id="code-input" placeholder="Paste your App.jsx code here??></textarea>
+    <button id="check-btn" onclick="runCheck()">?뵇 Check My Code</button>
+    <div class="result-panel" id="result"></div>
+  </div>
+</div>
+
+<!-- SUBMISSION -->
+<div class="section">
+  <div class="section-title"><span class="sec-icon" style="background:color-mix(in srgb,var(--react) 15%,transparent)">?뱾</span>How to Submit</div>
+  <div class="sub-box">
+    <ol>
+      <li>Run the Self-Check above ??fix any red items</li>
+      <li>Open the Sprint Quiz on the course page</li>
+      <li>Enter your <strong>GitHub repo URL</strong> and <strong>GitHub Pages URL</strong></li>
+      <li>Enter your <strong>in-class Activity Code</strong> from the Visual Lecture (confirms attendance)</li>
+      <li>Upload a <strong>screenshot</strong> of your running app showing your student ID</li>
+    </ol>
+  </div>
+  <p style="font-size:12px;color:var(--fg2);margin-top:12px">?좑툘 Submissions with the same code as another student receive 0. The activity code from the in-class lecture is unique per student ??it proves you wrote this yourself.</p>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+function runCheck(){
+  const sid = document.getElementById('inp-id').value.trim();
+  const gh  = document.getElementById('inp-gh').value.trim();
+  const code= document.getElementById('code-input').value;
+  const panel = document.getElementById('result');
+  panel.className = 'result-panel';
+
+  const checks = [];
+  let score = 0;
+
+  // 1. Student ID present in code
+  if(!sid){ checks.push({ok:false, text:'Enter your Student ID in the field above first.'}); }
+  else if(code.includes(sid)){
+    checks.push({ok:true, text:`Your student ID "${sid}" is in the code ??});
+    score++;
+  } else {
+    checks.push({ok:false, text:`Student ID "${sid}" NOT found in code. Add studentId="${sid}" as a prop value.`});
+  }
+
+  // 2. StudentProfileCard import
+  if(/import\s+StudentProfileCard/.test(code)){
+    checks.push({ok:true, text:'StudentProfileCard is imported correctly ??}); score++;
+  } else {
+    checks.push({ok:false, text:"Missing: import StudentProfileCard from './StudentProfileCard'"});
+  }
+
+  // 3. Count StudentProfileCard usages
+  const uses = (code.match(/<StudentProfileCard/g)||[]).length;
+  if(uses>=3){
+    checks.push({ok:true, text:`${uses} StudentProfileCard instances found (?? required) ??}); score++;
+  } else {
+    checks.push({ok:false, text:`Only ${uses} card(s) found ??need at least 3 (your card + 2 classmates).`});
+  }
+
+  // 4. All 5 props present in at least one usage
+  const propNames = ['name','studentId','major','year','gpa'];
+  const missingProps = propNames.filter(p=>!new RegExp(p+'=').test(code));
+  if(missingProps.length===0){
+    checks.push({ok:true, text:'All 5 required props are used: name, studentId, major, year, gpa ??}); score++;
+  } else {
+    checks.push({ok:false, text:`Missing props: ${missingProps.join(', ')}`});
+  }
+
+  // 5. export default
+  if(/export\s+default\s+App/.test(code)){
+    checks.push({ok:true, text:'App is exported as default ??}); score++;
+  } else {
+    checks.push({ok:false, text:"Missing: export default App at the end of the file."});
+  }
+
+  // 6. GitHub URL format
+  if(gh && /github\.com\/[^/]+\/[^/]+/.test(gh)){
+    checks.push({ok:true, text:`GitHub repo URL looks valid ??}); score++;
+  } else {
+    checks.push({ok:false, text:'Enter a valid GitHub repo URL (github.com/username/repo-name).'});
+  }
+
+  // 7. No AI patterns (basic check)
+  const aiPatterns = ['Lorem ipsum','placeholder text','classmate1','Classmate1','student1','Student1','student2','Student2','example.com'];
+  const aiFound = aiPatterns.filter(p=>code.toLowerCase().includes(p.toLowerCase()));
+  if(aiFound.length===0){
+    checks.push({ok:true, text:'No placeholder/generic names detected ??});
+  } else {
+    checks.push({ok:false, text:`Replace generic placeholders: "${aiFound.join('", "')}" ??use real names.`});
+  }
+
+  // Render
+  const pct = Math.round(score/7*100);
+  panel.className = 'result-panel show ' + (pct>=85?'pass':pct>=50?'warn':'fail');
+  const icon = pct>=85?'??:pct>=50?'?좑툘':'??;
+  panel.innerHTML = `<div class="result-title">${icon} Self-Check: ${score}/7 items passed (${pct}%)</div>
+    <p style="font-size:13px;color:var(--fg2);margin-bottom:8px">${pct>=85?'Looking good! Submit when ready.':pct>=50?'Some issues to fix before submitting.':'Several problems to fix.'}</p>
+    <ul class="check-items">`+
+    checks.map(c=>`<li class="check-item"><span class="ci-icon">${c.ok?'??:'??}</span><span class="ci-text" style="color:${c.ok?'var(--ok)':'var(--err)'}">${c.text}</span></li>`).join('')+
+    `</ul>`;
+}
+
+// Due date: next Friday
+const d = new Date();
+d.setDate(d.getDate() + ((5-d.getDay()+7)%7||7));
+document.getElementById('due-date').textContent = d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})+' ??start of class';
+</script>
+
+</html>
