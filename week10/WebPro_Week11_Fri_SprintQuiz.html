@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sprint Quiz — React Components &amp; Props · Week 11 Fri</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f0f9ff;--surf:#fff;--surf2:#e0f2fe;--brd:#bae6fd;--tx:#0c2a40;--mu:#4a7a9b;--ac:#0891b2;--acl:#ecfeff;--ac2:#0e7490;--ok:#16a34a;--okl:#dcfce7;--er:#dc2626;--erl:#fee2e2;--warn:#d97706;--warnl:#fef3c7}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#060f16;--surf:#0a1e2e;--surf2:#0d2a40;--brd:#164e70;--tx:#e0f2fe;--mu:#5090b8;--ac:#22d3ee;--acl:#042f2e;--ac2:#67e8f9;--ok:#4ade80;--okl:#052e16;--er:#f87171;--erl:#450a0a;--warn:#fbbf24;--warnl:#1a1000}}
+:root[data-theme=dark]{--bg:#060f16;--surf:#0a1e2e;--surf2:#0d2a40;--brd:#164e70;--tx:#e0f2fe;--mu:#5090b8;--ac:#22d3ee;--acl:#042f2e;--ac2:#67e8f9;--ok:#4ade80;--okl:#052e16;--er:#f87171;--erl:#450a0a;--warn:#fbbf24;--warnl:#1a1000}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;font-size:16px;line-height:1.65;min-height:100vh}
+.header{background:var(--surf);border-bottom:3px solid #61dafb;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.badge{background:#61dafb;color:#111;font-family:'Space Grotesk',sans-serif;font-weight:700;padding:4px 12px;border-radius:6px;font-size:15px}
+.hdr-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px}
+.hdr-sub{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em}
+.theme-btn{background:var(--surf2);border:1px solid var(--brd);color:var(--tx);padding:5px 12px;border-radius:16px;cursor:pointer;font-size:13px}
+.wrap{max-width:760px;margin:0 auto;padding:28px 16px 80px}
+.student-form{background:var(--surf);border:1px solid var(--brd);border-radius:12px;padding:24px;margin-bottom:32px}
+.student-form h2{font-family:'Space Grotesk',sans-serif;font-size:17px;margin-bottom:16px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:500px){.form-row{grid-template-columns:1fr}}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:4px;color:var(--mu)}
+input[type=text],input[type=number]{width:100%;padding:9px 12px;border:1px solid var(--brd);border-radius:8px;background:var(--surf2);color:var(--tx);font-size:15px;font-family:'Inter',sans-serif}
+input:focus{outline:2px solid var(--ac);outline-offset:1px}
+.quiz-title{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;margin-bottom:4px}
+.quiz-meta{font-size:13px;color:var(--mu);margin-bottom:24px}
+.qcard{background:var(--surf);border:1px solid var(--brd);border-radius:12px;padding:20px 24px;margin-bottom:16px}
+.qcard.correct{border-color:var(--ok);background:var(--okl)}
+.qcard.wrong{border-color:var(--er);background:var(--erl)}
+.qnum{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin-bottom:8px;font-family:'Space Grotesk',sans-serif}
+.qtext{font-size:15px;font-weight:600;margin-bottom:14px;line-height:1.5}
+code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--surf2);padding:1px 5px;border-radius:3px;color:var(--ac2)}
+.options{display:flex;flex-direction:column;gap:8px}
+.opt-label{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:1px solid var(--brd);border-radius:8px;cursor:pointer;transition:background .15s}
+.opt-label:hover{background:var(--surf2)}
+.opt-label input[type=radio]{margin-top:3px;accent-color:var(--ac);flex-shrink:0}
+.opt-text{font-size:14px;line-height:1.45}
+.result-badge{display:none;font-size:13px;font-weight:700;padding:4px 10px;border-radius:6px;margin-top:10px}
+.result-badge.show{display:inline-block}
+.result-badge.ok{background:var(--ok);color:#fff}
+.result-badge.er{background:var(--er);color:#fff}
+.explanation{margin-top:10px;font-size:13px;padding:10px 14px;background:var(--surf2);border-radius:8px;display:none}
+.explanation.show{display:block}
+.submit-area{text-align:center;margin-top:28px}
+.submit-btn{background:var(--ac);color:#fff;border:none;padding:14px 48px;border-radius:10px;font-size:17px;font-weight:700;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:opacity .15s}
+.submit-btn:hover{opacity:.88}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed}
+.score-panel{display:none;background:var(--surf);border:2px solid var(--ac);border-radius:14px;padding:28px;margin-top:28px;text-align:center}
+.score-panel.show{display:block}
+.score-big{font-size:56px;font-weight:700;font-family:'Space Grotesk',sans-serif;color:var(--ac);line-height:1}
+.score-label{font-size:16px;color:var(--mu);margin-top:6px}
+.score-pct{font-size:28px;font-weight:700;margin-top:4px}
+.sync-msg{margin-top:16px;font-size:13px;color:var(--mu);font-style:italic}
+.sync-msg.ok{color:var(--ok)}
+.sync-msg.er{color:var(--er)}
+</style>
+</head>
+<body>
+<div class="header">
+  <div style="display:flex;align-items:center;gap:14px">
+    <div class="badge">⚛ React</div>
+    <div>
+      <div class="hdr-sub">Sprint Quiz · Week 11 Friday · K0126_002</div>
+      <div class="hdr-title">React Components &amp; Props</div>
+    </div>
+  </div>
+  <button class="theme-btn" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">🌙</button>
+</div>
+
+<div class="wrap">
+  <div class="student-form">
+    <h2>🎓 Student Information</h2>
+    <div class="form-row">
+      <div>
+        <label for="sid">Gachon Student ID</label>
+        <input type="number" id="sid" placeholder="e.g. 202011234" min="200000000" max="299999999">
+      </div>
+      <div>
+        <label for="sname">Full Name</label>
+        <input type="text" id="sname" placeholder="e.g. Amir Tashkentov">
+      </div>
+    </div>
+  </div>
+
+  <div class="quiz-title">React Components &amp; Props — Sprint Quiz</div>
+  <div class="quiz-meta">12 questions · Multiple choice · Scores sync to grade book</div>
+
+  <div id="quiz-container"></div>
+
+  <div class="submit-area">
+    <button class="submit-btn" id="submit-btn" onclick="submitQuiz()">Submit Quiz</button>
+  </div>
+
+  <div class="score-panel" id="score-panel">
+    <div class="score-big" id="score-num">0 / 12</div>
+    <div class="score-label">Questions Correct</div>
+    <div class="score-pct" id="score-pct">0%</div>
+    <div class="sync-msg" id="sync-msg">Syncing to grade book…</div>
+  </div>
+</div>
+
+<script>
+const GAS_URL = 'YOUR_GAS_ENDPOINT_URL'; // Replace with deployed GAS web app URL
+
+const WEEK_NUM = 11;
+const SESSION  = 2;
+
+const questions = [
+  {
+    q: 'What is the correct way to define a functional component in React?',
+    opts: [
+      'function myComponent() { return &lt;div /&gt;; }',
+      'function MyComponent() { return &lt;div /&gt;; }',
+      'class MyComponent { render() { return &lt;div /&gt;; } }',
+      'const mycomponent = () =&gt; &lt;div /&gt;;'
+    ],
+    ans: 1,
+    exp: 'React component names must start with a capital letter. `myComponent` or `mycomponent` would be treated as a plain HTML element, not a React component.'
+  },
+  {
+    q: 'In JSX, what attribute replaces HTML\'s `class`?',
+    opts: ['htmlClass', 'cssClass', 'className', 'classList'],
+    ans: 2,
+    exp: 'JSX uses `className` because `class` is a reserved keyword in JavaScript. It maps to the DOM `class` attribute.'
+  },
+  {
+    q: 'How do you correctly pass a prop called `score` with numeric value 95 to a component?',
+    opts: [
+      '&lt;ScoreCard score="95" /&gt;',
+      '&lt;ScoreCard score={95} /&gt;',
+      '&lt;ScoreCard score=(95) /&gt;',
+      '&lt;ScoreCard {score: 95} /&gt;'
+    ],
+    ans: 1,
+    exp: 'Non-string values (numbers, booleans, expressions) must be wrapped in curly braces `{}`. `score="95"` passes the string "95", not the number 95.'
+  },
+  {
+    q: 'Which of the following correctly reads the `name` prop inside a component?',
+    opts: [
+      'function Hi(name) { return &lt;p&gt;{name}&lt;/p&gt;; }',
+      'function Hi(props) { return &lt;p&gt;{props.name}&lt;/p&gt;; }',
+      'function Hi([name]) { return &lt;p&gt;{name}&lt;/p&gt;; }',
+      'function Hi() { return &lt;p&gt;{this.name}&lt;/p&gt;; }'
+    ],
+    ans: 1,
+    exp: 'React passes a single `props` object as the first argument. Access individual props with `props.name`. (Destructuring `{ name }` is also valid, but not option A.)'
+  },
+  {
+    q: 'What does `props.children` contain?',
+    opts: [
+      'The first child component\'s state',
+      'The list of all prop names',
+      'The JSX content placed between a component\'s opening and closing tags',
+      'The parent component\'s props'
+    ],
+    ans: 2,
+    exp: '`props.children` holds whatever JSX is placed between `&lt;MyComp&gt;` and `&lt;/MyComp&gt;`. It enables wrapper/layout components.'
+  },
+  {
+    q: 'When rendering a list with `.map()`, why must each element have a `key` prop?',
+    opts: [
+      'It is required by JavaScript syntax',
+      'React uses it to efficiently identify which items changed, were added, or removed',
+      'The key is displayed as an ID in the DOM',
+      'Without it, the array fails to iterate'
+    ],
+    ans: 1,
+    exp: 'React uses `key` to reconcile the virtual DOM efficiently. Without stable keys, React may re-render the wrong items or produce bugs when the list changes.'
+  },
+  {
+    q: 'Which `key` value is recommended when rendering a list?',
+    opts: [
+      'The array index (0, 1, 2…)',
+      'A random number generated each render',
+      'A stable unique ID from your data',
+      'The item\'s full object converted to a string'
+    ],
+    ans: 2,
+    exp: 'Using the array index as a key causes bugs when items are reordered or removed. A stable unique ID (from your data model) is the correct choice.'
+  },
+  {
+    q: 'What does this JSX render? `{isAdmin && &lt;button&gt;Delete&lt;/button&gt;}`',
+    opts: [
+      'Always renders the button',
+      'Renders the button only when `isAdmin` is truthy',
+      'Renders the button only when `isAdmin` is falsy',
+      'Throws an error if `isAdmin` is false'
+    ],
+    ans: 1,
+    exp: 'The `&&` short-circuit operator evaluates the right side only when the left is truthy. If `isAdmin` is false, nothing is rendered (React ignores `false`).'
+  },
+  {
+    q: 'What is the output of `{0 && &lt;p&gt;Hello&lt;/p&gt;}` in JSX?',
+    opts: [
+      'Renders nothing',
+      'Renders &lt;p&gt;Hello&lt;/p&gt;',
+      'Renders the number 0 in the DOM',
+      'Throws a runtime error'
+    ],
+    ans: 2,
+    exp: 'This is a common React gotcha! `0` is falsy, so the right side is NOT evaluated — but React does render the number `0` itself in the DOM. Use `!!count && ...` or a ternary to avoid this.'
+  },
+  {
+    q: 'What rule applies to the top-level return of a React component?',
+    opts: [
+      'You can return an array of any number of elements without a wrapper',
+      'You must return exactly one root element (or a Fragment)',
+      'You must return a string',
+      'You must return null'
+    ],
+    ans: 1,
+    exp: 'JSX must have a single root element. Use `&lt;div&gt;` or a Fragment `&lt;&gt;...&lt;/&gt;` to wrap multiple sibling elements.'
+  },
+  {
+    q: 'Which syntax correctly defines a default prop value using destructuring?',
+    opts: [
+      'function Btn(props.label = "OK") {}',
+      'function Btn({ label = "OK" }) { return &lt;button&gt;{label}&lt;/button&gt;; }',
+      'function Btn({ label }) { label = label || "OK"; return &lt;button&gt;{label}&lt;/button&gt;; }',
+      'function Btn() { const label = props.label || "OK"; }'
+    ],
+    ans: 1,
+    exp: 'Default values in destructuring are set with `= value` after the parameter name. This is the idiomatic modern React way to set default prop values.'
+  },
+  {
+    q: 'In JSX, how do you write a comment?',
+    opts: [
+      '// comment inside JSX',
+      '&lt;!-- HTML comment --&gt;',
+      '{/* JSX comment */}',
+      '/* inside JSX */'
+    ],
+    ans: 2,
+    exp: 'JSX comments use the syntax `{/* ... */}`. Regular `//` or `/* */` only work in JavaScript expressions outside of the JSX return, and HTML comments are invalid in JSX.'
+  }
+];
+
+function buildQuiz() {
+  const container = document.getElementById('quiz-container');
+  questions.forEach((q, i) => {
+    const opts = q.opts.map((opt, j) => `
+      <label class="opt-label">
+        <input type="radio" name="q${i}" value="${j}">
+        <span class="opt-text">${opt}</span>
+      </label>`).join('');
+    container.innerHTML += `
+      <div class="qcard" id="qcard-${i}">
+        <div class="qnum">Question ${i+1} of ${questions.length}</div>
+        <div class="qtext">${q.q}</div>
+        <div class="options">${opts}</div>
+        <div class="result-badge" id="rbadge-${i}"></div>
+        <div class="explanation" id="exp-${i}">${q.exp}</div>
+      </div>`;
+  });
+}
+
+function submitQuiz() {
+  const sid   = document.getElementById('sid').value.trim();
+  const sname = document.getElementById('sname').value.trim();
+  if (!sid || !sname) { alert('Please enter your Student ID and Name.'); return; }
+
+  let correct = 0;
+  questions.forEach((q, i) => {
+    const sel = document.querySelector(`input[name="q${i}"]:checked`);
+    const card = document.getElementById(`qcard-${i}`);
+    const badge = document.getElementById(`rbadge-${i}`);
+    const exp = document.getElementById(`exp-${i}`);
+    if (sel) {
+      const chosen = parseInt(sel.value);
+      if (chosen === q.ans) {
+        correct++;
+        card.classList.add('correct');
+        badge.textContent = '✅ Correct!';
+        badge.classList.add('show','ok');
+      } else {
+        card.classList.add('wrong');
+        badge.textContent = `❌ Wrong — correct: ${String.fromCharCode(65 + q.ans)}`;
+        badge.classList.add('show','er');
+        exp.classList.add('show');
+      }
+    } else {
+      card.classList.add('wrong');
+      badge.textContent = '— Not answered';
+      badge.classList.add('show','er');
+      exp.classList.add('show');
+    }
+    // Disable all radio buttons
+    document.querySelectorAll(`input[name="q${i}"]`).forEach(r => r.disabled = true);
+  });
+
+  const quizScore = Math.round((correct / questions.length) * 10 * 10) / 10;
+  const pct = Math.round(correct / questions.length * 100);
+
+  document.getElementById('score-num').textContent = `${correct} / ${questions.length}`;
+  document.getElementById('score-pct').textContent = `${pct}%`;
+  document.getElementById('score-panel').classList.add('show');
+  document.getElementById('submit-btn').disabled = true;
+
+  // Sync to grade book
+  const payload = {
+    studentId: sid, studentName: sname,
+    weekNum: WEEK_NUM, session: SESSION,
+    quizScore, pct,
+    submittedAt: new Date().toISOString()
+  };
+
+  const syncEl = document.getElementById('sync-msg');
+
+  if (!GAS_URL || GAS_URL === 'YOUR_GAS_ENDPOINT_URL') {
+    syncEl.textContent = '⚠️ Grade sync URL not configured — score shown above but not recorded.';
+    syncEl.className = 'sync-msg er';
+    return;
+  }
+
+  fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.json())
+  .then(d => {
+    syncEl.textContent = d.ok ? '✅ Score synced to grade book!' : '⚠️ Sync failed: ' + d.error;
+    syncEl.className = 'sync-msg ' + (d.ok ? 'ok' : 'er');
+  })
+  .catch(() => {
+    syncEl.textContent = '⚠️ Could not reach grade book server. Your score above is still valid.';
+    syncEl.className = 'sync-msg er';
+  });
+}
+
+buildQuiz();
+</script>
+</body>
+</html>
