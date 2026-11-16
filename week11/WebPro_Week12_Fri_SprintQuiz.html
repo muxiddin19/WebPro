@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sprint Quiz — React useEffect · Week 12 Fri</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff7ed;--surf:#fff;--surf2:#ffedd5;--brd:#fed7aa;--tx:#3a1500;--mu:#8a4a10;--ac:#ea580c;--acl:#fff7ed;--ac2:#c2410c;--ok:#16a34a;--okl:#dcfce7;--er:#dc2626;--erl:#fee2e2}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f0800;--surf:#1e1000;--surf2:#2a1600;--brd:#4a2a00;--tx:#ffedd5;--mu:#c08040;--ac:#fb923c;--acl:#1a0800;--ac2:#fdba74;--ok:#4ade80;--okl:#052e16;--er:#f87171;--erl:#450a0a}}
+:root[data-theme=dark]{--bg:#0f0800;--surf:#1e1000;--surf2:#2a1600;--brd:#4a2a00;--tx:#ffedd5;--mu:#c08040;--ac:#fb923c;--acl:#1a0800;--ac2:#fdba74;--ok:#4ade80;--okl:#052e16;--er:#f87171;--erl:#450a0a}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;font-size:16px;line-height:1.65}
+.header{background:var(--surf);border-bottom:3px solid var(--ac);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.badge{background:var(--ac);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;padding:4px 12px;border-radius:6px;font-size:15px}
+.hdr-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px}
+.hdr-sub{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em}
+.theme-btn{background:var(--surf2);border:1px solid var(--brd);color:var(--tx);padding:5px 12px;border-radius:16px;cursor:pointer;font-size:13px}
+.wrap{max-width:760px;margin:0 auto;padding:28px 16px 80px}
+.student-form{background:var(--surf);border:1px solid var(--brd);border-radius:12px;padding:24px;margin-bottom:32px}
+.student-form h2{font-family:'Space Grotesk',sans-serif;font-size:17px;margin-bottom:16px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:500px){.form-row{grid-template-columns:1fr}}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:4px;color:var(--mu)}
+input[type=text],input[type=number]{width:100%;padding:9px 12px;border:1px solid var(--brd);border-radius:8px;background:var(--surf2);color:var(--tx);font-size:15px;font-family:'Inter',sans-serif}
+input:focus{outline:2px solid var(--ac);outline-offset:1px}
+.quiz-title{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;margin-bottom:4px}
+.quiz-meta{font-size:13px;color:var(--mu);margin-bottom:24px}
+.qcard{background:var(--surf);border:1px solid var(--brd);border-radius:12px;padding:20px 24px;margin-bottom:16px}
+.qcard.correct{border-color:var(--ok);background:var(--okl)}
+.qcard.wrong{border-color:var(--er);background:var(--erl)}
+.qnum{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin-bottom:8px;font-family:'Space Grotesk',sans-serif}
+.qtext{font-size:15px;font-weight:600;margin-bottom:14px;line-height:1.5}
+code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--surf2);padding:1px 5px;border-radius:3px;color:var(--ac2)}
+.options{display:flex;flex-direction:column;gap:8px}
+.opt-label{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:1px solid var(--brd);border-radius:8px;cursor:pointer;transition:background .15s}
+.opt-label:hover{background:var(--surf2)}
+.opt-label input[type=radio]{margin-top:3px;accent-color:var(--ac);flex-shrink:0}
+.opt-text{font-size:14px;line-height:1.45}
+.result-badge{display:none;font-size:13px;font-weight:700;padding:4px 10px;border-radius:6px;margin-top:10px}
+.result-badge.show{display:inline-block}
+.result-badge.ok{background:var(--ok);color:#fff}
+.result-badge.er{background:var(--er);color:#fff}
+.explanation{margin-top:10px;font-size:13px;padding:10px 14px;background:var(--surf2);border-radius:8px;display:none}
+.explanation.show{display:block}
+.submit-area{text-align:center;margin-top:28px}
+.submit-btn{background:var(--ac);color:#fff;border:none;padding:14px 48px;border-radius:10px;font-size:17px;font-weight:700;font-family:'Space Grotesk',sans-serif;cursor:pointer}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed}
+.score-panel{display:none;background:var(--surf);border:2px solid var(--ac);border-radius:14px;padding:28px;margin-top:28px;text-align:center}
+.score-panel.show{display:block}
+.score-big{font-size:56px;font-weight:700;font-family:'Space Grotesk',sans-serif;color:var(--ac);line-height:1}
+.score-label{font-size:16px;color:var(--mu);margin-top:6px}
+.score-pct{font-size:28px;font-weight:700;margin-top:4px}
+.sync-msg{margin-top:16px;font-size:13px;color:var(--mu);font-style:italic}
+.sync-msg.ok{color:var(--ok)}.sync-msg.er{color:var(--er)}
+</style>
+</head>
+<body>
+<div class="header">
+  <div style="display:flex;align-items:center;gap:14px">
+    <div class="badge">🔄 useEffect</div>
+    <div>
+      <div class="hdr-sub">Sprint Quiz · Week 12 Friday · K0126_002</div>
+      <div class="hdr-title">React Effects — useEffect Hook</div>
+    </div>
+  </div>
+  <button class="theme-btn" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">🌙</button>
+</div>
+
+<div class="wrap">
+  <div class="student-form">
+    <h2>🎓 Student Information</h2>
+    <div class="form-row">
+      <div>
+        <label for="sid">Gachon Student ID</label>
+        <input type="number" id="sid" placeholder="e.g. 202011234">
+      </div>
+      <div>
+        <label for="sname">Full Name</label>
+        <input type="text" id="sname" placeholder="e.g. Rustam Nazarov">
+      </div>
+    </div>
+  </div>
+  <div class="quiz-title">React useEffect — Sprint Quiz</div>
+  <div class="quiz-meta">12 questions · Multiple choice · Week 12 Friday</div>
+  <div id="quiz-container"></div>
+  <div class="submit-area">
+    <button class="submit-btn" id="submit-btn" onclick="submitQuiz()">Submit Quiz</button>
+  </div>
+  <div class="score-panel" id="score-panel">
+    <div class="score-big" id="score-num">0 / 12</div>
+    <div class="score-label">Questions Correct</div>
+    <div class="score-pct" id="score-pct">0%</div>
+    <div class="sync-msg" id="sync-msg">Syncing to grade book…</div>
+  </div>
+</div>
+
+<script>
+const GAS_URL  = 'YOUR_GAS_ENDPOINT_URL';
+const WEEK_NUM = 12;
+const SESSION  = 2;
+
+const questions = [
+  {
+    q: 'What is a "side effect" in React?',
+    opts: [
+      'A bug caused by incorrect state updates',
+      'Any operation that reaches outside the pure render function (network, timers, DOM)',
+      'A prop that changes unexpectedly',
+      'An error thrown during rendering'
+    ],
+    ans: 1,
+    exp: 'Side effects are operations that interact with the world outside the component\'s render — like data fetching, subscriptions, timers, or document mutations. These must be handled in useEffect.'
+  },
+  {
+    q: 'What does `useEffect(() => { ... }, [])` do?',
+    opts: [
+      'Runs the effect after every render',
+      'Runs the effect once, after the first render only',
+      'Runs the effect before the first render',
+      'Never runs the effect'
+    ],
+    ans: 1,
+    exp: 'An empty dependency array `[]` means "no dependencies" — the effect runs once after the component first mounts. It never re-runs. This is equivalent to `componentDidMount` in class components.'
+  },
+  {
+    q: 'What does `useEffect(() => { ... })` with NO dependency array do?',
+    opts: [
+      'Runs once on mount only',
+      'Never runs',
+      'Runs after every render',
+      'Runs only when props change'
+    ],
+    ans: 2,
+    exp: 'Without a dependency array, the effect runs after EVERY render. This is rarely what you want and can cause performance issues or infinite loops.'
+  },
+  {
+    q: 'What is the purpose of the cleanup function returned from useEffect?',
+    opts: [
+      'To reset state to its initial value',
+      'To run code before the NEXT effect and when the component unmounts',
+      'To prevent the component from re-rendering',
+      'To cancel any pending setState calls'
+    ],
+    ans: 1,
+    exp: 'The cleanup function (returned from the effect) runs before the effect runs again (on next dep change) and when the component unmounts. Use it to clear timers, remove event listeners, and cancel subscriptions.'
+  },
+  {
+    q: 'Which of these creates an infinite loop?',
+    opts: [
+      'useEffect(() => { setCount(0); }, [])',
+      'useEffect(() => { setCount(c => c + 1); }, [count])',
+      'useEffect(() => { document.title = "hi"; }, [])',
+      'useEffect(() => { fetch("/api"); }, [userId])'
+    ],
+    ans: 1,
+    exp: 'Adding `count` to the dependency array means the effect runs every time `count` changes. But the effect updates `count`, which triggers the effect again — an infinite loop.'
+  },
+  {
+    q: 'Why can\'t you make the useEffect callback itself `async`?',
+    opts: [
+      'React doesn\'t support async functions at all',
+      'An async function returns a Promise, but useEffect expects either nothing or a cleanup function',
+      'async/await doesn\'t work inside React components',
+      'It would cause the component to pause rendering'
+    ],
+    ans: 1,
+    exp: 'useEffect expects the callback to return either nothing or a synchronous cleanup function. An async function implicitly returns a Promise, which React doesn\'t know how to handle as a cleanup. Define the async function inside and call it.'
+  },
+  {
+    q: 'You have `const [userId, setUserId] = useState(1)`. Which useEffect correctly re-fetches data each time userId changes?',
+    opts: [
+      'useEffect(() => { fetch(`/api/user/${userId}`); })',
+      'useEffect(() => { fetch(`/api/user/${userId}`); }, [])',
+      'useEffect(() => { fetch(`/api/user/${userId}`); }, [userId])',
+      'useEffect(() => { fetch(`/api/user/${userId}`); }, [1])'
+    ],
+    ans: 2,
+    exp: 'List `userId` in the dependency array. The effect re-runs every time `userId` changes, triggering a new fetch with the updated ID.'
+  },
+  {
+    q: 'Which code correctly cleans up a `setInterval` inside useEffect?',
+    opts: [
+      'useEffect(() => { setInterval(fn, 1000); return clearInterval; }, [])',
+      'useEffect(() => { const id = setInterval(fn, 1000); return () => clearInterval(id); }, [])',
+      'useEffect(() => { setInterval(fn, 1000); clearInterval(); }, [])',
+      'useEffect(() => { clearInterval(setInterval(fn, 1000)); }, [])'
+    ],
+    ans: 1,
+    exp: 'Store the interval ID, then return a cleanup function that calls `clearInterval(id)`. Without cleanup, the interval keeps running even after the component unmounts.'
+  },
+  {
+    q: 'Which class-component lifecycle method is equivalent to `useEffect(() => fn, [])`?',
+    opts: [
+      'componentWillUnmount',
+      'componentDidUpdate',
+      'componentDidMount',
+      'shouldComponentUpdate'
+    ],
+    ans: 2,
+    exp: '`useEffect` with an empty array runs once after first render — equivalent to `componentDidMount`. The returned cleanup function maps to `componentWillUnmount`.'
+  },
+  {
+    q: 'What is the correct pattern for fetching data with error handling inside useEffect?',
+    opts: [
+      'useEffect(async () => { const data = await fetch(url); setData(data); }, [url])',
+      'useEffect(() => { async function load() { try { const r = await fetch(url); setData(await r.json()); } catch(e) { setError(e); } } load(); }, [url])',
+      'useEffect(() => { fetch(url).then(setData); }, [url])',
+      'useEffect(() => { setData(fetch(url)); }, [url])'
+    ],
+    ans: 1,
+    exp: 'Define an async function inside the effect and call it immediately. This handles both success and error cases. The outer callback remains synchronous as useEffect requires.'
+  },
+  {
+    q: 'What does `useEffect(() => { return () => { document.title = "WebPro"; }; }, [])` do?',
+    opts: [
+      'Sets document title on every render',
+      'Sets document title once on mount',
+      'Resets document title to "WebPro" only when the component unmounts',
+      'Never changes the document title'
+    ],
+    ans: 2,
+    exp: 'The effect body is empty (no side effect on mount) but the cleanup function runs when the component unmounts. This resets the title on unmount — a common pattern for cleaning up page-level side effects.'
+  },
+  {
+    q: 'When does the cleanup function in useEffect run?',
+    opts: [
+      'Only when the component unmounts',
+      'Before every render',
+      'Before the next effect runs AND when the component unmounts',
+      'Only when the dependency array is empty'
+    ],
+    ans: 2,
+    exp: 'The cleanup runs at two times: (1) before the effect runs again (when a dependency changes), and (2) when the component unmounts. This ensures old subscriptions/timers are always cleared before new ones are set up.'
+  }
+];
+
+function buildQuiz() {
+  const container = document.getElementById('quiz-container');
+  questions.forEach((q, i) => {
+    const opts = q.opts.map((opt, j) => `
+      <label class="opt-label">
+        <input type="radio" name="q${i}" value="${j}">
+        <span class="opt-text">${opt}</span>
+      </label>`).join('');
+    container.innerHTML += `
+      <div class="qcard" id="qcard-${i}">
+        <div class="qnum">Question ${i+1} of ${questions.length}</div>
+        <div class="qtext">${q.q}</div>
+        <div class="options">${opts}</div>
+        <div class="result-badge" id="rbadge-${i}"></div>
+        <div class="explanation" id="exp-${i}">${q.exp}</div>
+      </div>`;
+  });
+}
+
+function submitQuiz() {
+  const sid   = document.getElementById('sid').value.trim();
+  const sname = document.getElementById('sname').value.trim();
+  if (!sid || !sname) { alert('Please enter your Student ID and Name.'); return; }
+  let correct = 0;
+  questions.forEach((q, i) => {
+    const sel  = document.querySelector(`input[name="q${i}"]:checked`);
+    const card = document.getElementById(`qcard-${i}`);
+    const badge= document.getElementById(`rbadge-${i}`);
+    const exp  = document.getElementById(`exp-${i}`);
+    const chosen = sel ? parseInt(sel.value) : -1;
+    if (chosen === q.ans) {
+      correct++;
+      card.classList.add('correct');
+      badge.textContent = '✅ Correct!';
+      badge.classList.add('show','ok');
+    } else {
+      card.classList.add('wrong');
+      badge.textContent = sel ? `❌ Wrong — correct: ${String.fromCharCode(65+q.ans)}` : '— Not answered';
+      badge.classList.add('show','er');
+      exp.classList.add('show');
+    }
+    document.querySelectorAll(`input[name="q${i}"]`).forEach(r => r.disabled = true);
+  });
+  const quizScore = Math.round((correct / questions.length) * 10 * 10) / 10;
+  const pct = Math.round(correct / questions.length * 100);
+  document.getElementById('score-num').textContent = `${correct} / ${questions.length}`;
+  document.getElementById('score-pct').textContent = `${pct}%`;
+  document.getElementById('score-panel').classList.add('show');
+  document.getElementById('submit-btn').disabled = true;
+  const payload = { studentId: sid, studentName: sname, weekNum: WEEK_NUM, session: SESSION, quizScore, pct, submittedAt: new Date().toISOString() };
+  const syncEl = document.getElementById('sync-msg');
+  if (!GAS_URL || GAS_URL === 'YOUR_GAS_ENDPOINT_URL') {
+    syncEl.textContent = '⚠️ Grade sync URL not configured.';
+    syncEl.className = 'sync-msg er';
+    return;
+  }
+  fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) })
+    .then(r => r.json())
+    .then(d => { syncEl.textContent = d.ok ? '✅ Score synced!' : '⚠️ ' + d.error; syncEl.className = 'sync-msg '+(d.ok?'ok':'er'); })
+    .catch(() => { syncEl.textContent = '⚠️ Could not reach server.'; syncEl.className = 'sync-msg er'; });
+}
+
+buildQuiz();
+</script>
+</body>
+</html>

@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React State (useState) — Week 12 Monday</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#faf5ff;--surf:#fff;--surf2:#ede9fe;--brd:#ddd6fe;--tx:#1e1040;--mu:#6050a0;--ac:#7c3aed;--acl:#ede9fe;--ac2:#6d28d9;--lime:#16a34a;--limel:#dcfce7;--warn:#d97706;--warnl:#fef3c7;--cor:#dc2626;--corl:#fee2e2;--cb:#0f0820;--ct:#ede9fe}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0a0616;--surf:#120d28;--surf2:#1a1038;--brd:#2e1a60;--tx:#ede9fe;--mu:#8060c0;--ac:#a78bfa;--acl:#1e0c40;--ac2:#c4b5fd;--lime:#4ade80;--limel:#052e16;--warn:#fbbf24;--warnl:#1a1000;--cor:#f87171;--corl:#450a0a;--cb:#0a0616;--ct:#ddd6fe}}
+:root[data-theme=dark]{--bg:#0a0616;--surf:#120d28;--surf2:#1a1038;--brd:#2e1a60;--tx:#ede9fe;--mu:#8060c0;--ac:#a78bfa;--acl:#1e0c40;--ac2:#c4b5fd;--lime:#4ade80;--limel:#052e16;--warn:#fbbf24;--warnl:#1a1000;--cor:#f87171;--corl:#450a0a;--cb:#0a0616;--ct:#ddd6fe}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;font-size:16px;line-height:1.75}
+a{color:var(--ac)}
+code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--surf2);padding:2px 6px;border-radius:4px;color:var(--ac2)}
+#site-header{position:sticky;top:0;z-index:100;background:var(--surf);border-bottom:3px solid var(--ac);display:flex;align-items:center;justify-content:space-between;padding:10px 20px;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.hdr-left{display:flex;align-items:center;gap:14px}
+.badge{background:var(--ac);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px;padding:4px 12px;border-radius:6px}
+.hdr-info .course{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.hdr-info .title{font-size:15px;font-weight:700;color:var(--tx);font-family:'Space Grotesk',sans-serif}
+.theme-btn{background:var(--surf2);border:1px solid var(--brd);color:var(--tx);padding:5px 14px;border-radius:20px;cursor:pointer;font-size:13px}
+.page-wrap{max-width:900px;margin:0 auto;padding:32px 16px 80px}
+.toc{background:var(--surf);border:1px solid var(--brd);border-radius:12px;padding:20px 24px;margin-bottom:36px}
+.toc h2{font-family:'Space Grotesk',sans-serif;font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:var(--mu);margin-bottom:12px}
+.toc ol{padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.toc li a{font-size:14px;color:var(--ac)}
+section{margin-bottom:48px}
+h1{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;line-height:1.25;margin-bottom:8px}
+h2{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:700;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--brd)}
+h3{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;margin:20px 0 8px;color:var(--ac2)}
+p{margin-bottom:12px}
+ul,ol{padding-left:22px;margin-bottom:12px}
+li{margin-bottom:4px}
+.code-block{background:var(--cb);color:var(--ct);border-radius:10px;padding:20px;margin:16px 0;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.6;border:1px solid var(--brd)}
+.code-block code{background:none;padding:0;color:var(--ct);font-size:inherit}
+.concept{background:var(--surf);border:1px solid var(--brd);border-radius:12px;padding:24px;margin-bottom:24px}
+.obj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:12px}
+.obj-card{background:var(--surf);border:1px solid var(--brd);border-radius:8px;padding:14px 16px;display:flex;align-items:flex-start;gap:10px}
+.obj-card .num{background:var(--ac);color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;font-family:'Space Grotesk',sans-serif}
+.obj-card p{margin:0;font-size:14px}
+.callout{border-radius:10px;padding:16px 20px;margin:16px 0;display:flex;gap:12px;align-items:flex-start}
+.callout.info{background:var(--acl);border-left:4px solid var(--ac)}
+.callout.warn{background:var(--warnl);border-left:4px solid var(--warn)}
+.callout.tip{background:var(--limel);border-left:4px solid var(--lime)}
+.callout .icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.callout p{margin:0;font-size:14px}
+.exercise{background:var(--surf);border:1px solid var(--brd);border-radius:12px;margin-bottom:16px;overflow:hidden}
+.exercise summary{padding:16px 20px;cursor:pointer;font-weight:600;font-family:'Space Grotesk',sans-serif;display:flex;align-items:center;gap:10px;list-style:none;user-select:none}
+.exercise summary::before{content:'▶';font-size:12px;color:var(--ac);transition:transform .2s}
+.exercise[open] summary::before{transform:rotate(90deg)}
+.exercise-body{padding:0 20px 20px;border-top:1px solid var(--brd)}
+.cheatsheet{background:var(--surf);border:2px solid var(--ac);border-radius:14px;padding:28px}
+.cs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:16px}
+.cs-item{background:var(--surf2);border-radius:8px;padding:14px}
+.cs-item h4{font-family:'Space Grotesk',sans-serif;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin-bottom:8px}
+.cs-item pre{margin:0;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.comparison{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+@media(max-width:600px){.comparison{grid-template-columns:1fr}}
+.comp-card{border-radius:8px;padding:14px;background:var(--surf2)}
+.comp-card h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;color:var(--mu)}
+</style>
+</head>
+<body>
+<header id="site-header">
+  <div class="hdr-left">
+    <div class="badge">🪝 useState</div>
+    <div class="hdr-info">
+      <div class="course">Web Programming · K0126_002 · Week 12 Monday</div>
+      <div class="title">React State — useState Hook</div>
+    </div>
+  </div>
+  <button class="theme-btn" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">🌙 Theme</button>
+</header>
+
+<div class="page-wrap">
+  <section id="intro">
+    <h1>React State — <code>useState</code> Hook</h1>
+    <p>Props flow data <em>into</em> a component. <strong>State</strong> is data that the component owns and can change over time. When state changes, React automatically re-renders the component to reflect the new data.</p>
+  </section>
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#objectives">Learning Objectives</a></li>
+      <li><a href="#what-is-state">What is State?</a></li>
+      <li><a href="#usestate-syntax">useState Syntax</a></li>
+      <li><a href="#updating-state">Updating State — Rules</a></li>
+      <li><a href="#multiple-state">Multiple State Variables</a></li>
+      <li><a href="#lifting-state">Lifting State Up</a></li>
+      <li><a href="#exercises">Practice Exercises</a></li>
+      <li><a href="#cheatsheet">Cheat Sheet</a></li>
+    </ol>
+  </nav>
+
+  <section id="objectives">
+    <h2>Learning Objectives</h2>
+    <div class="obj-grid">
+      <div class="obj-card"><div class="num">1</div><p>Understand why state is needed and how it differs from props</p></div>
+      <div class="obj-card"><div class="num">2</div><p>Call <code>useState</code> correctly and destructure its return value</p></div>
+      <div class="obj-card"><div class="num">3</div><p>Update state immutably (especially objects and arrays)</p></div>
+      <div class="obj-card"><div class="num">4</div><p>Manage multiple state variables</p></div>
+      <div class="obj-card"><div class="num">5</div><p>Lift state up to share between sibling components</p></div>
+    </div>
+  </section>
+
+  <section id="what-is-state">
+    <h2>1. What is State?</h2>
+    <div class="concept">
+      <p><strong>State</strong> is dynamic data owned by a component — data that can change in response to user actions, timers, or network responses. Unlike props (which the parent controls), <strong>a component controls its own state</strong>.</p>
+      <div class="comparison">
+        <div class="comp-card">
+          <h4>Props</h4>
+          <ul style="font-size:14px;padding-left:16px">
+            <li>Passed from parent</li>
+            <li>Read-only inside child</li>
+            <li>Controlled by parent</li>
+            <li>Like function parameters</li>
+          </ul>
+        </div>
+        <div class="comp-card">
+          <h4>State</h4>
+          <ul style="font-size:14px;padding-left:16px">
+            <li>Owned by the component</li>
+            <li>Can change over time</li>
+            <li>Component updates itself</li>
+            <li>Like local variables — but persistent</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout info">
+        <div class="icon">💡</div>
+        <p>When React state changes, the component <strong>re-renders</strong> — React calls your function again with the new state value and updates the DOM efficiently.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="usestate-syntax">
+    <h2>2. useState Syntax</h2>
+    <div class="concept">
+      <div class="code-block"><code>import { useState } from 'react';
+
+function Counter() {
+  // useState returns [currentValue, setterFunction]
+  // The argument to useState() is the INITIAL value
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;div&gt;
+      &lt;p&gt;Count: {count}&lt;/p&gt;
+      &lt;button onClick={() =&gt; setCount(count + 1)}&gt;+1&lt;/button&gt;
+      &lt;button onClick={() =&gt; setCount(count - 1)}&gt;-1&lt;/button&gt;
+      &lt;button onClick={() =&gt; setCount(0)}&gt;Reset&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+</code></div>
+      <div class="callout warn">
+        <div class="icon">⚠️</div>
+        <p><strong>Never call useState inside loops, conditions, or nested functions.</strong> Hooks must be called at the top level of your component, in the same order every render. This is "the Rules of Hooks".</p>
+      </div>
+
+      <h3>Initial state types</h3>
+      <div class="code-block"><code>const [count,  setCount]  = useState(0);           // number
+const [name,   setName]   = useState('');           // string
+const [isOpen, setIsOpen] = useState(false);        // boolean
+const [items,  setItems]  = useState([]);           // array
+const [user,   setUser]   = useState(null);         // null
+const [form,   setForm]   = useState({ name: '', email: '' }); // object
+</code></div>
+
+      <h3>Lazy initial state (for expensive computation)</h3>
+      <div class="code-block"><code>// If initial value is expensive to compute, pass a FUNCTION
+// (the function runs only once on mount, not every render)
+const [data, setData] = useState(() =&gt; expensiveComputation());
+</code></div>
+    </div>
+  </section>
+
+  <section id="updating-state">
+    <h2>3. Updating State — Rules</h2>
+    <div class="concept">
+      <h3>Rule 1: Never mutate state directly</h3>
+      <div class="code-block"><code>// ❌ WRONG — mutating state directly does NOT trigger re-render
+count++;
+state.name = 'Amir';
+items.push('new item');
+
+// ✅ CORRECT — always call the setter function
+setCount(count + 1);
+setName('Amir');
+setItems([...items, 'new item']); // create a NEW array
+</code></div>
+
+      <h3>Rule 2: Updating objects — spread to copy first</h3>
+      <div class="code-block"><code>const [user, setUser] = useState({ name: 'Amir', age: 20, city: 'Tashkent' });
+
+// ❌ WRONG — mutates the object
+user.age = 21;
+setUser(user); // React sees the same object reference — no re-render!
+
+// ✅ CORRECT — spread to create a NEW object, override what changed
+setUser({ ...user, age: 21 });
+// Result: { name: 'Amir', age: 21, city: 'Tashkent' }
+</code></div>
+
+      <h3>Rule 3: Updating arrays — use non-mutating methods</h3>
+      <div class="code-block"><code>const [items, setItems] = useState(['HTML', 'CSS']);
+
+// Add item
+setItems([...items, 'JavaScript']); // spread + append
+setItems(prev =&gt; [...prev, 'React']); // functional update — preferred
+
+// Remove item
+setItems(items.filter(item =&gt; item !== 'CSS'));
+
+// Update item
+setItems(items.map(item =&gt; item === 'HTML' ? 'HTML5' : item));
+</code></div>
+
+      <h3>Functional updates (when new state depends on previous)</h3>
+      <div class="code-block"><code>// If new state depends on old, use the callback form of the setter
+// This guarantees you get the LATEST state, not a stale closure
+setCount(prevCount =&gt; prevCount + 1); // ✅ safe
+setCount(count + 1);                   // ⚠️ can be stale in async contexts
+</code></div>
+    </div>
+  </section>
+
+  <section id="multiple-state">
+    <h2>4. Multiple State Variables</h2>
+    <div class="concept">
+      <p>You can call <code>useState</code> as many times as you need. Each call tracks a separate piece of state.</p>
+      <div class="code-block"><code>function RegistrationForm() {
+  const [name,     setName]     = useState('');
+  const [email,    setEmail]    = useState('');
+  const [isSubmit, setIsSubmit] = useState(false);
+  const [errors,   setErrors]   = useState({});
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    const newErrors = {};
+    if (!name)  newErrors.name  = 'Name is required';
+    if (!email) newErrors.email = 'Email is required';
+
+    if (Object.keys(newErrors).length &gt; 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setIsSubmit(true);
+    // submit logic…
+  }
+
+  if (isSubmit) return &lt;p&gt;Thank you, {name}!&lt;/p&gt;;
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      &lt;input value={name}  onChange={e =&gt; setName(e.target.value)}  placeholder="Name" /&gt;
+      {errors.name  &amp;&amp; &lt;p style={{color:'red'}}&gt;{errors.name}&lt;/p&gt;}
+      &lt;input value={email} onChange={e =&gt; setEmail(e.target.value)} placeholder="Email" /&gt;
+      {errors.email &amp;&amp; &lt;p style={{color:'red'}}&gt;{errors.email}&lt;/p&gt;}
+      &lt;button type="submit"&gt;Register&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+</code></div>
+    </div>
+  </section>
+
+  <section id="lifting-state">
+    <h2>5. Lifting State Up</h2>
+    <div class="concept">
+      <p>When two sibling components need to share state, <strong>lift the state up</strong> to their nearest common parent. The parent holds the state and passes it down via props, along with setter callbacks.</p>
+      <div class="code-block"><code>// Parent holds shared state
+function TemperatureApp() {
+  const [celsius, setCelsius] = useState(0);
+  const fahrenheit = celsius * 9/5 + 32;
+
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;Temperature Converter&lt;/h2&gt;
+      &lt;CelsiusInput value={celsius} onChange={setCelsius} /&gt;
+      &lt;p&gt;In Fahrenheit: {fahrenheit.toFixed(1)}°F&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+
+// Child receives value + callback via props
+function CelsiusInput({ value, onChange }) {
+  return (
+    &lt;label&gt;
+      Celsius:
+      &lt;input
+        type="number"
+        value={value}
+        onChange={e =&gt; onChange(Number(e.target.value))}
+      /&gt;
+    &lt;/label&gt;
+  );
+}
+</code></div>
+      <div class="callout tip">
+        <div class="icon">✅</div>
+        <p><strong>One-way data flow:</strong> State flows <em>down</em> as props; events flow <em>up</em> as callbacks. This makes React apps predictable — you always know where data comes from.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="exercises">
+    <h2>Practice Exercises</h2>
+
+    <details class="exercise">
+      <summary>Exercise 1 — Toggle visibility</summary>
+      <div class="exercise-body">
+        <p><strong>Task:</strong> Build a component with a button labeled "Show details" / "Hide details". When clicked, toggle the visibility of a paragraph of text using boolean state.</p>
+        <div class="code-block"><code>function ToggleDetail() {
+  const [isVisible, setIsVisible] = useState(false);
+
+  return (
+    &lt;div&gt;
+      &lt;button onClick={() =&gt; setIsVisible(prev =&gt; !prev)}&gt;
+        {isVisible ? 'Hide details' : 'Show details'}
+      &lt;/button&gt;
+      {isVisible &amp;&amp; (
+        &lt;p&gt;React state enables dynamic UIs without page reloads.&lt;/p&gt;
+      )}
+    &lt;/div&gt;
+  );
+}
+</code></div>
+      </div>
+    </details>
+
+    <details class="exercise">
+      <summary>Exercise 2 — Add &amp; remove items from a list</summary>
+      <div class="exercise-body">
+        <p><strong>Task:</strong> Build a component with a text input and "Add" button. Items typed in the input are added to an array stored in state. Each item has a "✕" button that removes it from the list.</p>
+        <div class="code-block"><code>function TaskList() {
+  const [tasks, setTasks] = useState([]);
+  const [input, setInput] = useState('');
+
+  function addTask() {
+    if (!input.trim()) return;
+    setTasks(prev =&gt; [...prev, { id: Date.now(), text: input.trim() }]);
+    setInput('');
+  }
+
+  function removeTask(id) {
+    setTasks(prev =&gt; prev.filter(t =&gt; t.id !== id));
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;input value={input} onChange={e =&gt; setInput(e.target.value)} placeholder="New task" /&gt;
+      &lt;button onClick={addTask}&gt;Add&lt;/button&gt;
+      &lt;ul&gt;
+        {tasks.map(task =&gt; (
+          &lt;li key={task.id}&gt;
+            {task.text}
+            &lt;button onClick={() =&gt; removeTask(task.id)}&gt;✕&lt;/button&gt;
+          &lt;/li&gt;
+        ))}
+      &lt;/ul&gt;
+    &lt;/div&gt;
+  );
+}
+</code></div>
+      </div>
+    </details>
+
+    <details class="exercise">
+      <summary>Exercise 3 — Lift state between two counters</summary>
+      <div class="exercise-body">
+        <p><strong>Task:</strong> Create a parent <code>ScoreBoard</code> with two <code>PlayerScore</code> children. Each player has increment/decrement buttons. The parent shows the total score of both players combined.</p>
+        <div class="code-block"><code>function PlayerScore({ name, score, onIncrement, onDecrement }) {
+  return (
+    &lt;div&gt;
+      &lt;h3&gt;{name}: {score}&lt;/h3&gt;
+      &lt;button onClick={onDecrement}&gt;−&lt;/button&gt;
+      &lt;button onClick={onIncrement}&gt;+&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+
+function ScoreBoard() {
+  const [p1, setP1] = useState(0);
+  const [p2, setP2] = useState(0);
+
+  return (
+    &lt;div&gt;
+      &lt;PlayerScore name="Player 1" score={p1}
+        onIncrement={() =&gt; setP1(p =&gt; p + 1)}
+        onDecrement={() =&gt; setP1(p =&gt; p - 1)} /&gt;
+      &lt;PlayerScore name="Player 2" score={p2}
+        onIncrement={() =&gt; setP2(p =&gt; p + 1)}
+        onDecrement={() =&gt; setP2(p =&gt; p - 1)} /&gt;
+      &lt;h2&gt;Total: {p1 + p2}&lt;/h2&gt;
+    &lt;/div&gt;
+  );
+}
+</code></div>
+      </div>
+    </details>
+  </section>
+
+  <section id="cheatsheet">
+    <div class="cheatsheet">
+      <h2>🪝 useState — Cheat Sheet</h2>
+      <div class="cs-grid">
+        <div class="cs-item">
+          <h4>Basic syntax</h4>
+          <pre>const [val, setVal] = useState(init);</pre>
+        </div>
+        <div class="cs-item">
+          <h4>Update primitive</h4>
+          <pre>setCount(count + 1);
+// or functional:
+setCount(prev => prev + 1);</pre>
+        </div>
+        <div class="cs-item">
+          <h4>Update object</h4>
+          <pre>setUser({ ...user, age: 21 });
+// spread first, then override</pre>
+        </div>
+        <div class="cs-item">
+          <h4>Add to array</h4>
+          <pre>setItems(prev => [...prev, newItem]);</pre>
+        </div>
+        <div class="cs-item">
+          <h4>Remove from array</h4>
+          <pre>setItems(items.filter(x => x.id !== id));</pre>
+        </div>
+        <div class="cs-item">
+          <h4>Toggle boolean</h4>
+          <pre>setIsOpen(prev => !prev);</pre>
+        </div>
+        <div class="cs-item">
+          <h4>Rules of Hooks</h4>
+          <pre>✅ Top level only
+✅ React functions only
+❌ Not in loops/if
+❌ Not in callbacks</pre>
+        </div>
+        <div class="cs-item">
+          <h4>Lifting state up</h4>
+          <pre>// Parent owns state
+// Children get value + setter
+// via props</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React Effects — useEffect · Week 12 Friday</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff7ed;--surf:#fff;--surf2:#ffedd5;--brd:#fed7aa;--tx:#3a1500;--mu:#8a4a10;--ac:#ea580c;--acl:#fff7ed;--ac2:#c2410c;--lime:#16a34a;--limel:#dcfce7;--warn:#d97706;--warnl:#fef3c7;--cor:#dc2626;--corl:#fee2e2;--cb:#1a0a00;--ct:#fed7aa}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f0800;--surf:#1e1000;--surf2:#2a1600;--brd:#4a2a00;--tx:#ffedd5;--mu:#c08040;--ac:#fb923c;--acl:#1a0800;--ac2:#fdba74;--lime:#4ade80;--limel:#052e16;--warn:#fbbf24;--warnl:#1a1000;--cor:#f87171;--corl:#450a0a;--cb:#0f0800;--ct:#fed7aa}}
+:root[data-theme=dark]{--bg:#0f0800;--surf:#1e1000;--surf2:#2a1600;--brd:#4a2a00;--tx:#ffedd5;--mu:#c08040;--ac:#fb923c;--acl:#1a0800;--ac2:#fdba74;--lime:#4ade80;--limel:#052e16;--warn:#fbbf24;--warnl:#1a1000;--cor:#f87171;--corl:#450a0a;--cb:#0f0800;--ct:#fed7aa}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;font-size:16px;line-height:1.75}
+a{color:var(--ac)}
+code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--surf2);padding:2px 6px;border-radius:4px;color:var(--ac2)}
+#site-header{position:sticky;top:0;z-index:100;background:var(--surf);border-bottom:3px solid var(--ac);display:flex;align-items:center;justify-content:space-between;padding:10px 20px;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.hdr-left{display:flex;align-items:center;gap:14px}
+.badge{background:var(--ac);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px;padding:4px 12px;border-radius:6px}
+.hdr-info .course{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.hdr-info .title{font-size:15px;font-weight:700;color:var(--tx);font-family:'Space Grotesk',sans-serif}
+.theme-btn{background:var(--surf2);border:1px solid var(--brd);color:var(--tx);padding:5px 14px;border-radius:20px;cursor:pointer;font-size:13px}
+.page-wrap{max-width:900px;margin:0 auto;padding:32px 16px 80px}
+.toc{background:var(--surf);border:1px solid var(--brd);border-radius:12px;padding:20px 24px;margin-bottom:36px}
+.toc h2{font-family:'Space Grotesk',sans-serif;font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:var(--mu);margin-bottom:12px}
+.toc ol{padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.toc li a{font-size:14px;color:var(--ac)}
+section{margin-bottom:48px}
+h1{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;line-height:1.25;margin-bottom:8px}
+h2{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:700;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--brd)}
+h3{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;margin:20px 0 8px;color:var(--ac2)}
+p{margin-bottom:12px}
+ul,ol{padding-left:22px;margin-bottom:12px}
+li{margin-bottom:4px}
+.code-block{background:var(--cb);color:var(--ct);border-radius:10px;padding:20px;margin:16px 0;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.6;border:1px solid var(--brd)}
+.code-block code{background:none;padding:0;color:var(--ct);font-size:inherit}
+.concept{background:var(--surf);border:1px solid var(--brd);border-radius:12px;padding:24px;margin-bottom:24px}
+.obj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:12px}
+.obj-card{background:var(--surf);border:1px solid var(--brd);border-radius:8px;padding:14px 16px;display:flex;align-items:flex-start;gap:10px}
+.obj-card .num{background:var(--ac);color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.obj-card p{margin:0;font-size:14px}
+.callout{border-radius:10px;padding:16px 20px;margin:16px 0;display:flex;gap:12px;align-items:flex-start}
+.callout.info{background:var(--acl);border-left:4px solid var(--ac)}
+.callout.warn{background:var(--warnl);border-left:4px solid var(--warn)}
+.callout.tip{background:var(--limel);border-left:4px solid var(--lime)}
+.callout .icon{font-size:18px;flex-shrink:0}
+.callout p{margin:0;font-size:14px}
+.exercise{background:var(--surf);border:1px solid var(--brd);border-radius:12px;margin-bottom:16px;overflow:hidden}
+.exercise summary{padding:16px 20px;cursor:pointer;font-weight:600;font-family:'Space Grotesk',sans-serif;display:flex;align-items:center;gap:10px;list-style:none;user-select:none}
+.exercise summary::before{content:'▶';font-size:12px;color:var(--ac);transition:transform .2s}
+.exercise[open] summary::before{transform:rotate(90deg)}
+.exercise-body{padding:0 20px 20px;border-top:1px solid var(--brd)}
+.cheatsheet{background:var(--surf);border:2px solid var(--ac);border-radius:14px;padding:28px}
+.cs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:16px}
+.cs-item{background:var(--surf2);border-radius:8px;padding:14px}
+.cs-item h4{font-family:'Space Grotesk',sans-serif;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin-bottom:8px}
+.cs-item pre{margin:0;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+th{background:var(--surf2);font-family:'Space Grotesk',sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:.05em;padding:10px 14px;text-align:left}
+td{padding:10px 14px;border-top:1px solid var(--brd)}
+tr:hover td{background:var(--surf2)}
+</style>
+</head>
+<body>
+<header id="site-header">
+  <div class="hdr-left">
+    <div class="badge">🔄 useEffect</div>
+    <div class="hdr-info">
+      <div class="course">Web Programming · K0126_002 · Week 12 Friday</div>
+      <div class="title">React Effects — useEffect Hook</div>
+    </div>
+  </div>
+  <button class="theme-btn" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">🌙 Theme</button>
+</header>
+
+<div class="page-wrap">
+  <section id="intro">
+    <h1>React Effects — <code>useEffect</code> Hook</h1>
+    <p><code>useEffect</code> lets you synchronize a component with an external system — fetching data from an API, subscribing to a WebSocket, setting up a timer, or directly manipulating the DOM. It runs <em>after</em> the component renders.</p>
+  </section>
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#objectives">Learning Objectives</a></li>
+      <li><a href="#what-is-effect">What is a Side Effect?</a></li>
+      <li><a href="#syntax">useEffect Syntax &amp; Dependency Array</a></li>
+      <li><a href="#cleanup">Cleanup Functions</a></li>
+      <li><a href="#fetching">Data Fetching Pattern</a></li>
+      <li><a href="#common-patterns">Common Patterns</a></li>
+      <li><a href="#exercises">Practice Exercises</a></li>
+      <li><a href="#cheatsheet">Cheat Sheet</a></li>
+    </ol>
+  </nav>
+
+  <section id="objectives">
+    <h2>Learning Objectives</h2>
+    <div class="obj-grid">
+      <div class="obj-card"><div class="num">1</div><p>Explain what a side effect is and why it needs special handling</p></div>
+      <div class="obj-card"><div class="num">2</div><p>Use the dependency array to control when effects run</p></div>
+      <div class="obj-card"><div class="num">3</div><p>Write cleanup functions to prevent memory leaks</p></div>
+      <div class="obj-card"><div class="num">4</div><p>Fetch data from an API inside useEffect</p></div>
+      <div class="obj-card"><div class="num">5</div><p>Avoid the infinite loop trap</p></div>
+    </div>
+  </section>
+
+  <section id="what-is-effect">
+    <h2>1. What is a Side Effect?</h2>
+    <div class="concept">
+      <p>React components should be <strong>pure functions</strong> — given the same input (props + state), they always return the same JSX. A <strong>side effect</strong> is anything that reaches outside this pure render: network requests, timers, subscriptions, logging, or direct DOM mutations.</p>
+      <ul>
+        <li><strong>OK inside render:</strong> Calculating derived values, filtering lists, formatting strings</li>
+        <li><strong>Must use useEffect:</strong> <code>fetch()</code>, <code>setTimeout()</code>, <code>addEventListener()</code>, WebSocket connections, <code>document.title</code></li>
+      </ul>
+      <div class="callout warn">
+        <div class="icon">⚠️</div>
+        <p><strong>Never put side effects directly in the render body.</strong> They would run on every render, causing infinite loops, duplicate requests, and unpredictable bugs.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="syntax">
+    <h2>2. useEffect Syntax &amp; Dependency Array</h2>
+    <div class="concept">
+      <div class="code-block"><code>import { useState, useEffect } from 'react';
+
+useEffect(
+  () =&gt; {
+    // Effect code runs here (after render)
+    console.log('Effect ran!');
+
+    // Optional: return a cleanup function
+    return () =&gt; {
+      console.log('Cleanup!');
+    };
+  },
+  [dep1, dep2]  // ← dependency array
+);
+</code></div>
+
+      <h3>Dependency array controls WHEN the effect runs</h3>
+      <table>
+        <tr><th>Dependency array</th><th>When does the effect run?</th></tr>
+        <tr><td><code>useEffect(fn)</code> — no array</td><td>After <strong>every</strong> render (avoid — usually wrong)</td></tr>
+        <tr><td><code>useEffect(fn, [])</code> — empty array</td><td>Once, after the <strong>first</strong> render (like componentDidMount)</td></tr>
+        <tr><td><code>useEffect(fn, [a, b])</code></td><td>After first render, and when <code>a</code> or <code>b</code> changes</td></tr>
+      </table>
+
+      <div class="code-block"><code>// 1. Run once on mount — empty array
+useEffect(() =&gt; {
+  document.title = 'Web Programming Course';
+}, []);
+
+// 2. Run when userId changes — userId in dependencies
+useEffect(() =&gt; {
+  fetchUserProfile(userId);
+}, [userId]);
+
+// 3. Run after every render — no array (usually wrong!)
+useEffect(() =&gt; {
+  console.log('Rendered at:', new Date());
+});
+</code></div>
+
+      <div class="callout warn">
+        <div class="icon">⚠️</div>
+        <p><strong>Infinite loop trap:</strong> If your effect updates state, and that state is in the dependency array, you get an infinite loop. Always think: "does updating this state cause my effect to run again?"</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="cleanup">
+    <h2>3. Cleanup Functions</h2>
+    <div class="concept">
+      <p>Some effects create resources that need to be released when the component unmounts or before the effect runs again (e.g., subscriptions, timers, event listeners). Return a cleanup function to handle this.</p>
+      <div class="code-block"><code>// Cleanup pattern — timer
+function Countdown({ seconds }) {
+  const [timeLeft, setTimeLeft] = useState(seconds);
+
+  useEffect(() =&gt; {
+    if (timeLeft === 0) return;
+
+    const timerId = setInterval(() =&gt; {
+      setTimeLeft(prev =&gt; prev - 1);
+    }, 1000);
+
+    // Cleanup: clear the timer when component unmounts
+    // or before the next effect run
+    return () =&gt; clearInterval(timerId);
+  }, [timeLeft]);
+
+  return &lt;p&gt;{timeLeft}s remaining&lt;/p&gt;;
+}
+
+// Cleanup pattern — event listener
+function WindowSize() {
+  const [width, setWidth] = useState(window.innerWidth);
+
+  useEffect(() =&gt; {
+    const handleResize = () =&gt; setWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup: remove listener when component unmounts
+    return () =&gt; window.removeEventListener('resize', handleResize);
+  }, []); // runs once — listener persists until cleanup
+
+  return &lt;p&gt;Window width: {width}px&lt;/p&gt;;
+}
+</code></div>
+      <div class="callout tip">
+        <div class="icon">✅</div>
+        <p><strong>Always cleanup:</strong> Forgetting to clear timers or remove event listeners causes memory leaks. When the component unmounts, React calls the cleanup function automatically.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="fetching">
+    <h2>4. Data Fetching Pattern</h2>
+    <div class="concept">
+      <p>Fetching data from an API is the most common use of <code>useEffect</code>. The pattern: use state for <code>data</code>, <code>isLoading</code>, and <code>error</code>; fetch inside an effect with the right dependencies.</p>
+      <div class="code-block"><code>function CourseList({ instructorId }) {
+  const [courses,   setCourses]   = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error,     setError]     = useState(null);
+
+  useEffect(() =&gt; {
+    setIsLoading(true);
+    setError(null);
+
+    fetch(`https://api.example.com/courses?instructor=${instructorId}`)
+      .then(res =&gt; {
+        if (!res.ok) throw new Error('Network error');
+        return res.json();
+      })
+      .then(data =&gt; {
+        setCourses(data);
+        setIsLoading(false);
+      })
+      .catch(err =&gt; {
+        setError(err.message);
+        setIsLoading(false);
+      });
+  }, [instructorId]); // re-fetch when instructorId changes
+
+  if (isLoading) return &lt;p&gt;Loading courses…&lt;/p&gt;;
+  if (error)     return &lt;p style={{color:'red'}}&gt;Error: {error}&lt;/p&gt;;
+
+  return (
+    &lt;ul&gt;
+      {courses.map(c =&gt; &lt;li key={c.id}&gt;{c.title}&lt;/li&gt;)}
+    &lt;/ul&gt;
+  );
+}
+</code></div>
+      <div class="callout info">
+        <div class="icon">💡</div>
+        <p><strong>Async inside useEffect:</strong> You cannot make the useEffect callback itself async. Instead, define an async function inside the effect and call it immediately.</p>
+      </div>
+      <div class="code-block"><code>useEffect(() =&gt; {
+  // Define async function inside
+  async function loadCourses() {
+    try {
+      const res  = await fetch('/api/courses');
+      const data = await res.json();
+      setCourses(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  loadCourses(); // call it immediately
+}, []);
+</code></div>
+    </div>
+  </section>
+
+  <section id="common-patterns">
+    <h2>5. Common Patterns</h2>
+    <div class="concept">
+      <h3>Sync document title with state</h3>
+      <div class="code-block"><code>useEffect(() =&gt; {
+  document.title = `${unreadCount} unread messages — WebPro`;
+}, [unreadCount]);
+</code></div>
+
+      <h3>Debounced search (avoid fetching on every keystroke)</h3>
+      <div class="code-block"><code>const [query, setQuery] = useState('');
+const [results, setResults] = useState([]);
+
+useEffect(() =&gt; {
+  if (!query) { setResults([]); return; }
+
+  const timerId = setTimeout(async () =&gt; {
+    const res  = await fetch(`/api/search?q=${query}`);
+    const data = await res.json();
+    setResults(data);
+  }, 400); // wait 400ms after typing stops
+
+  return () =&gt; clearTimeout(timerId); // cancel if query changes quickly
+}, [query]);
+</code></div>
+
+      <h3>Lifecycle analogy</h3>
+      <table>
+        <tr><th>Class component lifecycle</th><th>useEffect equivalent</th></tr>
+        <tr><td><code>componentDidMount</code></td><td><code>useEffect(() =&gt; {...}, [])</code></td></tr>
+        <tr><td><code>componentDidUpdate</code></td><td><code>useEffect(() =&gt; {...}, [dep])</code></td></tr>
+        <tr><td><code>componentWillUnmount</code></td><td>Cleanup function: <code>return () =&gt; {...}</code></td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section id="exercises">
+    <h2>Practice Exercises</h2>
+
+    <details class="exercise">
+      <summary>Exercise 1 — Page title sync</summary>
+      <div class="exercise-body">
+        <p><strong>Task:</strong> Build a component with a text input. Use <code>useEffect</code> to update <code>document.title</code> to show whatever is typed in the input. Revert the title to "WebPro" when the component unmounts (via cleanup).</p>
+        <div class="code-block"><code>function TitleEditor() {
+  const [text, setText] = useState('');
+
+  useEffect(() =&gt; {
+    document.title = text || 'WebPro';
+    return () =&gt; { document.title = 'WebPro'; }; // cleanup on unmount
+  }, [text]);
+
+  return (
+    &lt;input
+      value={text}
+      onChange={e =&gt; setText(e.target.value)}
+      placeholder="Type to change tab title…"
+    /&gt;
+  );
+}
+</code></div>
+      </div>
+    </details>
+
+    <details class="exercise">
+      <summary>Exercise 2 — Fetch a user from an API</summary>
+      <div class="exercise-body">
+        <p><strong>Task:</strong> Use <code>https://jsonplaceholder.typicode.com/users/1</code> to fetch a user and display their name and email. Show "Loading…" while fetching and handle errors.</p>
+        <div class="code-block"><code>function UserProfile() {
+  const [user, setUser]         = useState(null);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState(null);
+
+  useEffect(() =&gt; {
+    async function fetchUser() {
+      try {
+        const res  = await fetch('https://jsonplaceholder.typicode.com/users/1');
+        if (!res.ok) throw new Error('Failed to fetch');
+        const data = await res.json();
+        setUser(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchUser();
+  }, []); // empty array — run once on mount
+
+  if (loading) return &lt;p&gt;Loading…&lt;/p&gt;;
+  if (error)   return &lt;p&gt;Error: {error}&lt;/p&gt;;
+
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;{user.name}&lt;/h2&gt;
+      &lt;p&gt;{user.email}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+</code></div>
+      </div>
+    </details>
+
+    <details class="exercise">
+      <summary>Exercise 3 — Stopwatch with cleanup</summary>
+      <div class="exercise-body">
+        <p><strong>Task:</strong> Build a stopwatch with Start, Stop, and Reset buttons. Use <code>setInterval</code> inside <code>useEffect</code> and clean it up properly to avoid memory leaks.</p>
+        <div class="code-block"><code>function Stopwatch() {
+  const [seconds, setSeconds] = useState(0);
+  const [running, setRunning] = useState(false);
+
+  useEffect(() =&gt; {
+    if (!running) return; // do nothing when stopped
+
+    const id = setInterval(() =&gt; setSeconds(s =&gt; s + 1), 1000);
+    return () =&gt; clearInterval(id); // cleanup when running changes or unmounts
+  }, [running]);
+
+  return (
+    &lt;div&gt;
+      &lt;p&gt;{seconds}s&lt;/p&gt;
+      &lt;button onClick={() =&gt; setRunning(true)}&gt;Start&lt;/button&gt;
+      &lt;button onClick={() =&gt; setRunning(false)}&gt;Stop&lt;/button&gt;
+      &lt;button onClick={() =&gt; { setRunning(false); setSeconds(0); }}&gt;Reset&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+</code></div>
+      </div>
+    </details>
+  </section>
+
+  <section id="cheatsheet">
+    <div class="cheatsheet">
+      <h2>🔄 useEffect — Cheat Sheet</h2>
+      <div class="cs-grid">
+        <div class="cs-item">
+          <h4>Run once (on mount)</h4>
+          <pre>useEffect(() => {
+  // setup
+}, []);</pre>
+        </div>
+        <div class="cs-item">
+          <h4>Run on dep change</h4>
+          <pre>useEffect(() => {
+  fetchData(id);
+}, [id]);</pre>
+        </div>
+        <div class="cs-item">
+          <h4>With cleanup</h4>
+          <pre>useEffect(() => {
+  const id = setInterval(fn, 1000);
+  return () => clearInterval(id);
+}, []);</pre>
+        </div>
+        <div class="cs-item">
+          <h4>Async data fetch</h4>
+          <pre>useEffect(() => {
+  async function load() {
+    const d = await fetch(url).then(r=>r.json());
+    setData(d);
+  }
+  load();
+}, [url]);</pre>
+        </div>
+        <div class="cs-item">
+          <h4>Loading pattern</h4>
+          <pre>const [data, setData] = useState(null);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState(null);</pre>
+        </div>
+        <div class="cs-item">
+          <h4>Dep array rules</h4>
+          <pre>[]    → once on mount
+[a]   → on a change
+none  → every render (avoid)</pre>
+        </div>
+        <div class="cs-item">
+          <h4>Avoid infinite loop</h4>
+          <pre>// ❌ state in deps that effect updates
+useEffect(()=>{ setX(1); }, [x]);
+// ✅ no dep, or functional form</pre>
+        </div>
+        <div class="cs-item">
+          <h4>No async callback</h4>
+          <pre>// ❌ useEffect(async () => {...});
+// ✅ define async fn inside, call it</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

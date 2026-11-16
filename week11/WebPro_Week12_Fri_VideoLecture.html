@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React useEffect · Week 12 Fri Video Lecture</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;700&display=swap">
+<style>
+:root{--bg:#0a0f1e;--surf:#111827;--surf2:#1f2937;--brd:#374151;--tx:#f1f5f9;--mu:#94a3b8;--ac:#f59e0b;--ac2:#d97706;--acl:#1c1007}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column}
+header{position:sticky;top:0;z-index:100;background:#060b14;border-bottom:2px solid var(--ac);display:flex;align-items:center;justify-content:space-between;padding:10px 20px}
+.badge{background:var(--ac);color:#0a0f1e;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;padding:4px 12px;border-radius:6px}
+.hdr-label{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em}
+.hdr-title{font-size:14px;font-weight:600;color:var(--tx)}
+#counter{font-family:'Space Grotesk',sans-serif;font-size:14px;color:var(--mu)}
+.progress-wrap{position:fixed;bottom:72px;left:0;right:0;height:3px;background:var(--surf2)}
+#progress-bar{height:3px;background:var(--ac);transition:width .3s}
+nav{position:fixed;bottom:0;left:0;right:0;background:#060b14;border-top:1px solid var(--brd);display:flex;justify-content:center;gap:12px;padding:14px}
+.btn{background:var(--surf2);border:1px solid var(--brd);color:var(--tx);padding:8px 24px;border-radius:8px;cursor:pointer;font-size:14px;font-family:'Inter',sans-serif}
+.btn:hover{background:var(--brd)}
+.btn.primary{background:var(--ac);color:#0a0f1e;border-color:var(--ac);font-weight:600}
+#slides{flex:1;padding-bottom:120px}
+.slide{display:none;min-height:calc(100vh - 160px);padding:3rem 2rem;max-width:860px;margin:0 auto;animation:fadeIn .25s ease}
+.slide.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+h1{font-family:'Space Grotesk',sans-serif;font-size:2.6rem;font-weight:700;color:var(--ac);line-height:1.2;margin-bottom:.6rem}
+h2{font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:700;color:var(--ac);margin-bottom:1.2rem;padding-bottom:.5rem;border-bottom:2px solid var(--acl)}
+h3{font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:600;color:var(--ac2);margin:1.2rem 0 .6rem}
+p{color:var(--mu);line-height:1.75;margin-bottom:1rem}
+ul,ol{padding-left:1.4rem;color:var(--mu);line-height:1.9;margin-bottom:1rem}
+li strong{color:var(--tx)}
+pre{background:var(--surf2);border:1px solid var(--brd);border-radius:10px;padding:1.4rem;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:#e2e8f0;line-height:1.65;margin:1rem 0}
+code{font-family:'JetBrains Mono',monospace;font-size:.82rem;background:var(--surf2);padding:1px 6px;border-radius:4px;color:var(--ac)}
+.subtitle{font-size:1.2rem;color:var(--mu);margin-top:.4rem}
+.instructor{margin-top:1.2rem;font-size:.95rem;color:var(--mu)}
+.agenda-list{list-style:none;padding:0;counter-reset:agenda}
+.agenda-list li{counter-increment:agenda;padding:.7rem 1rem .7rem 3.5rem;position:relative;background:var(--surf);border:1px solid var(--brd);border-radius:8px;margin-bottom:.6rem;color:var(--tx)}
+.agenda-list li::before{content:counter(agenda);position:absolute;left:.9rem;top:.65rem;background:var(--ac);color:#0a0f1e;font-weight:700;font-size:.85rem;width:1.6rem;height:1.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.card{background:var(--surf);border:1px solid var(--brd);border-radius:10px;padding:1.4rem;margin-bottom:1rem}
+.card-title{font-weight:600;color:var(--ac);margin-bottom:.5rem;font-family:'Space Grotesk',sans-serif}
+.tip{background:var(--acl);border-left:3px solid var(--ac);border-radius:0 8px 8px 0;padding:.8rem 1rem;margin:1rem 0;color:var(--tx);font-size:.93rem}
+.practice-box{background:#0d1f0d;border:2px dashed #22c55e;border-radius:10px;padding:1.4rem;margin:1rem 0}
+.practice-box h3{color:#4ade80;margin-top:0}
+.key-point{display:flex;align-items:flex-start;gap:.8rem;padding:.6rem 0;border-bottom:1px solid var(--brd)}
+.key-point:last-child{border-bottom:none}
+.kp-num{background:var(--ac);color:#0a0f1e;font-weight:700;font-size:.8rem;min-width:1.6rem;height:1.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;flex-shrink:0;margin-top:.1rem}
+.dep-table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.88rem}
+.dep-table th{background:var(--surf2);color:var(--ac);text-align:left;padding:.6rem 1rem;border:1px solid var(--brd)}
+.dep-table td{padding:.6rem 1rem;border:1px solid var(--brd);color:var(--mu)}
+.dep-table td:first-child{color:var(--tx);font-family:'JetBrains Mono',monospace}
+.comment{color:#6b7280}.kw{color:#f97316}.fn{color:#a78bfa}.str{color:#34d399}.num{color:#fb923c}.tag{color:#f87171}
+</style>
+</head>
+<body>
+<header>
+  <div style="display:flex;align-items:center;gap:12px">
+    <span class="badge">useEffect</span>
+    <div>
+      <div class="hdr-label">Web Programming K0126_002 · Week 12 Friday</div>
+      <div class="hdr-title">React Effects &amp; useEffect Hook</div>
+    </div>
+  </div>
+  <span id="counter">1 / 15</span>
+</header>
+
+<div id="slides">
+
+<div class="slide active" id="slide-1">
+  <div style="display:flex;flex-direction:column;justify-content:center;min-height:60vh;text-align:center">
+    <div style="font-size:4rem;margin-bottom:1rem">⚡</div>
+    <h1>React Effects<br>&amp; useEffect Hook</h1>
+    <p class="subtitle">Synchronizing components with the outside world</p>
+    <p class="instructor">Web Programming K0126_002 · Week 12 Friday<br>Dr. Mukhiddin Toshpulatov · Gachon University</p>
+    <div class="tip" style="max-width:500px;margin:2rem auto 0">Use <strong>← →</strong> arrow keys or the buttons below to navigate.</div>
+  </div>
+</div>
+
+<div class="slide" id="slide-2">
+  <h2>📋 Today's Agenda</h2>
+  <ol class="agenda-list">
+    <li>What are "side effects" in React?</li>
+    <li>Introducing useEffect</li>
+    <li>The dependency array — controlling when effects run</li>
+    <li>Cleanup functions</li>
+    <li>Fetching data with useEffect</li>
+    <li>Common patterns: timers, subscriptions</li>
+    <li>useState + useEffect together</li>
+    <li>Common mistakes</li>
+    <li>Practice challenge</li>
+  </ol>
+</div>
+
+<div class="slide" id="slide-3">
+  <h2>🌍 What are Side Effects?</h2>
+  <p>A <strong>side effect</strong> is anything that affects something outside the current function's scope. In React components, side effects include:</p>
+  <ul>
+    <li><strong>Fetching data</strong> from an API (network request)</li>
+    <li><strong>Setting up timers</strong> (<code>setTimeout</code>, <code>setInterval</code>)</li>
+    <li><strong>Subscribing</strong> to events (resize, scroll, WebSocket)</li>
+    <li><strong>Updating the document title</strong> (<code>document.title</code>)</li>
+    <li><strong>Integrating</strong> with third-party DOM libraries</li>
+    <li><strong>Storing data</strong> in localStorage</li>
+  </ul>
+  <div class="tip">These can't go directly in render because render should be a <em>pure function</em> — same input → same output, no side effects.</div>
+</div>
+
+<div class="slide" id="slide-4">
+  <h2>⚡ Introducing useEffect</h2>
+  <p><code>useEffect</code> tells React: "after rendering, run this function." It's the main way to perform side effects in functional components.</p>
+  <pre><span class="kw">import</span> { useState, useEffect } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="kw">function</span> <span class="fn">PageTitle</span>({ title }) {
+  useEffect(() =&gt; {
+    <span class="comment">// This runs after every render where title changed</span>
+    document.title = title + <span class="str">' | Web Programming'</span>;
+  }, [title]); <span class="comment">// ← dependency array</span>
+
+  <span class="kw">return</span> &lt;<span class="tag">h1</span>&gt;{title}&lt;/<span class="tag">h1</span>&gt;;
+}</pre>
+  <div class="card">
+    <div class="card-title">Syntax</div>
+    <pre style="font-size:.78rem">useEffect(effectFn, [deps]);
+<span class="comment">//           ↑ runs after render   ↑ optional array of dependencies</span></pre>
+  </div>
+</div>
+
+<div class="slide" id="slide-5">
+  <h2>🔗 The Dependency Array</h2>
+  <table class="dep-table">
+    <tr><th>Dependency array</th><th>When does the effect run?</th></tr>
+    <tr><td>Omitted</td><td>After <strong>every</strong> render (dangerous — often causes infinite loops!)</td></tr>
+    <tr><td><code>[]</code> (empty)</td><td><strong>Once</strong> — only after the first render (component mount)</td></tr>
+    <tr><td><code>[a, b]</code></td><td>After the first render, then whenever <code>a</code> or <code>b</code> changes</td></tr>
+  </table>
+  <pre><span class="comment">// Runs every render — usually wrong!</span>
+useEffect(() =&gt; { fetch(...); });
+
+<span class="comment">// Runs once on mount — good for one-time setup</span>
+useEffect(() =&gt; { fetch('/api/init'); }, []);
+
+<span class="comment">// Runs when userId changes — re-fetch profile data</span>
+useEffect(() =&gt; { fetch('/api/users/' + userId); }, [userId]);</pre>
+  <div class="tip">Every value you use inside <code>useEffect</code> that comes from outside the effect must be listed in the dependency array.</div>
+</div>
+
+<div class="slide" id="slide-6">
+  <h2>🧹 Cleanup Functions</h2>
+  <p>When your effect creates something that must be torn down (a timer, event listener, subscription), return a <strong>cleanup function</strong>.</p>
+  <pre><span class="kw">function</span> <span class="fn">Clock</span>() {
+  <span class="kw">const</span> [time, setTime] = useState(<span class="kw">new</span> Date());
+
+  useEffect(() =&gt; {
+    <span class="comment">// Set up a timer</span>
+    <span class="kw">const</span> timer = setInterval(() =&gt; {
+      setTime(<span class="kw">new</span> Date());
+    }, <span class="num">1000</span>);
+
+    <span class="comment">// Return cleanup function — called when component unmounts</span>
+    <span class="comment">// or before the effect runs again</span>
+    <span class="kw">return</span> () =&gt; {
+      clearInterval(timer); <span class="comment">// ← clean up the timer!</span>
+    };
+  }, []); <span class="comment">// empty array = run once on mount</span>
+
+  <span class="kw">return</span> &lt;<span class="tag">p</span>&gt;현재 시간: {time.toLocaleTimeString(<span class="str">'ko-KR'</span>)}&lt;/<span class="tag">p</span>&gt;;
+}</pre>
+  <div class="tip">Without cleanup, the timer keeps running even after the component is removed — a <strong>memory leak</strong>!</div>
+</div>
+
+<div class="slide" id="slide-7">
+  <h2>🌐 Data Fetching Pattern</h2>
+  <p>The most common use of <code>useEffect</code> — fetching data when a component mounts or when a dependency changes.</p>
+  <pre><span class="kw">function</span> <span class="fn">UserProfile</span>({ userId }) {
+  <span class="kw">const</span> [user, setUser]       = useState(<span class="kw">null</span>);
+  <span class="kw">const</span> [loading, setLoading] = useState(<span class="kw">true</span>);
+  <span class="kw">const</span> [error, setError]     = useState(<span class="kw">null</span>);
+
+  useEffect(() =&gt; {
+    setLoading(<span class="kw">true</span>);
+    setError(<span class="kw">null</span>);
+
+    fetch(<span class="str">`/api/users/${userId}`</span>)
+      .then(res =&gt; {
+        <span class="kw">if</span> (!res.ok) <span class="kw">throw new</span> Error(<span class="str">'User not found'</span>);
+        <span class="kw">return</span> res.json();
+      })
+      .then(data =&gt; { setUser(data); setLoading(<span class="kw">false</span>); })
+      .catch(err =&gt; { setError(err.message); setLoading(<span class="kw">false</span>); });
+  }, [userId]); <span class="comment">// re-fetch when userId changes</span>
+
+  <span class="kw">if</span> (loading) <span class="kw">return</span> &lt;<span class="tag">p</span>&gt;로딩 중...&lt;/<span class="tag">p</span>&gt;;
+  <span class="kw">if</span> (error)   <span class="kw">return</span> &lt;<span class="tag">p</span>&gt;오류: {error}&lt;/<span class="tag">p</span>&gt;;
+  <span class="kw">return</span> &lt;<span class="tag">h2</span>&gt;{user.name}&lt;/<span class="tag">h2</span>&gt;;
+}</pre>
+</div>
+
+<div class="slide" id="slide-8">
+  <h2>🛑 Abort Controller — Preventing Stale Responses</h2>
+  <p>When <code>userId</code> changes rapidly (user clicks fast), old fetch responses might arrive after newer ones — causing wrong data to display. Fix this with <code>AbortController</code>.</p>
+  <pre>useEffect(() =&gt; {
+  <span class="kw">const</span> controller = <span class="kw">new</span> AbortController();
+
+  fetch(<span class="str">`/api/users/${userId}`</span>, {
+    signal: controller.signal  <span class="comment">// link request to controller</span>
+  })
+    .then(res =&gt; res.json())
+    .then(data =&gt; setUser(data))
+    .catch(err =&gt; {
+      <span class="kw">if</span> (err.name === <span class="str">'AbortError'</span>) <span class="kw">return</span>; <span class="comment">// ignore cancel</span>
+      setError(err.message);
+    });
+
+  <span class="kw">return</span> () =&gt; {
+    controller.abort(); <span class="comment">// cancel in-flight request on cleanup</span>
+  };
+}, [userId]);</pre>
+</div>
+
+<div class="slide" id="slide-9">
+  <h2>📐 async/await in useEffect</h2>
+  <p><code>useEffect</code>'s callback cannot be <code>async</code> directly (it would return a Promise, not a cleanup function). Create an inner async function instead.</p>
+  <pre><span class="comment">// WRONG — useEffect async directly</span>
+useEffect(<span class="kw">async</span> () =&gt; {        <span class="comment">// ❌ returns Promise, not cleanup</span>
+  <span class="kw">const</span> data = <span class="kw">await</span> fetchData();
+}, []);
+
+<span class="comment">// CORRECT — inner async function</span>
+useEffect(() =&gt; {
+  <span class="kw">async function</span> <span class="fn">loadData</span>() {
+    <span class="kw">try</span> {
+      setLoading(<span class="kw">true</span>);
+      <span class="kw">const</span> res  = <span class="kw">await</span> fetch(<span class="str">'/api/courses'</span>);
+      <span class="kw">const</span> data = <span class="kw">await</span> res.json();
+      setCourses(data);
+    } <span class="kw">catch</span> (err) {
+      setError(err.message);
+    } <span class="kw">finally</span> {
+      setLoading(<span class="kw">false</span>);
+    }
+  }
+
+  loadData(); <span class="comment">// call it</span>
+  <span class="comment">// still returns cleanup normally:</span>
+  <span class="kw">return</span> () =&gt; { <span class="comment">/* cancel if needed */</span> };
+}, []);</pre>
+</div>
+
+<div class="slide" id="slide-10">
+  <h2>📡 Event Listener Pattern</h2>
+  <pre><span class="kw">function</span> <span class="fn">WindowSize</span>() {
+  <span class="kw">const</span> [size, setSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+
+  useEffect(() =&gt; {
+    <span class="kw">const</span> <span class="fn">handleResize</span> = () =&gt; {
+      setSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+
+    window.addEventListener(<span class="str">'resize'</span>, handleResize);
+
+    <span class="comment">// Cleanup removes the listener when component unmounts</span>
+    <span class="kw">return</span> () =&gt; {
+      window.removeEventListener(<span class="str">'resize'</span>, handleResize);
+    };
+  }, []); <span class="comment">// only on mount</span>
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">p</span>&gt;창 크기: {size.width} × {size.height}&lt;/<span class="tag">p</span>&gt;
+  );
+}</pre>
+  <div class="tip">Always remove event listeners in cleanup — the same function reference must be passed to <code>removeEventListener</code>.</div>
+</div>
+
+<div class="slide" id="slide-11">
+  <h2>🔗 useState + useEffect Together</h2>
+  <p>A common real-world pattern: fetch data when a search term changes (with debounce).</p>
+  <pre><span class="kw">function</span> <span class="fn">BookSearch</span>() {
+  <span class="kw">const</span> [query, setQuery] = useState(<span class="str">''</span>);
+  <span class="kw">const</span> [books, setBooks] = useState([]);
+  <span class="kw">const</span> [loading, setLoading] = useState(<span class="kw">false</span>);
+
+  useEffect(() =&gt; {
+    <span class="kw">if</span> (!query.trim()) { setBooks([]); <span class="kw">return</span>; }
+
+    <span class="kw">const</span> delay = setTimeout(<span class="kw">async</span> () =&gt; {
+      setLoading(<span class="kw">true</span>);
+      <span class="kw">const</span> res = <span class="kw">await</span> fetch(
+        <span class="str">`https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=5`</span>
+      );
+      <span class="kw">const</span> data = <span class="kw">await</span> res.json();
+      setBooks(data.docs || []);
+      setLoading(<span class="kw">false</span>);
+    }, <span class="num">400</span>); <span class="comment">// debounce: wait 400ms after typing stops</span>
+
+    <span class="kw">return</span> () =&gt; clearTimeout(delay); <span class="comment">// cancel if query changes fast</span>
+  }, [query]);
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      &lt;<span class="tag">input</span> value={query} onChange={e =&gt; setQuery(e.target.value)}
+             placeholder=<span class="str">"책 제목 검색..."</span> /&gt;
+      {loading &amp;&amp; &lt;<span class="tag">p</span>&gt;검색 중...&lt;/<span class="tag">p</span>&gt;}
+      {books.<span class="fn">map</span>(b =&gt; &lt;<span class="tag">p</span> key={b.key}&gt;{b.title}&lt;/<span class="tag">p</span>&gt;)}
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}</pre>
+</div>
+
+<div class="slide" id="slide-12">
+  <h2>⚠️ Common useEffect Mistakes</h2>
+  <div class="card" style="border-color:#ef4444">
+    <div class="card-title" style="color:#f87171">❌ Infinite loop — missing dependency array</div>
+    <pre style="font-size:.78rem">useEffect(() =&gt; {
+  setCount(count + <span class="num">1</span>); <span class="comment">// changes state → re-render → runs again → ∞</span>
+}); <span class="comment">// no deps = runs every render!</span></pre>
+  </div>
+  <div class="card" style="border-color:#ef4444">
+    <div class="card-title" style="color:#f87171">❌ Stale closure — missing dependency</div>
+    <pre style="font-size:.78rem">useEffect(() =&gt; {
+  document.title = <span class="str">`Score: ${score}`</span>; <span class="comment">// score is used but not listed!</span>
+}, []); <span class="comment">// title never updates after first render</span></pre>
+  </div>
+  <div class="card" style="border-color:#22c55e">
+    <div class="card-title" style="color:#4ade80">✅ Correct</div>
+    <pre style="font-size:.78rem">useEffect(() =&gt; {
+  document.title = <span class="str">`Score: ${score}`</span>;
+}, [score]); <span class="comment">// listed — updates whenever score changes</span></pre>
+  </div>
+</div>
+
+<div class="slide" id="slide-13">
+  <h2>💻 Practice Challenge</h2>
+  <div class="practice-box">
+    <h3>🎯 GitHub User Lookup</h3>
+    <p>Build a component called <code>GitHubProfile</code> that:</p>
+    <ol style="color:#86efac;padding-left:1.4rem;line-height:2">
+      <li>Has an <code>&lt;input&gt;</code> where the user types a GitHub username</li>
+      <li>When the username changes, fetch from <code>https://api.github.com/users/{username}</code></li>
+      <li>Shows a loading indicator while fetching</li>
+      <li>Displays: avatar, name, public_repos count, bio</li>
+      <li>Shows an error message if the user is not found (404)</li>
+      <li><strong>Bonus:</strong> Debounce the fetch by 500ms so it doesn't fire on every keystroke</li>
+    </ol>
+    <pre style="background:#0a1a0a;border-color:#166534;color:#bbf7d0"><span class="comment">// API endpoint example:</span>
+// https://api.github.com/users/muxiddin19
+<span class="comment">// Returns: { login, name, avatar_url, bio, public_repos, ... }</span></pre>
+  </div>
+</div>
+
+<div class="slide" id="slide-14">
+  <h2>🗺️ useEffect Lifecycle Analogy</h2>
+  <p>If you've seen class components, here's how <code>useEffect</code> maps to lifecycle methods:</p>
+  <div class="card">
+    <div class="card-title">componentDidMount (run once after mount)</div>
+    <pre style="font-size:.78rem">useEffect(() =&gt; { <span class="comment">/* run once */</span> }, []);</pre>
+  </div>
+  <div class="card">
+    <div class="card-title">componentDidUpdate (run when deps change)</div>
+    <pre style="font-size:.78rem">useEffect(() =&gt; { <span class="comment">/* run when count changes */</span> }, [count]);</pre>
+  </div>
+  <div class="card">
+    <div class="card-title">componentWillUnmount (cleanup)</div>
+    <pre style="font-size:.78rem">useEffect(() =&gt; {
+  <span class="kw">return</span> () =&gt; { <span class="comment">/* cleanup on unmount */</span> };
+}, []);</pre>
+  </div>
+  <div class="tip">In practice, the dependency-array mental model is cleaner than the lifecycle model.</div>
+</div>
+
+<div class="slide" id="slide-15">
+  <h2>✅ Summary — Key Takeaways</h2>
+  <div class="key-point"><span class="kp-num">1</span><div><strong>Side effects</strong> (fetch, timers, events) must go in <code>useEffect</code>, not directly in render.</div></div>
+  <div class="key-point"><span class="kp-num">2</span><div><code>useEffect(fn, [deps])</code> — runs after render, controlled by the dependency array.</div></div>
+  <div class="key-point"><span class="kp-num">3</span><div><strong>Empty array <code>[]</code></strong>: runs once on mount. <strong>No array</strong>: runs every render (dangerous).</div></div>
+  <div class="key-point"><span class="kp-num">4</span><div><strong>Cleanup function</strong>: return it from the effect to tear down timers, listeners, subscriptions.</div></div>
+  <div class="key-point"><span class="kp-num">5</span><div><strong>Data fetching</strong>: use loading + error state, inner async function, AbortController for cleanup.</div></div>
+  <div class="key-point"><span class="kp-num">6</span><div><strong>Stale closures</strong>: list every value used inside the effect in the dependency array.</div></div>
+  <div class="tip" style="margin-top:1.4rem"><strong>Next class (Week 13 Mon):</strong> React Forms &amp; Controlled Components — handling user input like a pro!</div>
+</div>
+
+</div>
+
+<div class="progress-wrap"><div id="progress-bar" style="width:6.67%"></div></div>
+<nav>
+  <button class="btn" id="prev-btn" onclick="navigate(-1)">← Previous</button>
+  <button class="btn primary" id="next-btn" onclick="navigate(1)">Next →</button>
+</nav>
+<script>
+let current=1;const total=15;
+function show(n){if(n<1||n>total)return;document.getElementById('slide-'+current).classList.remove('active');current=n;document.getElementById('slide-'+current).classList.add('active');document.getElementById('counter').textContent=current+' / '+total;document.getElementById('progress-bar').style.width=(current/total*100)+'%';document.getElementById('prev-btn').disabled=current===1;document.getElementById('next-btn').textContent=current===total?'✓ Done':'Next →';window.scrollTo(0,0);}
+function navigate(dir){show(current+dir);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')navigate(1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')navigate(-1);});show(1);
+</script>
+</body>
+</html>

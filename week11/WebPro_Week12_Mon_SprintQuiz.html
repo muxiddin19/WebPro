@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sprint Quiz — React useState · Week 12 Mon</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#faf5ff;--surf:#fff;--surf2:#ede9fe;--brd:#ddd6fe;--tx:#1e1040;--mu:#6050a0;--ac:#7c3aed;--acl:#ede9fe;--ac2:#6d28d9;--ok:#16a34a;--okl:#dcfce7;--er:#dc2626;--erl:#fee2e2}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0a0616;--surf:#120d28;--surf2:#1a1038;--brd:#2e1a60;--tx:#ede9fe;--mu:#8060c0;--ac:#a78bfa;--acl:#1e0c40;--ac2:#c4b5fd;--ok:#4ade80;--okl:#052e16;--er:#f87171;--erl:#450a0a}}
+:root[data-theme=dark]{--bg:#0a0616;--surf:#120d28;--surf2:#1a1038;--brd:#2e1a60;--tx:#ede9fe;--mu:#8060c0;--ac:#a78bfa;--acl:#1e0c40;--ac2:#c4b5fd;--ok:#4ade80;--okl:#052e16;--er:#f87171;--erl:#450a0a}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;font-size:16px;line-height:1.65}
+.header{background:var(--surf);border-bottom:3px solid var(--ac);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.badge{background:var(--ac);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;padding:4px 12px;border-radius:6px;font-size:15px}
+.hdr-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px}
+.hdr-sub{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em}
+.theme-btn{background:var(--surf2);border:1px solid var(--brd);color:var(--tx);padding:5px 12px;border-radius:16px;cursor:pointer;font-size:13px}
+.wrap{max-width:760px;margin:0 auto;padding:28px 16px 80px}
+.student-form{background:var(--surf);border:1px solid var(--brd);border-radius:12px;padding:24px;margin-bottom:32px}
+.student-form h2{font-family:'Space Grotesk',sans-serif;font-size:17px;margin-bottom:16px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:500px){.form-row{grid-template-columns:1fr}}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:4px;color:var(--mu)}
+input[type=text],input[type=number]{width:100%;padding:9px 12px;border:1px solid var(--brd);border-radius:8px;background:var(--surf2);color:var(--tx);font-size:15px;font-family:'Inter',sans-serif}
+input:focus{outline:2px solid var(--ac);outline-offset:1px}
+.quiz-title{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;margin-bottom:4px}
+.quiz-meta{font-size:13px;color:var(--mu);margin-bottom:24px}
+.qcard{background:var(--surf);border:1px solid var(--brd);border-radius:12px;padding:20px 24px;margin-bottom:16px}
+.qcard.correct{border-color:var(--ok);background:var(--okl)}
+.qcard.wrong{border-color:var(--er);background:var(--erl)}
+.qnum{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin-bottom:8px;font-family:'Space Grotesk',sans-serif}
+.qtext{font-size:15px;font-weight:600;margin-bottom:14px;line-height:1.5}
+code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--surf2);padding:1px 5px;border-radius:3px;color:var(--ac2)}
+.options{display:flex;flex-direction:column;gap:8px}
+.opt-label{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:1px solid var(--brd);border-radius:8px;cursor:pointer;transition:background .15s}
+.opt-label:hover{background:var(--surf2)}
+.opt-label input[type=radio]{margin-top:3px;accent-color:var(--ac);flex-shrink:0}
+.opt-text{font-size:14px;line-height:1.45}
+.result-badge{display:none;font-size:13px;font-weight:700;padding:4px 10px;border-radius:6px;margin-top:10px}
+.result-badge.show{display:inline-block}
+.result-badge.ok{background:var(--ok);color:#fff}
+.result-badge.er{background:var(--er);color:#fff}
+.explanation{margin-top:10px;font-size:13px;padding:10px 14px;background:var(--surf2);border-radius:8px;display:none}
+.explanation.show{display:block}
+.submit-area{text-align:center;margin-top:28px}
+.submit-btn{background:var(--ac);color:#fff;border:none;padding:14px 48px;border-radius:10px;font-size:17px;font-weight:700;font-family:'Space Grotesk',sans-serif;cursor:pointer}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed}
+.score-panel{display:none;background:var(--surf);border:2px solid var(--ac);border-radius:14px;padding:28px;margin-top:28px;text-align:center}
+.score-panel.show{display:block}
+.score-big{font-size:56px;font-weight:700;font-family:'Space Grotesk',sans-serif;color:var(--ac);line-height:1}
+.score-label{font-size:16px;color:var(--mu);margin-top:6px}
+.score-pct{font-size:28px;font-weight:700;margin-top:4px}
+.sync-msg{margin-top:16px;font-size:13px;color:var(--mu);font-style:italic}
+.sync-msg.ok{color:var(--ok)}.sync-msg.er{color:var(--er)}
+</style>
+</head>
+<body>
+<div class="header">
+  <div style="display:flex;align-items:center;gap:14px">
+    <div class="badge">🪝 useState</div>
+    <div>
+      <div class="hdr-sub">Sprint Quiz · Week 12 Monday · K0126_002</div>
+      <div class="hdr-title">React State — useState Hook</div>
+    </div>
+  </div>
+  <button class="theme-btn" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">🌙</button>
+</div>
+
+<div class="wrap">
+  <div class="student-form">
+    <h2>🎓 Student Information</h2>
+    <div class="form-row">
+      <div>
+        <label for="sid">Gachon Student ID</label>
+        <input type="number" id="sid" placeholder="e.g. 202011234">
+      </div>
+      <div>
+        <label for="sname">Full Name</label>
+        <input type="text" id="sname" placeholder="e.g. Gulnora Nazarova">
+      </div>
+    </div>
+  </div>
+  <div class="quiz-title">React useState — Sprint Quiz</div>
+  <div class="quiz-meta">12 questions · Multiple choice · Week 12 Monday</div>
+  <div id="quiz-container"></div>
+  <div class="submit-area">
+    <button class="submit-btn" id="submit-btn" onclick="submitQuiz()">Submit Quiz</button>
+  </div>
+  <div class="score-panel" id="score-panel">
+    <div class="score-big" id="score-num">0 / 12</div>
+    <div class="score-label">Questions Correct</div>
+    <div class="score-pct" id="score-pct">0%</div>
+    <div class="sync-msg" id="sync-msg">Syncing to grade book…</div>
+  </div>
+</div>
+
+<script>
+const GAS_URL  = 'YOUR_GAS_ENDPOINT_URL';
+const WEEK_NUM = 12;
+const SESSION  = 1;
+
+const questions = [
+  {
+    q: 'What does `useState(0)` return?',
+    opts: [
+      'The number 0',
+      'An array: [currentState, setterFunction]',
+      'An object: { state: 0, setState: fn }',
+      'A Promise that resolves to 0'
+    ],
+    ans: 1,
+    exp: '`useState` returns a two-element array: the current state value and the setter function. We destructure it: `const [count, setCount] = useState(0);`'
+  },
+  {
+    q: 'Which of the following is the CORRECT way to update a state variable `count`?',
+    opts: [
+      'count = count + 1;',
+      'this.setState({ count: count + 1 });',
+      'setCount(count + 1);',
+      'useState(count + 1);'
+    ],
+    ans: 2,
+    exp: 'You must call the setter function returned by useState. Directly assigning to the variable (count++) does not trigger a re-render.'
+  },
+  {
+    q: 'What happens when you call a state setter function?',
+    opts: [
+      'The variable is updated instantly and nothing else happens',
+      'The component re-renders with the new state value',
+      'All components in the app re-render',
+      'An error is thrown if the value is the same'
+    ],
+    ans: 1,
+    exp: 'React schedules a re-render of the component (and its children). React does NOT update the variable in the current render — the new value is available on the next render.'
+  },
+  {
+    q: 'You have `const [user, setUser] = useState({ name: "Amir", age: 20 })`. How do you correctly update only the age?',
+    opts: [
+      'user.age = 21; setUser(user);',
+      'setUser({ age: 21 });',
+      'setUser({ ...user, age: 21 });',
+      'setUser(user.age = 21);'
+    ],
+    ans: 2,
+    exp: 'You must create a NEW object. Use the spread operator to copy all existing fields, then override what changed: `{ ...user, age: 21 }`. Mutating the object directly won\'t trigger a re-render.'
+  },
+  {
+    q: '`const [items, setItems] = useState([\'a\', \'b\'])`. How do you add \'c\' to the list?',
+    opts: [
+      'items.push(\'c\'); setItems(items);',
+      'setItems([...items, \'c\']);',
+      'setItems(items.add(\'c\'));',
+      'items[2] = \'c\'; setItems(items);'
+    ],
+    ans: 1,
+    exp: 'Create a new array using spread: `[...items, \'c\']`. Never mutate the existing array — React uses reference equality to detect changes, so a mutated array won\'t trigger re-render.'
+  },
+  {
+    q: 'What is the "functional update" form of a state setter?',
+    opts: [
+      'setCount(function count() {})',
+      'setCount(prevCount => prevCount + 1)',
+      'setCount(() => count)',
+      'setCount.update(count + 1)'
+    ],
+    ans: 1,
+    exp: 'The functional form `setCount(prev => prev + 1)` receives the guaranteed latest state value. This is safer than `setCount(count + 1)` in async scenarios where `count` might be stale.'
+  },
+  {
+    q: 'Where must `useState` be called?',
+    opts: [
+      'Inside event handlers only',
+      'At the top level of a React function component or custom Hook',
+      'Inside a useEffect callback',
+      'Inside a for loop to manage multiple state items'
+    ],
+    ans: 1,
+    exp: 'This is "the Rules of Hooks" — Hooks must be called at the top level of a React function, never inside loops, conditions, or nested functions. This ensures React can track hook order correctly across renders.'
+  },
+  {
+    q: 'What is "lifting state up"?',
+    opts: [
+      'Moving state into a global Redux store',
+      'Moving a component\'s state to its nearest common parent so siblings can share it',
+      'Converting state from useState to useReducer',
+      'Moving state to the browser\'s localStorage'
+    ],
+    ans: 1,
+    exp: 'When two sibling components need the same data, move the state to their common parent. The parent passes the state and a setter callback down as props.'
+  },
+  {
+    q: 'How do you remove an item with id=3 from `const [items, setItems] = useState([{id:1},{id:2},{id:3}])`?',
+    opts: [
+      'delete items[2]; setItems(items);',
+      'setItems(items.splice(2, 1));',
+      'setItems(items.filter(item => item.id !== 3));',
+      'items.pop(); setItems(items);'
+    ],
+    ans: 2,
+    exp: '`filter` returns a new array excluding the matched item — perfect for immutable removal. Never use `splice`, `delete`, or `pop` on state arrays directly.'
+  },
+  {
+    q: 'What is the initial state value of `useState()`  with no argument?',
+    opts: [
+      '0',
+      'null',
+      'undefined',
+      'false'
+    ],
+    ans: 2,
+    exp: 'If you don\'t pass an argument to `useState()`, the initial state is `undefined`. It\'s best practice to always pass an explicit initial value.'
+  },
+  {
+    q: 'What does "one-way data flow" mean in React?',
+    opts: [
+      'Data can only flow from child to parent via callbacks',
+      'State flows down from parent to child via props; events flow up via callbacks',
+      'Data flows through the DOM only',
+      'Each component reads and writes to a single global state object'
+    ],
+    ans: 1,
+    exp: 'React enforces a one-way data flow: parent passes state down as props, child calls the parent\'s callback to request state changes. This makes the data flow predictable and easy to debug.'
+  },
+  {
+    q: 'Which of these is a valid lazy initializer for useState?',
+    opts: [
+      'useState(async () => fetchData())',
+      'useState(() => JSON.parse(localStorage.getItem("data") ?? "null"))',
+      'useState(Promise.resolve(42))',
+      'useState(await someAsyncFn())'
+    ],
+    ans: 1,
+    exp: 'The lazy initializer is a synchronous function that returns the initial value — it runs only once on mount. Async functions or Promises are not valid initializers; handle async data with useEffect.'
+  }
+];
+
+function buildQuiz() {
+  const container = document.getElementById('quiz-container');
+  questions.forEach((q, i) => {
+    const opts = q.opts.map((opt, j) => `
+      <label class="opt-label">
+        <input type="radio" name="q${i}" value="${j}">
+        <span class="opt-text">${opt}</span>
+      </label>`).join('');
+    container.innerHTML += `
+      <div class="qcard" id="qcard-${i}">
+        <div class="qnum">Question ${i+1} of ${questions.length}</div>
+        <div class="qtext">${q.q}</div>
+        <div class="options">${opts}</div>
+        <div class="result-badge" id="rbadge-${i}"></div>
+        <div class="explanation" id="exp-${i}">${q.exp}</div>
+      </div>`;
+  });
+}
+
+function submitQuiz() {
+  const sid   = document.getElementById('sid').value.trim();
+  const sname = document.getElementById('sname').value.trim();
+  if (!sid || !sname) { alert('Please enter your Student ID and Name.'); return; }
+
+  let correct = 0;
+  questions.forEach((q, i) => {
+    const sel  = document.querySelector(`input[name="q${i}"]:checked`);
+    const card = document.getElementById(`qcard-${i}`);
+    const badge= document.getElementById(`rbadge-${i}`);
+    const exp  = document.getElementById(`exp-${i}`);
+    const chosen = sel ? parseInt(sel.value) : -1;
+    if (chosen === q.ans) {
+      correct++;
+      card.classList.add('correct');
+      badge.textContent = '✅ Correct!';
+      badge.classList.add('show','ok');
+    } else {
+      card.classList.add('wrong');
+      badge.textContent = sel ? `❌ Wrong — correct: ${String.fromCharCode(65+q.ans)}` : '— Not answered';
+      badge.classList.add('show','er');
+      exp.classList.add('show');
+    }
+    document.querySelectorAll(`input[name="q${i}"]`).forEach(r => r.disabled = true);
+  });
+
+  const quizScore = Math.round((correct / questions.length) * 10 * 10) / 10;
+  const pct = Math.round(correct / questions.length * 100);
+  document.getElementById('score-num').textContent = `${correct} / ${questions.length}`;
+  document.getElementById('score-pct').textContent = `${pct}%`;
+  document.getElementById('score-panel').classList.add('show');
+  document.getElementById('submit-btn').disabled = true;
+
+  const payload = { studentId: sid, studentName: sname, weekNum: WEEK_NUM, session: SESSION, quizScore, pct, submittedAt: new Date().toISOString() };
+  const syncEl = document.getElementById('sync-msg');
+
+  if (!GAS_URL || GAS_URL === 'YOUR_GAS_ENDPOINT_URL') {
+    syncEl.textContent = '⚠️ Grade sync URL not configured.';
+    syncEl.className = 'sync-msg er';
+    return;
+  }
+  fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) })
+    .then(r => r.json())
+    .then(d => { syncEl.textContent = d.ok ? '✅ Score synced!' : '⚠️ ' + d.error; syncEl.className = 'sync-msg '+(d.ok?'ok':'er'); })
+    .catch(() => { syncEl.textContent = '⚠️ Could not reach server. Score above is valid.'; syncEl.className = 'sync-msg er'; });
+}
+
+buildQuiz();
+</script>
+</body>
+</html>
