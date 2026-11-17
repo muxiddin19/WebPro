@@ -11,4 +11,8 @@
 ## Quiz for the first class
 ### https://docs.google.com/forms/d/e/1FAIpQLSdVpIC9C3kc6GcNmy3e1K723J_Q_VW44cLy1r-BJcfoC6dUbw/viewform
  
-
+## Video lectures
+### Shareable link: 
+#### https://us06web.zoom.us/rec/share/RyUCDXBUICGW0XIGuj-ylqDRhQU-tG_vSe6bBrof8c29FLDMGnEdMZ_q8IDtghV-.B9IXyOe_aFhHSZhv
+### Passcode: 
+#### &%nH7w*J
