@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>React State: live demos and source code</title>
+<style>
+:root{--bg:#f6f7f9;--sf:#fff;--fg:#1f2933;--mu:#5f6b7a;--bd:#d9dee5;--ac:#2f5d8a;--codebg:#0b1526;--codefg:#dbe6f5;--btn:#2f5d8a;--btnfg:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14181d;--sf:#1d232b;--fg:#e8edf2;--mu:#9aa6b4;--bd:#2d3641;--ac:#6fa3d6;--btn:#6fa3d6;--btnfg:#10151b}}
+:root[data-theme="dark"]{--bg:#14181d;--sf:#1d232b;--fg:#e8edf2;--mu:#9aa6b4;--bd:#2d3641;--ac:#6fa3d6;--btn:#6fa3d6;--btnfg:#10151b}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:70rem;margin:0 auto;padding:1.5rem 1.25rem 4rem}
+h1{margin:0 0 .25rem;font-size:1.6rem}.sub{color:var(--mu);margin:0 0 1rem}
+nav{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem}
+nav a{padding:.35rem .8rem;border:1px solid var(--bd);border-radius:999px;background:var(--sf);color:var(--ac);text-decoration:none;font-size:.9rem}
+section{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:1.25rem;margin-bottom:1.25rem}
+section h2{margin:0 0 .25rem;font-size:1.2rem}.d{color:var(--mu);margin:0 0 1rem}
+.grid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(18rem,1fr))}
+h3{margin:0 0 .5rem;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--mu)}.f{text-transform:none;letter-spacing:0;color:var(--ac)}
+.res{border:1px dashed var(--bd);border-radius:10px;padding:1rem;min-height:6rem}
+pre{margin:0;background:var(--codebg);color:var(--codefg);border-radius:10px;padding:1rem;font-size:.78rem;line-height:1.5;overflow-x:auto;max-height:26rem}
+button{padding:.4rem .9rem;margin:.15rem;border:0;border-radius:8px;background:var(--btn);color:var(--btnfg);font:inherit;cursor:pointer}
+input,textarea{padding:.4rem .6rem;margin:.15rem;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--fg);font:inherit;max-width:100%}
+li{margin:.25rem 0}
+</style></head><body><main>
+<h1>React State: live demos and source code</h1>
+<p class="sub">Week 12 · Web Programming K0126_002. Each demo is the code from the slides, running for real.</p>
+<nav><a href="#bug">The problem</a><a href="#counter">useState and functional updates</a><a href="#form">Multiple useState calls</a><a href="#object">State with objects (spread)</a><a href="#todos">State with arrays</a><a href="#lift">Lifting state up</a><a href="#history">Code challenge</a></nav>
+<section id="bug"><h2>The problem: a regular variable</h2><p class="d">Click +1: the console value changes, but the screen stays at 0.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-bug"></div></div><div><h3>Source <span class="f">01-CounterBug.jsx</span></h3><pre>// This does NOT work: a regular variable is not state
+export default function CounterBug() {
+  let count = 0; // resets to 0 on every render
+
+  function handleClick() {
+    count++; // local variable, React does not know
+    document.getElementById('bug-log').textContent += count + ' ';
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;p&gt;Count: {count}&lt;/p&gt;
+      &lt;button onClick={handleClick}&gt;+1&lt;/button&gt;
+      &lt;p&gt;console.log: &lt;span id="bug-log"&gt;&lt;/span&gt;&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+</pre></div></div></section>
+<section id="counter"><h2>useState and functional updates</h2><p class="d">Try “+3 (stale)” versus “+3 (functional)”. Same code idea, different result.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-counter"></div></div><div><h3>Source <span class="f">02-CounterState.jsx</span></h3><pre>import { useState } from 'react';
+
+// useState + functional updates
+export default function Counter() {
+  const [count, setCount] = useState(0);
+
+  const increment = () =&gt; setCount(prev =&gt; prev + 1);
+  const decrement = () =&gt; setCount(prev =&gt; prev - 1);
+  const reset     = () =&gt; setCount(0);
+
+  // Stale: all three calls read the same old count
+  const addThreeStale = () =&gt; {
+    setCount(count + 1); setCount(count + 1); setCount(count + 1);
+  };
+  // Safe: each call gets the latest value
+  const addThreeSafe = () =&gt; {
+    setCount(p =&gt; p + 1); setCount(p =&gt; p + 1); setCount(p =&gt; p + 1);
+  };
+
+  return (
+    &lt;div&gt;
+      &lt;button onClick={decrement}&gt;-&lt;/button&gt;
+      &lt;span&gt; {count} &lt;/span&gt;
+      &lt;button onClick={increment}&gt;+&lt;/button&gt;
+      &lt;button onClick={reset}&gt;Reset&lt;/button&gt;
+      &lt;p&gt;
+        &lt;button onClick={addThreeStale}&gt;+3 (stale)&lt;/button&gt;
+        &lt;button onClick={addThreeSafe}&gt;+3 (functional)&lt;/button&gt;
+      &lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+</pre></div></div></section>
+<section id="form"><h2>Multiple useState calls</h2><p class="d">Four independent pieces of state. Fill in the form and submit.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-form"></div></div><div><h3>Source <span class="f">03-UserForm.jsx</span></h3><pre>import { useState } from 'react';
+
+export default function UserForm() {
+  const [name,      setName]      = useState('');
+  const [email,     setEmail]     = useState('');
+  const [age,       setAge]       = useState(0);
+  const [submitted, setSubmitted] = useState(false);
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    setSubmitted(true);
+  }
+
+  if (submitted) {
+    return &lt;p&gt;Thanks, {name}! Email: {email}, Age: {age}&lt;/p&gt;;
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      &lt;input value={name}  onChange={e =&gt; setName(e.target.value)}  placeholder="Name" /&gt;
+      &lt;input value={email} onChange={e =&gt; setEmail(e.target.value)} placeholder="Email" /&gt;
+      &lt;input type="number" value={age} onChange={e =&gt; setAge(e.target.value)} /&gt;
+      &lt;button&gt;Submit&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+</pre></div></div></section>
+<section id="object"><h2>State with objects (spread)</h2><p class="d">Type in any field and watch the state object update below.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-object"></div></div><div><h3>Source <span class="f">04-ProfileForm.jsx</span></h3><pre>import { useState } from 'react';
+
+export default function ProfileForm() {
+  const [user, setUser] = useState({ name: '', email: '', bio: '' });
+
+  // WRONG: user.name = 'Kim Minho'; setUser(user);  (same object)
+  // CORRECT: spread creates a new object
+  const handleChange = (field, value) =&gt; {
+    setUser(prev =&gt; ({ ...prev, [field]: value }));
+  };
+
+  return (
+    &lt;form&gt;
+      &lt;input value={user.name}  onChange={e =&gt; handleChange('name',  e.target.value)} /&gt;
+      &lt;input value={user.email} onChange={e =&gt; handleChange('email', e.target.value)} /&gt;
+      &lt;textarea value={user.bio} onChange={e =&gt; handleChange('bio', e.target.value)} /&gt;
+      &lt;pre&gt;{JSON.stringify(user, null, 2)}&lt;/pre&gt;
+    &lt;/form&gt;
+  );
+}
+</pre></div></div></section>
+<section id="todos"><h2>State with arrays</h2><p class="d">Add, toggle (click the text) and remove items.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-todos"></div></div><div><h3>Source <span class="f">05-TodoList.jsx</span></h3><pre>import { useState } from 'react';
+
+export default function TodoList() {
+  const [todos, setTodos] = useState([]);
+  const [input, setInput] = useState('');
+
+  // Add: spread existing + new item
+  const addTodo = () =&gt; {
+    if (!input.trim()) return;
+    setTodos(prev =&gt; [...prev, { id: Date.now(), text: input, done: false }]);
+    setInput('');
+  };
+  // Remove: filter creates a new array
+  const removeTodo = (id) =&gt; setTodos(prev =&gt; prev.filter(t =&gt; t.id !== id));
+  // Toggle: map creates a new array
+  const toggleTodo = (id) =&gt;
+    setTodos(prev =&gt; prev.map(t =&gt; t.id === id ? { ...t, done: !t.done } : t));
+
+  return (
+    &lt;div&gt;
+      &lt;input value={input} onChange={e =&gt; setInput(e.target.value)} /&gt;
+      &lt;button onClick={addTodo}&gt;Add&lt;/button&gt;
+      &lt;ul&gt;
+        {todos.map(t =&gt; (
+          &lt;li key={t.id}&gt;
+            &lt;span onClick={() =&gt; toggleTodo(t.id)}
+                  style={{ textDecoration: t.done ? 'line-through' : 'none' }}&gt;
+              {t.text}
+            &lt;/span&gt;
+            &lt;button onClick={() =&gt; removeTodo(t.id)}&gt;x&lt;/button&gt;
+          &lt;/li&gt;
+        ))}
+      &lt;/ul&gt;
+    &lt;/div&gt;
+  );
+}
+</pre></div></div></section>
+<section id="lift"><h2>Lifting state up</h2><p class="d">The parent holds the query. SearchBar writes it, ResultList reads it.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-lift"></div></div><div><h3>Source <span class="f">06-SearchPage.jsx</span></h3><pre>import { useState } from 'react';
+
+const FRUITS = ['Apple', 'Apricot', 'Banana', 'Cherry', 'Grape', 'Mango', 'Melon'];
+
+// Parent owns the state
+export default function SearchPage() {
+  const [query, setQuery] = useState('');
+  const results = FRUITS.filter(f =&gt; f.toLowerCase().includes(query.toLowerCase()));
+
+  return (
+    &lt;&gt;
+      {/* Child 1 triggers updates via callback */}
+      &lt;SearchBar onSearch={setQuery} /&gt;
+      {/* Child 2 reads state via props */}
+      &lt;ResultList query={query} results={results} /&gt;
+    &lt;/&gt;
+  );
+}
+
+function SearchBar({ onSearch }) {
+  const [input, setInput] = useState('');
+  return &lt;input value={input} placeholder="Search fruit" onChange={e =&gt; {
+    setInput(e.target.value);
+    onSearch(e.target.value);
+  }} /&gt;;
+}
+
+function ResultList({ query, results }) {
+  return (
+    &lt;div&gt;
+      &lt;p&gt;{results.length} result(s) for "{query}"&lt;/p&gt;
+      &lt;ul&gt;{results.map(r =&gt; &lt;li key={r}&gt;{r}&lt;/li&gt;)}&lt;/ul&gt;
+    &lt;/div&gt;
+  );
+}
+</pre></div></div></section>
+<section id="history"><h2>Code challenge: counter with history</h2><p class="d">A possible solution. Use Undo to step back through the last 5 values.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-history"></div></div><div><h3>Source <span class="f">07-CounterWithHistory.jsx</span></h3><pre>import { useState } from 'react';
+
+// Code challenge solution: two state variables, count + history
+export default function CounterWithHistory() {
+  const [count, setCount]     = useState(0);
+  const [history, setHistory] = useState([0]);
+
+  function change(next) {
+    setCount(next);
+    setHistory(h =&gt; [...h, next].slice(-5)); // keep last 5 values
+  }
+
+  function undo() {
+    if (history.length &lt; 2) return;
+    setCount(history[history.length - 2]);
+    setHistory(h =&gt; h.slice(0, -1));
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;{count}&lt;/h2&gt;
+      &lt;button onClick={() =&gt; change(count + 1)}&gt;+1&lt;/button&gt;
+      &lt;button onClick={() =&gt; change(count - 1)}&gt;-1&lt;/button&gt;
+      &lt;button onClick={() =&gt; change(0)}&gt;Reset&lt;/button&gt;
+      &lt;button onClick={undo}&gt;Undo&lt;/button&gt;
+      &lt;p&gt;History: [{history.join(', ')}]&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+</pre></div></div></section>
+
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script>
+function mount(id,C){ReactDOM.createRoot(document.getElementById('res-'+id)).render(React.createElement(C));}
+(function(){const {useState}=React;
+// This does NOT work: a regular variable is not state
+function CounterBug() {
+    let count = 0; // resets to 0 on every render
+    function handleClick() {
+        count++; // local variable, React does not know
+        document.getElementById('bug-log').textContent += count + ' ';
+    }
+    return (React.createElement("div", null,
+        React.createElement("p", null,
+            "Count: ",
+            count),
+        React.createElement("button", { onClick: handleClick }, "+1"),
+        React.createElement("p", null,
+            "console.log: ",
+            React.createElement("span", { id: "bug-log" }))));
+}
+
+mount('bug',CounterBug);})();
+(function(){const {useState}=React;
+
+// useState + functional updates
+function Counter() {
+    const [count, setCount] = useState(0);
+    const increment = () => setCount(prev => prev + 1);
+    const decrement = () => setCount(prev => prev - 1);
+    const reset = () => setCount(0);
+    // Stale: all three calls read the same old count
+    const addThreeStale = () => {
+        setCount(count + 1);
+        setCount(count + 1);
+        setCount(count + 1);
+    };
+    // Safe: each call gets the latest value
+    const addThreeSafe = () => {
+        setCount(p => p + 1);
+        setCount(p => p + 1);
+        setCount(p => p + 1);
+    };
+    return (React.createElement("div", null,
+        React.createElement("button", { onClick: decrement }, "-"),
+        React.createElement("span", null,
+            " ",
+            count,
+            " "),
+        React.createElement("button", { onClick: increment }, "+"),
+        React.createElement("button", { onClick: reset }, "Reset"),
+        React.createElement("p", null,
+            React.createElement("button", { onClick: addThreeStale }, "+3 (stale)"),
+            React.createElement("button", { onClick: addThreeSafe }, "+3 (functional)"))));
+}
+
+mount('counter',Counter);})();
+(function(){const {useState}=React;
+
+function UserForm() {
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [age, setAge] = useState(0);
+    const [submitted, setSubmitted] = useState(false);
+    function handleSubmit(e) {
+        e.preventDefault();
+        setSubmitted(true);
+    }
+    if (submitted) {
+        return React.createElement("p", null,
+            "Thanks, ",
+            name,
+            "! Email: ",
+            email,
+            ", Age: ",
+            age);
+    }
+    return (React.createElement("form", { onSubmit: handleSubmit },
+        React.createElement("input", { value: name, onChange: e => setName(e.target.value), placeholder: "Name" }),
+        React.createElement("input", { value: email, onChange: e => setEmail(e.target.value), placeholder: "Email" }),
+        React.createElement("input", { type: "number", value: age, onChange: e => setAge(e.target.value) }),
+        React.createElement("button", null, "Submit")));
+}
+
+mount('form',UserForm);})();
+(function(){const {useState}=React;
+
+function ProfileForm() {
+    const [user, setUser] = useState({ name: '', email: '', bio: '' });
+    // WRONG: user.name = 'Kim Minho'; setUser(user);  (same object)
+    // CORRECT: spread creates a new object
+    const handleChange = (field, value) => {
+        setUser(prev => ({ ...prev, [field]: value }));
+    };
+    return (React.createElement("form", null,
+        React.createElement("input", { value: user.name, onChange: e => handleChange('name', e.target.value) }),
+        React.createElement("input", { value: user.email, onChange: e => handleChange('email', e.target.value) }),
+        React.createElement("textarea", { value: user.bio, onChange: e => handleChange('bio', e.target.value) }),
+        React.createElement("pre", null, JSON.stringify(user, null, 2))));
+}
+
+mount('object',ProfileForm);})();
+(function(){const {useState}=React;
+
+function TodoList() {
+    const [todos, setTodos] = useState([]);
+    const [input, setInput] = useState('');
+    // Add: spread existing + new item
+    const addTodo = () => {
+        if (!input.trim())
+            return;
+        setTodos(prev => [...prev, { id: Date.now(), text: input, done: false }]);
+        setInput('');
+    };
+    // Remove: filter creates a new array
+    const removeTodo = (id) => setTodos(prev => prev.filter(t => t.id !== id));
+    // Toggle: map creates a new array
+    const toggleTodo = (id) => setTodos(prev => prev.map(t => t.id === id ? { ...t, done: !t.done } : t));
+    return (React.createElement("div", null,
+        React.createElement("input", { value: input, onChange: e => setInput(e.target.value) }),
+        React.createElement("button", { onClick: addTodo }, "Add"),
+        React.createElement("ul", null, todos.map(t => (React.createElement("li", { key: t.id },
+            React.createElement("span", { onClick: () => toggleTodo(t.id), style: { textDecoration: t.done ? 'line-through' : 'none' } }, t.text),
+            React.createElement("button", { onClick: () => removeTodo(t.id) }, "x")))))));
+}
+
+mount('todos',TodoList);})();
+(function(){const {useState}=React;
+
+const FRUITS = ['Apple', 'Apricot', 'Banana', 'Cherry', 'Grape', 'Mango', 'Melon'];
+// Parent owns the state
+function SearchPage() {
+    const [query, setQuery] = useState('');
+    const results = FRUITS.filter(f => f.toLowerCase().includes(query.toLowerCase()));
+    return (React.createElement(React.Fragment, null,
+        React.createElement(SearchBar, { onSearch: setQuery }),
+        React.createElement(ResultList, { query: query, results: results })));
+}
+function SearchBar({ onSearch }) {
+    const [input, setInput] = useState('');
+    return React.createElement("input", { value: input, placeholder: "Search fruit", onChange: e => {
+            setInput(e.target.value);
+            onSearch(e.target.value);
+        } });
+}
+function ResultList({ query, results }) {
+    return (React.createElement("div", null,
+        React.createElement("p", null,
+            results.length,
+            " result(s) for \"",
+            query,
+            "\""),
+        React.createElement("ul", null, results.map(r => React.createElement("li", { key: r }, r)))));
+}
+
+mount('lift',SearchPage);})();
+(function(){const {useState}=React;
+
+// Code challenge solution: two state variables, count + history
+function CounterWithHistory() {
+    const [count, setCount] = useState(0);
+    const [history, setHistory] = useState([0]);
+    function change(next) {
+        setCount(next);
+        setHistory(h => [...h, next].slice(-5)); // keep last 5 values
+    }
+    function undo() {
+        if (history.length < 2)
+            return;
+        setCount(history[history.length - 2]);
+        setHistory(h => h.slice(0, -1));
+    }
+    return (React.createElement("div", null,
+        React.createElement("h2", null, count),
+        React.createElement("button", { onClick: () => change(count + 1) }, "+1"),
+        React.createElement("button", { onClick: () => change(count - 1) }, "-1"),
+        React.createElement("button", { onClick: () => change(0) }, "Reset"),
+        React.createElement("button", { onClick: undo }, "Undo"),
+        React.createElement("p", null,
+            "History: [",
+            history.join(', '),
+            "]")));
+}
+
+mount('history',CounterWithHistory);})();
+
+</script></body></html>
