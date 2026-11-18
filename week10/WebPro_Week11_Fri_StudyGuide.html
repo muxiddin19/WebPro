@@ -167,17 +167,17 @@ li{margin-bottom:4px}
       </div>
       <p>React lets you describe what your UI should look like for a given state, and it handles updating the DOM efficiently when state changes.</p>
       <p><strong>JSX</strong> is a syntax extension that lets you write HTML-like markup inside JavaScript. It is compiled to <code>React.createElement()</code> calls by Babel/the bundler.</p>
-      <div class="code-block"><code>// JSX (what you write)
+      <div class="code-block"><pre><code>// JSX (what you write)
 const element = &lt;h1 className="title"&gt;Hello, {name}!&lt;/h1&gt;;
 
 // What it compiles to (you never write this)
 const element = React.createElement('h1', { className: 'title' }, 'Hello, ' + name + '!');
-</code></div>
+</code></pre></div>
       <div class="callout info">
         <div class="icon">💡</div>
         <p><strong>JSX differences from HTML:</strong> Use <code>className</code> instead of <code>class</code>, <code>htmlFor</code> instead of <code>for</code>, and self-close all void elements: <code>&lt;img /&gt;</code>, <code>&lt;input /&gt;</code>, <code>&lt;br /&gt;</code>.</p>
       </div>
-      <div class="code-block"><code>// JSX rules
+      <div class="code-block"><pre><code>// JSX rules
 function App() {
   const user = 'Amir';
   return (
@@ -189,7 +189,7 @@ function App() {
     &lt;/div&gt;
   );
 }
-</code></div>
+</code></pre></div>
     </div>
   </section>
 
@@ -197,7 +197,7 @@ function App() {
     <h2> <a href="https://muxiddin19.github.io/web_pro/week11/2.FunctionalComponents_Visualized.html">2. Functional Components</a></h2>
     <div class="concept">
       <p>A <strong>functional component</strong> is a JavaScript function that returns JSX. Component names must start with a capital letter.</p>
-      <div class="code-block"><code>// Minimal component — a plain JS function
+      <div class="code-block"><pre><code>// Minimal component — a plain JS function
 function Greeting() {
   return &lt;h2&gt;Hello, World!&lt;/h2&gt;;
 }
@@ -214,13 +214,13 @@ function App() {
     &lt;/div&gt;
   );
 }
-</code></div>
+</code></pre></div>
       <div class="callout warn">
         <div class="icon">⚠️</div>
         <p><strong>Capital letter matters:</strong> <code>&lt;greeting /&gt;</code> renders as a plain HTML element. <code>&lt;Greeting /&gt;</code> calls your function. Always capitalize component names.</p>
       </div>
       <h3>Component returning multiple elements</h3>
-      <div class="code-block"><code>// Use a Fragment &lt;&gt;...&lt;/&gt; to avoid an extra wrapper div
+      <div class="code-block"><pre><code>// Use a Fragment &lt;&gt;...&lt;/&gt; to avoid an extra wrapper div
 function UserCard() {
   return (
     &lt;&gt;
@@ -229,7 +229,7 @@ function UserCard() {
     &lt;/&gt;
   );
 }
-</code></div>
+</code></pre></div>
     </div>
   </section>
 
@@ -237,7 +237,7 @@ function UserCard() {
     <h2><a href="https://muxiddin19.github.io/web_pro/week11/3.Props_Visualized.html">3. Props — Passing Data</a></h2>
     <div class="concept">
       <p><strong>Props</strong> (short for properties) are the mechanism for passing data from a parent component to a child. They are read-only inside the child.</p>
-      <div class="code-block"><code>// Parent passes props like HTML attributes
+      <div class="code-block"><pre><code>// Parent passes props like HTML attributes
 function App() {
   return (
     &lt;div&gt;
@@ -266,9 +266,9 @@ function StudentCard({ name, year }) {
     &lt;/div&gt;
   );
 }
-</code></div>
+</code></pre></div>
       <h3>Default props</h3>
-      <div class="code-block"><code>// Default values via destructuring default syntax
+      <div class="code-block"><pre><code>// Default values via destructuring default syntax
 function Button({ label = 'Click me', color = 'blue', disabled = false }) {
   return (
     &lt;button style={{ background: color }} disabled={disabled}&gt;
@@ -281,9 +281,9 @@ function Button({ label = 'Click me', color = 'blue', disabled = false }) {
 &lt;Button /&gt;                            {/* label="Click me", color="blue" */}
 &lt;Button label="Submit" /&gt;             {/* color still "blue" */}
 &lt;Button label="Delete" color="red" /&gt; {/* custom both */}
-</code></div>
+</code></pre></div>
       <h3>props.children</h3>
-      <div class="code-block"><code>// Anything between opening and closing tags becomes props.children
+      <div class="code-block"><pre><code>// Anything between opening and closing tags becomes props.children
 function Panel({ title, children }) {
   return (
     &lt;div className="panel"&gt;
@@ -298,7 +298,7 @@ function Panel({ title, children }) {
   &lt;p&gt;React session today&lt;/p&gt;
   &lt;ul&gt;&lt;li&gt;Components&lt;/li&gt;&lt;li&gt;Props&lt;/li&gt;&lt;/ul&gt;
 &lt;/Panel&gt;
-</code></div>
+</code></pre></div>
     </div>
   </section>
 
@@ -306,7 +306,7 @@ function Panel({ title, children }) {
     <h2><a href="https://muxiddin19.github.io/web_pro/week11/4.ListsConditional_Visualized.html">4. Lists &amp; Conditional Rendering</a></h2>
     <div class="concept">
       <h3>Rendering lists with .map()</h3>
-      <div class="code-block"><code>const courses = [
+      <div class="code-block"><pre><code>const courses = [
   { id: 1, name: 'Web Programming', credits: 3 },
   { id: 2, name: 'Databases', credits: 3 },
   { id: 3, name: 'Algorithms', credits: 4 },
@@ -324,13 +324,13 @@ function CourseList() {
     &lt;/ul&gt;
   );
 }
-</code></div>
+</code></pre></div>
       <div class="callout warn">
         <div class="icon">⚠️</div>
         <p><strong>Always add key:</strong> React uses <code>key</code> to identify which items changed. Missing keys causes a console warning and potential rendering bugs. Use a stable unique ID, not the array index.</p>
       </div>
       <h3>Conditional rendering</h3>
-      <div class="code-block"><code>function UserGreeting({ isLoggedIn, username }) {
+      <div class="code-block"><pre><code>function UserGreeting({ isLoggedIn, username }) {
   // 1. Ternary — renders one of two options
   return (
     &lt;div&gt;
@@ -352,7 +352,7 @@ function Dashboard({ isAdmin }) {
   if (!isAdmin) return &lt;p&gt;Access denied&lt;/p&gt;;
   return &lt;AdminPanel /&gt;;
 }
-</code></div>
+</code></pre></div>
     </div>
   </section>
 
@@ -360,7 +360,7 @@ function Dashboard({ isAdmin }) {
     <h2><a href="https://muxiddin19.github.io/web_pro/week11/5.Composition_Visualized.html">5. Component Composition</a></h2>
     <div class="concept">
       <p>Build complex UIs by composing smaller, single-responsibility components. This keeps each component focused, testable, and reusable.</p>
-      <div class="code-block"><code>// Small, focused components
+      <div class="code-block"><pre><code>// Small, focused components
 function Avatar({ src, alt }) {
   return &lt;img src={src} alt={alt} style={{ borderRadius: '50%', width: 48 }} /&gt;;
 }
@@ -393,7 +393,7 @@ function App() {
     &lt;/div&gt;
   );
 }
-</code></div>
+</code></pre></div>
       <div class="callout tip">
         <div class="icon">✅</div>
         <p><strong>Single Responsibility Principle:</strong> Each component should do one thing. If a component grows too large, split it into smaller ones. <code>Avatar</code>, <code>Badge</code>, and <code>StudentCard</code> each have a clear, narrow job.</p>
