@@ -140,7 +140,8 @@ li{margin-bottom:4px}
   <section id="usestate-syntax">
     <h2>2. useState Syntax</h2>
     <div class="concept">
-      <div class="code-block"><code>import { useState } from 'react';
+      
+      <div class="code-block"><pre><code>import { useState } from 'react';
 
 function Counter() {
   // useState returns [currentValue, setterFunction]
@@ -156,26 +157,26 @@ function Counter() {
     &lt;/div&gt;
   );
 }
-</code></div>
+</code></pre></div>
       <div class="callout warn">
         <div class="icon">⚠️</div>
         <p><strong>Never call useState inside loops, conditions, or nested functions.</strong> Hooks must be called at the top level of your component, in the same order every render. This is "the Rules of Hooks".</p>
       </div>
 
       <h3>Initial state types</h3>
-      <div class="code-block"><code>const [count,  setCount]  = useState(0);           // number
+      <div class="code-block"><pre><code>const [count,  setCount]  = useState(0);           // number
 const [name,   setName]   = useState('');           // string
 const [isOpen, setIsOpen] = useState(false);        // boolean
 const [items,  setItems]  = useState([]);           // array
 const [user,   setUser]   = useState(null);         // null
 const [form,   setForm]   = useState({ name: '', email: '' }); // object
-</code></div>
+</code></pre></div>
 
       <h3>Lazy initial state (for expensive computation)</h3>
-      <div class="code-block"><code>// If initial value is expensive to compute, pass a FUNCTION
+      <div class="code-block"><pre><code>// If initial value is expensive to compute, pass a FUNCTION
 // (the function runs only once on mount, not every render)
 const [data, setData] = useState(() =&gt; expensiveComputation());
-</code></div>
+</code></pre></div>
     </div>
   </section>
 
@@ -183,7 +184,7 @@ const [data, setData] = useState(() =&gt; expensiveComputation());
     <h2>3. Updating State — Rules</h2>
     <div class="concept">
       <h3>Rule 1: Never mutate state directly</h3>
-      <div class="code-block"><code>// ❌ WRONG — mutating state directly does NOT trigger re-render
+      <div class="code-block"><pre><code>// ❌ WRONG — mutating state directly does NOT trigger re-render
 count++;
 state.name = 'Amir';
 items.push('new item');
@@ -192,10 +193,10 @@ items.push('new item');
 setCount(count + 1);
 setName('Amir');
 setItems([...items, 'new item']); // create a NEW array
-</code></div>
+</code></pre></div>
 
       <h3>Rule 2: Updating objects — spread to copy first</h3>
-      <div class="code-block"><code>const [user, setUser] = useState({ name: 'Amir', age: 20, city: 'Tashkent' });
+      <div class="code-block"><pre><code>const [user, setUser] = useState({ name: 'Amir', age: 20, city: 'Tashkent' });
 
 // ❌ WRONG — mutates the object
 user.age = 21;
@@ -204,10 +205,10 @@ setUser(user); // React sees the same object reference — no re-render!
 // ✅ CORRECT — spread to create a NEW object, override what changed
 setUser({ ...user, age: 21 });
 // Result: { name: 'Amir', age: 21, city: 'Tashkent' }
-</code></div>
+</code></pre></div>
 
       <h3>Rule 3: Updating arrays — use non-mutating methods</h3>
-      <div class="code-block"><code>const [items, setItems] = useState(['HTML', 'CSS']);
+      <div class="code-block"><pre><code>const [items, setItems] = useState(['HTML', 'CSS']);
 
 // Add item
 setItems([...items, 'JavaScript']); // spread + append
@@ -218,14 +219,14 @@ setItems(items.filter(item =&gt; item !== 'CSS'));
 
 // Update item
 setItems(items.map(item =&gt; item === 'HTML' ? 'HTML5' : item));
-</code></div>
+</code></pre></div>
 
       <h3>Functional updates (when new state depends on previous)</h3>
-      <div class="code-block"><code>// If new state depends on old, use the callback form of the setter
+      <div class="code-block"><pre><code>// If new state depends on old, use the callback form of the setter
 // This guarantees you get the LATEST state, not a stale closure
 setCount(prevCount =&gt; prevCount + 1); // ✅ safe
 setCount(count + 1);                   // ⚠️ can be stale in async contexts
-</code></div>
+</code></pre></div>
     </div>
   </section>
 
@@ -233,7 +234,7 @@ setCount(count + 1);                   // ⚠️ can be stale in async contexts
     <h2>4. Multiple State Variables</h2>
     <div class="concept">
       <p>You can call <code>useState</code> as many times as you need. Each call tracks a separate piece of state.</p>
-      <div class="code-block"><code>function RegistrationForm() {
+      <div class="code-block"><pre><code>function RegistrationForm() {
   const [name,     setName]     = useState('');
   const [email,    setEmail]    = useState('');
   const [isSubmit, setIsSubmit] = useState(false);
@@ -266,7 +267,7 @@ setCount(count + 1);                   // ⚠️ can be stale in async contexts
     &lt;/form&gt;
   );
 }
-</code></div>
+</code></pre></div>
     </div>
   </section>
 
@@ -274,7 +275,7 @@ setCount(count + 1);                   // ⚠️ can be stale in async contexts
     <h2>5. Lifting State Up</h2>
     <div class="concept">
       <p>When two sibling components need to share state, <strong>lift the state up</strong> to their nearest common parent. The parent holds the state and passes it down via props, along with setter callbacks.</p>
-      <div class="code-block"><code>// Parent holds shared state
+      <div class="code-block"><pre><code>// Parent holds shared state
 function TemperatureApp() {
   const [celsius, setCelsius] = useState(0);
   const fahrenheit = celsius * 9/5 + 32;
@@ -301,7 +302,7 @@ function CelsiusInput({ value, onChange }) {
     &lt;/label&gt;
   );
 }
-</code></div>
+</code></pre></div>
       <div class="callout tip">
         <div class="icon">✅</div>
         <p><strong>One-way data flow:</strong> State flows <em>down</em> as props; events flow <em>up</em> as callbacks. This makes React apps predictable — you always know where data comes from.</p>
