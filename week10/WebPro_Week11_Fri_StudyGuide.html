@@ -408,7 +408,7 @@ function App() {
       <summary>Exercise 1 — Build a ProfileCard component</summary>
       <div class="exercise-body">
         <p><strong>Task:</strong> Create a <code>ProfileCard</code> component that accepts <code>name</code>, <code>role</code>, <code>email</code>, and optional <code>avatarUrl</code> (default: a placeholder image). Render a card showing all four fields. Use default prop for <code>avatarUrl</code>.</p>
-        <div class="code-block"><code>function ProfileCard({ name, role, email, avatarUrl = 'https://via.placeholder.com/80' }) {
+        <div class="code-block"><pre><code>function ProfileCard({ name, role, email, avatarUrl = 'https://via.placeholder.com/80' }) {
   return (
     &lt;div style={{ border: '1px solid #ccc', borderRadius: 8, padding: 16, maxWidth: 300 }}&gt;
       &lt;img src={avatarUrl} alt={name} style={{ borderRadius: '50%', width: 80 }} /&gt;
@@ -425,7 +425,7 @@ function App() {
   role="Professor"
   email="muhiddin@gachon.ac.kr"
 /&gt;
-</code></div>
+</code></pre></div>
       </div>
     </details>
 
@@ -433,7 +433,7 @@ function App() {
       <summary>Exercise 2 — Render a list of notifications</summary>
       <div class="exercise-body">
         <p><strong>Task:</strong> Given an array of notification objects <code>[{ id, type, message }]</code>, render each as a styled item. Show a checkmark icon for <code>type === 'success'</code>, a warning icon for <code>type === 'warning'</code>, and a default icon otherwise. Use conditional rendering.</p>
-        <div class="code-block"><code>const notifications = [
+        <div class="code-block"><pre><code>const notifications = [
   { id: 1, type: 'success', message: 'Profile updated successfully' },
   { id: 2, type: 'warning', message: 'Password expires in 3 days' },
   { id: 3, type: 'info',    message: 'New lecture materials available' },
@@ -455,7 +455,7 @@ function NotificationList() {
     &lt;/ul&gt;
   );
 }
-</code></div>
+</code></pre></div>
       </div>
     </details>
 
@@ -463,7 +463,7 @@ function NotificationList() {
       <summary>Exercise 3 — Layout with props.children</summary>
       <div class="exercise-body">
         <p><strong>Task:</strong> Create a reusable <code>Card</code> component that accepts a <code>title</code> prop and renders any <code>children</code> inside a styled box. Use it to wrap two different content sections.</p>
-        <div class="code-block"><code>function Card({ title, children }) {
+        <div class="code-block"><pre><code>function Card({ title, children }) {
   return (
     &lt;div style={{
       border: '1px solid #bae6fd',
@@ -488,7 +488,7 @@ function NotificationList() {
 &lt;Card title="Homework"&gt;
   &lt;p&gt;Build a student portfolio component&lt;/p&gt;
 &lt;/Card&gt;
-</code></div>
+</code></pre></div>
       </div>
     </details>
   </section>
