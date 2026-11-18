@@ -317,7 +317,7 @@ function CelsiusInput({ value, onChange }) {
       <summary>Exercise 1 — Toggle visibility</summary>
       <div class="exercise-body">
         <p><strong>Task:</strong> Build a component with a button labeled "Show details" / "Hide details". When clicked, toggle the visibility of a paragraph of text using boolean state.</p>
-        <div class="code-block"><code>function ToggleDetail() {
+        <div class="code-block"><pre><code>function ToggleDetail() {
   const [isVisible, setIsVisible] = useState(false);
 
   return (
@@ -331,7 +331,7 @@ function CelsiusInput({ value, onChange }) {
     &lt;/div&gt;
   );
 }
-</code></div>
+</code></pre></div>
       </div>
     </details>
 
@@ -339,7 +339,7 @@ function CelsiusInput({ value, onChange }) {
       <summary>Exercise 2 — Add &amp; remove items from a list</summary>
       <div class="exercise-body">
         <p><strong>Task:</strong> Build a component with a text input and "Add" button. Items typed in the input are added to an array stored in state. Each item has a "✕" button that removes it from the list.</p>
-        <div class="code-block"><code>function TaskList() {
+        <div class="code-block"><pre><code>function TaskList() {
   const [tasks, setTasks] = useState([]);
   const [input, setInput] = useState('');
 
@@ -368,7 +368,7 @@ function CelsiusInput({ value, onChange }) {
     &lt;/div&gt;
   );
 }
-</code></div>
+</code></pre></div>
       </div>
     </details>
 
@@ -376,7 +376,7 @@ function CelsiusInput({ value, onChange }) {
       <summary>Exercise 3 — Lift state between two counters</summary>
       <div class="exercise-body">
         <p><strong>Task:</strong> Create a parent <code>ScoreBoard</code> with two <code>PlayerScore</code> children. Each player has increment/decrement buttons. The parent shows the total score of both players combined.</p>
-        <div class="code-block"><code>function PlayerScore({ name, score, onIncrement, onDecrement }) {
+        <div class="code-block"><pre><code>function PlayerScore({ name, score, onIncrement, onDecrement }) {
   return (
     &lt;div&gt;
       &lt;h3&gt;{name}: {score}&lt;/h3&gt;
@@ -402,7 +402,7 @@ function ScoreBoard() {
     &lt;/div&gt;
   );
 }
-</code></div>
+</code></pre></div>
       </div>
     </details>
   </section>
