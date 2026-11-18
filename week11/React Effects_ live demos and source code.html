@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>React Effects: live demos and source code</title>
+<style>
+:root{--bg:#f6f7f9;--sf:#fff;--fg:#1f2933;--mu:#5f6b7a;--bd:#d9dee5;--ac:#2f5d8a;--codebg:#0b1526;--codefg:#dbe6f5;--btn:#2f5d8a;--btnfg:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14181d;--sf:#1d232b;--fg:#e8edf2;--mu:#9aa6b4;--bd:#2d3641;--ac:#6fa3d6;--btn:#6fa3d6;--btnfg:#10151b}}
+:root[data-theme="dark"]{--bg:#14181d;--sf:#1d232b;--fg:#e8edf2;--mu:#9aa6b4;--bd:#2d3641;--ac:#6fa3d6;--btn:#6fa3d6;--btnfg:#10151b}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + .5rem);scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:70rem;margin:0 auto;padding:1.5rem 1.25rem 14rem}
+h1{margin:0 0 .25rem;font-size:1.6rem}.sub{color:var(--mu);margin:0 0 .75rem}
+.bar{display:flex;flex-wrap:wrap;gap:1rem;align-items:center;margin-bottom:.75rem;color:var(--mu);font-size:.9rem}
+nav{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem}
+nav a{padding:.35rem .8rem;border:1px solid var(--bd);border-radius:999px;background:var(--sf);color:var(--ac);text-decoration:none;font-size:.9rem}
+section{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:1.25rem;margin-bottom:1.25rem}
+section h2{margin:0 0 .25rem;font-size:1.2rem}.d{color:var(--mu);margin:0 0 1rem}
+.grid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(19rem,1fr))}
+h3{margin:0 0 .5rem;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--mu)}.f{text-transform:none;letter-spacing:0;color:var(--ac)}
+.res{border:1px dashed var(--bd);border-radius:10px;padding:1rem;min-height:6rem}
+pre{margin:0;background:var(--codebg);color:var(--codefg);border-radius:10px;padding:1rem;font-size:.76rem;line-height:1.5;overflow-x:auto;max-height:28rem}
+button{padding:.4rem .9rem;margin:.15rem;border:0;border-radius:8px;background:var(--btn);color:var(--btnfg);font:inherit;cursor:pointer}
+input:not([type=checkbox]),textarea{padding:.4rem .6rem;margin:.15rem;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--fg);font:inherit;max-width:100%}
+label{margin-right:.5rem}
+#dock{position:fixed;left:0;right:0;bottom:0;background:#0b1526;color:#dbe6f5;border-top:2px solid #1fb5d1;padding-bottom:env(safe-area-inset-bottom,0px);z-index:20}
+#dock .hd{display:flex;align-items:center;gap:.75rem;padding:.35rem .9rem;font-size:.8rem;color:#9fb4d3}
+#dock .hd b{color:#fff}#dock button{padding:.15rem .6rem;font-size:.75rem;background:#1fb5d1;color:#0b1526}
+#log{margin:0;height:7.5rem;overflow:auto;padding:.25rem .9rem .5rem;font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap}
+#log .net{color:#7dd3fc}#log .err{color:#f28b82}#log .ok{color:#7ddba3}</style></head><body><main>
+<h1>React Effects: live demos and source code</h1>
+<p class="sub">Week 12 · Friday · Web Programming K0126_002. Each demo is the code from the slides, running for real against a simulated API (this page cannot reach external servers).</p>
+<div class="bar"><label><input type="checkbox" onchange="setStrict(this.checked)"> Strict Mode (development double-invoke)</label><span>Open the Console at the bottom while you try each demo.</span></div>
+<nav><a href="#syntax">useEffect syntax</a><a href="#deps">The three dependency patterns</a><a href="#fetch">Fetching data on mount</a><a href="#async">async/await inside an effect</a><a href="#clock">Cleanup</a><a href="#abort">Cleanup</a><a href="#lookup">Code challenge</a><a href="#race">Race condition and the fix</a><a href="#persist">localStorage persistence</a><a href="#title">Document title sync</a><a href="#loop">Gotcha</a><a href="#derived">You might not need an effect</a><a href="#weather">Homework starter</a></nav>
+<section id="syntax"><h2>useEffect syntax: mount and cleanup</h2><p class="d">Open the Console below, then press Unmount and Mount. Tick “Strict Mode” at the top to see development double-invocation.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-syntax"></div></div><div><h3>Source <span class="f">01-EffectSyntax.jsx</span></h3><pre>import { useState, useEffect } from 'react';
+
+function MyComponent() {
+  const [data, setData] = useState(null);
+
+  useEffect(() =&gt; {
+    // Runs after the first render (empty dependency array)
+    console.log('Component rendered!');
+
+    // Optional: return a cleanup function
+    return () =&gt; {
+      console.log('Cleanup before next run or unmount');
+    };
+  }, []);
+
+  return &lt;div&gt;{JSON.stringify(data)}&lt;/div&gt;;
+}
+
+// Demo wrapper: mount and unmount the component
+export default function Demo() {
+  const [shown, setShown] = useState(true);
+  return (
+    &lt;div&gt;
+      &lt;button onClick={() =&gt; setShown(s =&gt; !s)}&gt;{shown ? 'Unmount' : 'Mount'}&lt;/button&gt;
+      {shown &amp;&amp; &lt;MyComponent /&gt;}
+    &lt;/div&gt;
+  );
+}
+</pre></div></div></section>
+<section id="deps"><h2>The three dependency patterns</h2><p class="d">Compare which effects log when you change val and when you only re-render.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-deps"></div></div><div><h3>Source <span class="f">02-DependencyPatterns.jsx</span></h3><pre>import { useState, useEffect } from 'react';
+
+function RunsOnce() {
+  useEffect(() =&gt; { console.log('[]     -&gt; ran once after mount'); }, []);
+  return &lt;p&gt;[] : once after mount&lt;/p&gt;;
+}
+
+function RunsOnChange({ val }) {
+  useEffect(() =&gt; { console.log('[val]  -&gt; ran, val =', val); }, [val]);
+  return &lt;p&gt;[val] : when val changes&lt;/p&gt;;
+}
+
+function RunsEveryRender() {
+  // No dependency array: usually a bug
+  useEffect(() =&gt; { console.log('(none) -&gt; ran after EVERY render'); });
+  return &lt;p&gt;(none) : after every render&lt;/p&gt;;
+}
+
+export default function DependencyPatterns() {
+  const [val, setVal]   = useState(0);
+  const [tick, setTick] = useState(0);
+  return (
+    &lt;div&gt;
+      &lt;button onClick={() =&gt; setVal(v =&gt; v + 1)}&gt;val++ (changes val)&lt;/button&gt;
+      &lt;button onClick={() =&gt; setTick(t =&gt; t + 1)}&gt;re-render (val unchanged)&lt;/button&gt;
+      &lt;p&gt;val = {val}, extra renders = {tick}&lt;/p&gt;
+      &lt;RunsOnce /&gt;
+      &lt;RunsOnChange val={val} /&gt;
+      &lt;RunsEveryRender /&gt;
+    &lt;/div&gt;
+  );
+}
+</pre></div></div></section>
+<section id="fetch"><h2>Fetching data on mount</h2><p class="d">Change userId: the effect re-runs. userId 99 triggers the error branch.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-fetch"></div></div><div><h3>Source <span class="f">03-UserProfile.jsx</span></h3><pre>import { useState, useEffect } from 'react';
+
+export function UserProfile({ userId }) {
+  const [user, setUser]       = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState(null);
+
+  useEffect(() =&gt; {
+    setLoading(true);
+    setError(null);
+    fetch(`https://api.example.com/users/${userId}`)
+      .then(res =&gt; {
+        if (!res.ok) throw new Error('User not found');
+        return res.json();
+      })
+      .then(data =&gt; { setUser(data); setLoading(false); })
+      .catch(err  =&gt; { setError(err.message); setLoading(false); });
+  }, [userId]);       // re-fetch when userId prop changes
+
+  if (loading) return &lt;p&gt;Loading...&lt;/p&gt;;
+  if (error)   return &lt;p&gt;Error: {error}&lt;/p&gt;;
+  return &lt;h2&gt;{user?.name}&lt;/h2&gt;;
+}
+
+// Demo wrapper: change the userId prop
+export default function Demo() {
+  const [id, setId] = useState(1);
+  return (
+    &lt;div&gt;
+      {[1, 2, 3, 99].map(n =&gt; (
+        &lt;button key={n} onClick={() =&gt; setId(n)}&gt;userId {n}&lt;/button&gt;
+      ))}
+      &lt;UserProfile userId={id} /&gt;
+    &lt;/div&gt;
+  );
+}
+</pre></div></div></section>
+<section id="async"><h2>async/await inside an effect</h2><p class="d">The async function is defined inside the effect and called immediately.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-async"></div></div><div><h3>Source <span class="f">04-AsyncEffect.jsx</span></h3><pre>import { useState, useEffect } from 'react';
+
+export default function AsyncEffect() {
+  const [user, setUser]       = useState(null);
+  const [error, setError]     = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // WRONG: useEffect(async () =&gt; { ... }, [])
+  //   an async callback returns a Promise, but useEffect
+  //   expects undefined or a cleanup function
+
+  // CORRECT: define the async function inside and call it
+  useEffect(() =&gt; {
+    async function fetchData() {
+      try {
+        const res  = await fetch('https://api.github.com/users/muxiddin19');
+        const data = await res.json();
+        setUser(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+    // No return needed here unless we have cleanup
+  }, []);
+
+  if (loading) return &lt;p&gt;Loading...&lt;/p&gt;;
+  if (error)   return &lt;p&gt;Error: {error}&lt;/p&gt;;
+  return &lt;p&gt;{user.login}: {user.name}&lt;/p&gt;;
+}
+</pre></div></div></section>
+<section id="clock"><h2>Cleanup: timer</h2><p class="d">Mount LeakyClock, then Unmount: the console keeps logging ticks. LiveClock stops cleanly.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-clock"></div></div><div><h3>Source <span class="f">05-LiveClock.jsx</span></h3><pre>import { useState, useEffect } from 'react';
+
+function LiveClock() {
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() =&gt; {
+    const intervalId = setInterval(() =&gt; {
+      setTime(new Date());
+    }, 1000);
+
+    // CORRECT: return cleanup, stop the timer when the component unmounts
+    return () =&gt; clearInterval(intervalId);
+  }, []);    // empty: start once on mount, cleanup on unmount
+
+  return &lt;p&gt;{time.toLocaleTimeString('ko-KR')}&lt;/p&gt;;
+}
+
+// WRONG: no cleanup. The interval keeps running after unmount.
+// (This copy stops itself after 10 ticks so the demo stays safe.)
+function LeakyClock() {
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() =&gt; {
+    let n = 0;
+    const id = setInterval(() =&gt; {
+      console.log('leaky tick #' + (++n) + ' (component may already be gone)');
+      setTime(new Date());
+      if (n &gt;= 10) clearInterval(id);
+    }, 1000);
+  }, []);
+
+  return &lt;p&gt;{time.toLocaleTimeString('ko-KR')}&lt;/p&gt;;
+}
+
+// Demo wrapper
+export default function Demo() {
+  const [mode, setMode] = useState('none');
+  return (
+    &lt;div&gt;
+      &lt;button onClick={() =&gt; setMode('good')}&gt;Mount LiveClock&lt;/button&gt;
+      &lt;button onClick={() =&gt; setMode('leaky')}&gt;Mount LeakyClock&lt;/button&gt;
+      &lt;button onClick={() =&gt; setMode('none')}&gt;Unmount&lt;/button&gt;
+      {mode === 'good'  &amp;&amp; &lt;LiveClock /&gt;}
+      {mode === 'leaky' &amp;&amp; &lt;LeakyClock /&gt;}
+    &lt;/div&gt;
+  );
+}
+</pre></div></div></section>
+<section id="abort"><h2>Cleanup: AbortController</h2><p class="d">Type quickly in the box and watch the console: earlier requests are aborted.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-abort"></div></div><div><h3>Source <span class="f">06-AbortFetch.jsx</span></h3><pre>import { useState, useEffect } from 'react';
+
+export function UserCard({ username }) {
+  const [user, setUser]   = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() =&gt; {
+    const controller = new AbortController();
+    setError(null);
+
+    async function fetchUser() {
+      try {
+        const res = await fetch(
+          `https://api.github.com/users/${username}`,
+          { signal: controller.signal }   // link to controller
+        );
+        if (!res.ok) throw new Error('User not found');
+        const data = await res.json();
+        setUser(data);
+      } catch (err) {
+        if (err.name === 'AbortError') {            // ignore cancelled requests
+          console.log('aborted request for', username);
+          return;
+        }
+        setError(err.message);
+      }
+    }
+    fetchUser();
+
+    // Cancel the in-flight request if username changes
+    return () =&gt; controller.abort();
+  }, [username]);
+
+  if (error) return &lt;p&gt;Error: {error}&lt;/p&gt;;
+  return &lt;p&gt;{user ? user.login + ' / ' + user.name : 'Loading...'}&lt;/p&gt;;
+}
+
+// Demo wrapper: type to change the username
+export default function Demo() {
+  const [name, setName] = useState('react-learner');
+  return (
+    &lt;div&gt;
+      &lt;input value={name} onChange={e =&gt; setName(e.target.value)} /&gt;
+      &lt;UserCard username={name} /&gt;
+    &lt;/div&gt;
+  );
+}
+</pre></div></div></section>
+<section id="lookup"><h2>Code challenge: GitHub user lookup (solution)</h2><p class="d">Try “react-learner”, then “nobody-here” (a 404).</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-lookup"></div></div><div><h3>Source <span class="f">07-GitHubUserLookup.jsx</span></h3><pre>import { useState, useEffect } from 'react';
+
+// Code challenge: one possible solution
+export default function GitHubUserLookup() {
+  const [input, setInput]       = useState('');
+  const [username, setUsername] = useState('');   // set when Search is clicked
+  const [user, setUser]         = useState(null);
+  const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState(null);
+
+  useEffect(() =&gt; {
+    if (!username) return;
+    const controller = new AbortController();   // BONUS: abort previous request
+    setLoading(true); setError(null); setUser(null);
+
+    fetch(`https://api.github.com/users/${username}`, { signal: controller.signal })
+      .then(res =&gt; {
+        if (res.status === 404) throw new Error('User not found (404)');
+        if (!res.ok) throw new Error('Request failed: ' + res.status);
+        return res.json();
+      })
+      .then(data =&gt; { setUser(data); setLoading(false); })
+      .catch(err =&gt; {
+        if (err.name === 'AbortError') return;
+        setError(err.message); setLoading(false);
+      });
+
+    return () =&gt; controller.abort();
+  }, [username]);
+
+  return (
+    &lt;div&gt;
+      &lt;input value={input} placeholder="GitHub username"
+             onChange={e =&gt; setInput(e.target.value)} /&gt;
+      &lt;button onClick={() =&gt; setUsername(input.trim())}&gt;Search&lt;/button&gt;
+
+      {loading &amp;&amp; &lt;p&gt;Loading...&lt;/p&gt;}
+      {error &amp;&amp; &lt;p style={{ color: 'crimson' }}&gt;{error}&lt;/p&gt;}
+      {user &amp;&amp; (
+        &lt;div&gt;
+          &lt;img src={user.avatar_url} alt="" width="64" height="64" /&gt;
+          &lt;h3&gt;{user.name || user.login}&lt;/h3&gt;
+          &lt;p&gt;{user.bio}&lt;/p&gt;
+          &lt;p&gt;{user.followers} followers · {user.public_repos} public repos&lt;/p&gt;
+          &lt;a href={user.html_url}&gt;{user.html_url}&lt;/a&gt;
+        &lt;/div&gt;
+      )}
+    &lt;/div&gt;
+  );
+}
+</pre></div></div></section>
+<section id="race"><h2>Race condition and the fix</h2><p class="d">Type “abcdef” quickly with the checkbox off, then on. Compare the result shown.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-race"></div></div><div><h3>Source <span class="f">12-RaceCondition.jsx</span></h3><pre>import { useState, useEffect } from 'react';
+
+// In this demo, requests for SHORTER names are slower, so responses
+// arrive out of order when you type quickly.
+export default function RaceCondition() {
+  const [query, setQuery]   = useState('');
+  const [result, setResult] = useState('');
+  const [safe, setSafe]     = useState(false);
+
+  useEffect(() =&gt; {
+    if (!query) return;
+    const controller = new AbortController();
+
+    fetch(`https://api.github.com/users/${query}`,
+          { signal: safe ? controller.signal : undefined })
+      .then(res =&gt; res.json())
+      .then(data =&gt; setResult(data.login))
+      .catch(err =&gt; { if (err.name !== 'AbortError') console.log(err.message); });
+
+    // SAFE mode: cancel the previous request when query changes
+    return safe ? () =&gt; controller.abort() : undefined;
+  }, [query, safe]);
+
+  return (
+    &lt;div&gt;
+      &lt;label&gt;
+        &lt;input type="checkbox" checked={safe} onChange={e =&gt; setSafe(e.target.checked)} /&gt;
+        {' '}Abort previous request (the fix)
+      &lt;/label&gt;
+      &lt;p&gt;&lt;input value={query} placeholder="type slowly, then quickly: abcdef"
+                onChange={e =&gt; setQuery(e.target.value)} /&gt;&lt;/p&gt;
+      &lt;p&gt;You typed: &lt;b&gt;{query || '-'}&lt;/b&gt;&lt;/p&gt;
+      &lt;p&gt;Result shown for: &lt;b style={{ color: result &amp;&amp; result !== query ? 'crimson' : 'inherit' }}&gt;
+        {result || '-'}&lt;/b&gt; {result &amp;&amp; result !== query &amp;&amp; ' (stale!)'}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+</pre></div></div></section>
+<section id="persist"><h2>localStorage persistence</h2><p class="d">Toggle the theme, then reload the page: the choice is remembered (this page’s own theme changes too).</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-persist"></div></div><div><h3>Source <span class="f">08-ThemeToggle.jsx</span></h3><pre>import { useState, useEffect } from 'react';
+
+export default function ThemeToggle() {
+  // Read once at mount (lazy initializer form)
+  const [theme, setTheme] = useState(
+    () =&gt; localStorage.getItem('theme') || 'light'
+  );
+
+  // Write whenever theme changes
+  useEffect(() =&gt; {
+    localStorage.setItem('theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  return (
+    &lt;button onClick={() =&gt; setTheme(t =&gt; t === 'light' ? 'dark' : 'light')}&gt;
+      Current: {theme} — Click to toggle
+    &lt;/button&gt;
+  );
+}
+</pre></div></div></section>
+<section id="title"><h2>Document title sync</h2><p class="d">The effect updates document.title each time count changes (see the console).</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-title"></div></div><div><h3>Source <span class="f">09-DocumentTitle.jsx</span></h3><pre>import { useState, useEffect } from 'react';
+
+export default function Inbox() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() =&gt; {
+    document.title = `Inbox (${count})`;
+    console.log('document.title is now', document.title);
+  }, [count]);
+
+  return (
+    &lt;div&gt;
+      &lt;p&gt;Unread messages: {count}&lt;/p&gt;
+      &lt;button onClick={() =&gt; setCount(c =&gt; c + 1)}&gt;New message&lt;/button&gt;
+      &lt;button onClick={() =&gt; setCount(0)}&gt;Mark all read&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+</pre></div></div></section>
+<section id="loop"><h2>Gotcha: infinite loop</h2><p class="d">BadLoop is stopped by a safety guard after 8 runs. FixedOnce runs a single time.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-loop"></div></div><div><h3>Source <span class="f">10-InfiniteLoopGuarded.jsx</span></h3><pre>import { useState, useEffect, useRef } from 'react';
+
+// BAD: setState inside the effect + that same state in the dependency array
+function BadLoop() {
+  const [count, setCount] = useState(0);
+  const runs = useRef(0);
+
+  useEffect(() =&gt; {
+    runs.current += 1;
+    // Safety guard so this demo cannot freeze the page
+    if (runs.current &gt; 8) { console.log('safety stop: this loop would never end'); return; }
+    console.log('effect run #' + runs.current + ', count =', count);
+    setCount(count + 1);          // changes count -&gt; effect runs again
+  }, [count]);
+
+  return &lt;p&gt;BadLoop count = {count}&lt;/p&gt;;
+}
+
+// FIX: functional update with an empty dependency array
+function FixedOnce() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() =&gt; {
+    setCount(c =&gt; c + 1);
+    console.log('FixedOnce effect ran');
+  }, []);
+
+  return &lt;p&gt;FixedOnce count = {count}&lt;/p&gt;;
+}
+
+// Demo wrapper
+export default function Demo() {
+  const [which, setWhich] = useState('none');
+  return (
+    &lt;div&gt;
+      &lt;button onClick={() =&gt; setWhich('bad')}&gt;Run BadLoop&lt;/button&gt;
+      &lt;button onClick={() =&gt; setWhich('fixed')}&gt;Run FixedOnce&lt;/button&gt;
+      &lt;button onClick={() =&gt; setWhich('none')}&gt;Unmount&lt;/button&gt;
+      {which === 'bad'   &amp;&amp; &lt;BadLoop /&gt;}
+      {which === 'fixed' &amp;&amp; &lt;FixedOnce /&gt;}
+    &lt;/div&gt;
+  );
+}
+</pre></div></div></section>
+<section id="derived"><h2>You might not need an effect</h2><p class="d">Type in either box and compare the render counters.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-derived"></div></div><div><h3>Source <span class="f">11-DerivedState.jsx</span></h3><pre>import { useState, useEffect, useRef } from 'react';
+
+// Unnecessary effect: extra state and an extra render
+function WithEffect({ first, last }) {
+  const renders = useRef(0); renders.current += 1;   // demo counter only
+  const [fullName, setFullName] = useState('');
+  useEffect(() =&gt; { setFullName(first + ' ' + last); }, [first, last]);
+  return &lt;p&gt;WithEffect: {fullName} (renders: {renders.current})&lt;/p&gt;;
+}
+
+// Better: derive the value while rendering
+function Derived({ first, last }) {
+  const renders = useRef(0); renders.current += 1;   // demo counter only
+  const fullName = first + ' ' + last;
+  return &lt;p&gt;Derived: {fullName} (renders: {renders.current})&lt;/p&gt;;
+}
+
+export default function Demo() {
+  const [first, setFirst] = useState('Kim');
+  const [last, setLast]   = useState('Minho');
+  return (
+    &lt;div&gt;
+      &lt;input value={first} onChange={e =&gt; setFirst(e.target.value)} /&gt;
+      &lt;input value={last}  onChange={e =&gt; setLast(e.target.value)} /&gt;
+      &lt;WithEffect first={first} last={last} /&gt;
+      &lt;Derived first={first} last={last} /&gt;
+    &lt;/div&gt;
+  );
+}
+</pre></div></div></section>
+<section id="weather"><h2>Homework starter: Weather dashboard</h2><p class="d">Change latitude or longitude. Try latitude 120 to see the error state.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-weather"></div></div><div><h3>Source <span class="f">13-WeatherStarter.jsx</span></h3><pre>import { useState, useEffect } from 'react';
+
+// Homework starter: Weather Dashboard (Open-Meteo, no API key)
+// TODO 1: let the user type a CITY name and look up coordinates
+//         (https://geocoding-api.open-meteo.com/v1/search?name=Seoul)
+// TODO 2: map weather_code to a description ("Clear", "Rain", ...)
+// TODO 3: BONUS: use navigator.geolocation for the first coordinates
+export default function WeatherStarter() {
+  const [lat, setLat]         = useState(37.46);
+  const [lon, setLon]         = useState(127.01);
+  const [weather, setWeather] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState(null);
+
+  useEffect(() =&gt; {
+    const controller = new AbortController();
+    setLoading(true); setError(null);
+
+    const url = 'https://api.open-meteo.com/v1/forecast'
+      + `?latitude=${lat}&amp;longitude=${lon}`
+      + '&amp;current=temperature_2m,wind_speed_10m,weather_code';
+
+    fetch(url, { signal: controller.signal })
+      .then(res =&gt; {
+        if (!res.ok) throw new Error('Could not load weather (check coordinates)');
+        return res.json();
+      })
+      .then(data =&gt; { setWeather(data.current); setLoading(false); })
+      .catch(err =&gt; {
+        if (err.name === 'AbortError') return;
+        setError(err.message); setLoading(false);
+      });
+
+    return () =&gt; controller.abort();
+  }, [lat, lon]);
+
+  return (
+    &lt;div&gt;
+      &lt;label&gt;lat &lt;input type="number" value={lat} onChange={e =&gt; setLat(e.target.value)} /&gt;&lt;/label&gt;
+      &lt;label&gt; lon &lt;input type="number" value={lon} onChange={e =&gt; setLon(e.target.value)} /&gt;&lt;/label&gt;
+      {loading &amp;&amp; &lt;p&gt;Loading...&lt;/p&gt;}
+      {error &amp;&amp; &lt;p style={{ color: 'crimson' }}&gt;{error}&lt;/p&gt;}
+      {weather &amp;&amp; !loading &amp;&amp; !error &amp;&amp; (
+        &lt;p&gt;{weather.temperature_2m} °C · wind {weather.wind_speed_10m} km/h · code {weather.weather_code}&lt;/p&gt;
+      )}
+    &lt;/div&gt;
+  );
+}
+</pre></div></div></section>
+
+</main>
+<div id="dock"><div class="hd"><b>Console</b><span>effects, cleanups and simulated requests</span><button onclick="document.getElementById('log').textContent=''">Clear</button></div><div id="log"></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.development.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.development.js"></script>
+<script>
+
+const logEl=()=>document.getElementById('log');
+function logLine(msg,cls){const el=logEl();if(!el)return;const d=document.createElement('div');if(cls)d.className=cls;d.textContent=new Date().toLocaleTimeString('en-GB')+'  '+msg;el.appendChild(d);while(el.childNodes.length>200)el.removeChild(el.firstChild);el.scrollTop=el.scrollHeight;}
+['log','warn','error'].forEach(k=>{const o=console[k].bind(console);console[k]=(...a)=>{o(...a);try{logLine(a.map(x=>typeof x==='string'?x:JSON.stringify(x)).join(' '),k==='log'?'':'err');}catch(e){}};});
+// ---- simulated backend: same fetch() code as on the slides, no real network ----
+const delay=(ms,sig)=>new Promise((res,rej)=>{const abort=()=>{clearTimeout(t);rej(new DOMException('The operation was aborted.','AbortError'));};const t=setTimeout(()=>{if(sig)sig.removeEventListener('abort',abort);res();},ms);if(sig){if(sig.aborted)return abort();sig.addEventListener('abort',abort);}});
+const avatar=n=>'data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><rect width="64" height="64" rx="12" fill="#2f5d8a"/><text x="32" y="42" font-size="30" text-anchor="middle" fill="#fff" font-family="sans-serif">'+(n[0]||'?').toUpperCase()+'</text></svg>');
+function reply(status,body){return {ok:status>=200&&status<300,status,json:async()=>body};}
+window.fetch=async(url,opts={})=>{
+  const u=new URL(url);const path=u.pathname;const t0=performance.now();const sig=opts.signal;
+  logLine('-> GET '+u.host+path+u.search.slice(0,60),'net');
+  let ms=500,res;
+  try{
+    if(u.host==='api.example.com'){const id=+path.split('/').pop();ms=600;await delay(ms,sig);const names=['Ada Lovelace','Grace Hopper','Alan Turing'];res=names[id-1]?reply(200,{id,name:names[id-1]}):reply(404,{message:'Not Found'});}
+    else if(u.host==='api.github.com'){const name=decodeURIComponent(path.split('/').pop());ms=Math.max(300,2000-350*name.length);await delay(ms,sig);
+      res=(/^[a-z0-9-]{3,}$/i.test(name)&&!/^nobody/i.test(name))?reply(200,{login:name,name:'Simulated user ('+name+')',bio:'Simulated profile for classroom demos.',avatar_url:avatar(name),followers:12+name.length*7,public_repos:3+name.length,html_url:'https://github.com/'+name}):reply(404,{message:'Not Found'});}
+    else if(u.host==='api.open-meteo.com'){const lat=+u.searchParams.get('latitude'),lon=+u.searchParams.get('longitude');ms=700;await delay(ms,sig);
+      res=(isFinite(lat)&&isFinite(lon)&&Math.abs(lat)<=90&&Math.abs(lon)<=180)?reply(200,{current:{temperature_2m:Math.round((28-Math.abs(lat)*0.45)*10)/10,wind_speed_10m:Math.round((8+Math.abs(lon)%7)*10)/10,weather_code:(Math.round(Math.abs(lat))%3)*3}}):reply(400,{error:true,reason:'Latitude/longitude out of range'});}
+    else{await delay(300,sig);res=reply(404,{message:'No simulated route'});}
+  }catch(e){logLine('x aborted: '+u.host+path,'err');throw e;}
+  logLine('<- '+res.status+' in '+Math.round(performance.now()-t0)+' ms','ok');return res;
+};
+// ---- mount helpers + StrictMode toggle ----
+const demos=[];let strict=false;
+function view(C){return strict?React.createElement(React.StrictMode,null,React.createElement(C)):React.createElement(C);}
+function mount(id,C){const root=ReactDOM.createRoot(document.getElementById('res-'+id));demos.push({root,C});root.render(view(C));}
+function setStrict(v){strict=v;demos.forEach(d=>d.root.render(view(d.C)));logLine('Strict Mode '+(v?'ON: effects run, clean up and run again on mount':'OFF'));}
+try{const th=localStorage.getItem('theme');if(th)document.documentElement.setAttribute('data-theme',th);}catch(e){}
+
+(function(){const {useState,useEffect,useRef}=React;
+
+function MyComponent() {
+    const [data, setData] = useState(null);
+    useEffect(() => {
+        // Runs after the first render (empty dependency array)
+        console.log('Component rendered!');
+        // Optional: return a cleanup function
+        return () => {
+            console.log('Cleanup before next run or unmount');
+        };
+    }, []);
+    return React.createElement("div", null, JSON.stringify(data));
+}
+// Demo wrapper: mount and unmount the component
+function Demo() {
+    const [shown, setShown] = useState(true);
+    return (React.createElement("div", null,
+        React.createElement("button", { onClick: () => setShown(s => !s) }, shown ? 'Unmount' : 'Mount'),
+        shown && React.createElement(MyComponent, null)));
+}
+
+mount('syntax',Demo);})();
+(function(){const {useState,useEffect,useRef}=React;
+
+function RunsOnce() {
+    useEffect(() => { console.log('[]     -> ran once after mount'); }, []);
+    return React.createElement("p", null, "[] : once after mount");
+}
+function RunsOnChange({ val }) {
+    useEffect(() => { console.log('[val]  -> ran, val =', val); }, [val]);
+    return React.createElement("p", null, "[val] : when val changes");
+}
+function RunsEveryRender() {
+    // No dependency array: usually a bug
+    useEffect(() => { console.log('(none) -> ran after EVERY render'); });
+    return React.createElement("p", null, "(none) : after every render");
+}
+function DependencyPatterns() {
+    const [val, setVal] = useState(0);
+    const [tick, setTick] = useState(0);
+    return (React.createElement("div", null,
+        React.createElement("button", { onClick: () => setVal(v => v + 1) }, "val++ (changes val)"),
+        React.createElement("button", { onClick: () => setTick(t => t + 1) }, "re-render (val unchanged)"),
+        React.createElement("p", null,
+            "val = ",
+            val,
+            ", extra renders = ",
+            tick),
+        React.createElement(RunsOnce, null),
+        React.createElement(RunsOnChange, { val: val }),
+        React.createElement(RunsEveryRender, null)));
+}
+
+mount('deps',DependencyPatterns);})();
+(function(){const {useState,useEffect,useRef}=React;
+
+function UserProfile({ userId }) {
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    useEffect(() => {
+        setLoading(true);
+        setError(null);
+        fetch(`https://api.example.com/users/${userId}`)
+            .then(res => {
+            if (!res.ok)
+                throw new Error('User not found');
+            return res.json();
+        })
+            .then(data => { setUser(data); setLoading(false); })
+            .catch(err => { setError(err.message); setLoading(false); });
+    }, [userId]); // re-fetch when userId prop changes
+    if (loading)
+        return React.createElement("p", null, "Loading...");
+    if (error)
+        return React.createElement("p", null,
+            "Error: ",
+            error);
+    return React.createElement("h2", null, user === null || user === void 0 ? void 0 : user.name);
+}
+// Demo wrapper: change the userId prop
+function Demo() {
+    const [id, setId] = useState(1);
+    return (React.createElement("div", null,
+        [1, 2, 3, 99].map(n => (React.createElement("button", { key: n, onClick: () => setId(n) },
+            "userId ",
+            n))),
+        React.createElement(UserProfile, { userId: id })));
+}
+
+mount('fetch',Demo);})();
+(function(){const {useState,useEffect,useRef}=React;
+
+function AsyncEffect() {
+    const [user, setUser] = useState(null);
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
+    // WRONG: useEffect(async () => { ... }, [])
+    //   an async callback returns a Promise, but useEffect
+    //   expects undefined or a cleanup function
+    // CORRECT: define the async function inside and call it
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                const res = await fetch('https://api.github.com/users/muxiddin19');
+                const data = await res.json();
+                setUser(data);
+            }
+            catch (err) {
+                setError(err.message);
+            }
+            finally {
+                setLoading(false);
+            }
+        }
+        fetchData();
+        // No return needed here unless we have cleanup
+    }, []);
+    if (loading)
+        return React.createElement("p", null, "Loading...");
+    if (error)
+        return React.createElement("p", null,
+            "Error: ",
+            error);
+    return React.createElement("p", null,
+        user.login,
+        ": ",
+        user.name);
+}
+
+mount('async',AsyncEffect);})();
+(function(){const {useState,useEffect,useRef}=React;
+
+function LiveClock() {
+    const [time, setTime] = useState(new Date());
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            setTime(new Date());
+        }, 1000);
+        // CORRECT: return cleanup, stop the timer when the component unmounts
+        return () => clearInterval(intervalId);
+    }, []); // empty: start once on mount, cleanup on unmount
+    return React.createElement("p", null, time.toLocaleTimeString('ko-KR'));
+}
+// WRONG: no cleanup. The interval keeps running after unmount.
+// (This copy stops itself after 10 ticks so the demo stays safe.)
+function LeakyClock() {
+    const [time, setTime] = useState(new Date());
+    useEffect(() => {
+        let n = 0;
+        const id = setInterval(() => {
+            console.log('leaky tick #' + (++n) + ' (component may already be gone)');
+            setTime(new Date());
+            if (n >= 10)
+                clearInterval(id);
+        }, 1000);
+    }, []);
+    return React.createElement("p", null, time.toLocaleTimeString('ko-KR'));
+}
+// Demo wrapper
+function Demo() {
+    const [mode, setMode] = useState('none');
+    return (React.createElement("div", null,
+        React.createElement("button", { onClick: () => setMode('good') }, "Mount LiveClock"),
+        React.createElement("button", { onClick: () => setMode('leaky') }, "Mount LeakyClock"),
+        React.createElement("button", { onClick: () => setMode('none') }, "Unmount"),
+        mode === 'good' && React.createElement(LiveClock, null),
+        mode === 'leaky' && React.createElement(LeakyClock, null)));
+}
+
+mount('clock',Demo);})();
+(function(){const {useState,useEffect,useRef}=React;
+
+function UserCard({ username }) {
+    const [user, setUser] = useState(null);
+    const [error, setError] = useState(null);
+    useEffect(() => {
+        const controller = new AbortController();
+        setError(null);
+        async function fetchUser() {
+            try {
+                const res = await fetch(`https://api.github.com/users/${username}`, { signal: controller.signal } // link to controller
+                );
+                if (!res.ok)
+                    throw new Error('User not found');
+                const data = await res.json();
+                setUser(data);
+            }
+            catch (err) {
+                if (err.name === 'AbortError') { // ignore cancelled requests
+                    console.log('aborted request for', username);
+                    return;
+                }
+                setError(err.message);
+            }
+        }
+        fetchUser();
+        // Cancel the in-flight request if username changes
+        return () => controller.abort();
+    }, [username]);
+    if (error)
+        return React.createElement("p", null,
+            "Error: ",
+            error);
+    return React.createElement("p", null, user ? user.login + ' / ' + user.name : 'Loading...');
+}
+// Demo wrapper: type to change the username
+function Demo() {
+    const [name, setName] = useState('react-learner');
+    return (React.createElement("div", null,
+        React.createElement("input", { value: name, onChange: e => setName(e.target.value) }),
+        React.createElement(UserCard, { username: name })));
+}
+
+mount('abort',Demo);})();
+(function(){const {useState,useEffect,useRef}=React;
+
+// Code challenge: one possible solution
+function GitHubUserLookup() {
+    const [input, setInput] = useState('');
+    const [username, setUsername] = useState(''); // set when Search is clicked
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    useEffect(() => {
+        if (!username)
+            return;
+        const controller = new AbortController(); // BONUS: abort previous request
+        setLoading(true);
+        setError(null);
+        setUser(null);
+        fetch(`https://api.github.com/users/${username}`, { signal: controller.signal })
+            .then(res => {
+            if (res.status === 404)
+                throw new Error('User not found (404)');
+            if (!res.ok)
+                throw new Error('Request failed: ' + res.status);
+            return res.json();
+        })
+            .then(data => { setUser(data); setLoading(false); })
+            .catch(err => {
+            if (err.name === 'AbortError')
+                return;
+            setError(err.message);
+            setLoading(false);
+        });
+        return () => controller.abort();
+    }, [username]);
+    return (React.createElement("div", null,
+        React.createElement("input", { value: input, placeholder: "GitHub username", onChange: e => setInput(e.target.value) }),
+        React.createElement("button", { onClick: () => setUsername(input.trim()) }, "Search"),
+        loading && React.createElement("p", null, "Loading..."),
+        error && React.createElement("p", { style: { color: 'crimson' } }, error),
+        user && (React.createElement("div", null,
+            React.createElement("img", { src: user.avatar_url, alt: "", width: "64", height: "64" }),
+            React.createElement("h3", null, user.name || user.login),
+            React.createElement("p", null, user.bio),
+            React.createElement("p", null,
+                user.followers,
+                " followers \u00B7 ",
+                user.public_repos,
+                " public repos"),
+            React.createElement("a", { href: user.html_url }, user.html_url)))));
+}
+
+mount('lookup',GitHubUserLookup);})();
+(function(){const {useState,useEffect,useRef}=React;
+
+// In this demo, requests for SHORTER names are slower, so responses
+// arrive out of order when you type quickly.
+function RaceCondition() {
+    const [query, setQuery] = useState('');
+    const [result, setResult] = useState('');
+    const [safe, setSafe] = useState(false);
+    useEffect(() => {
+        if (!query)
+            return;
+        const controller = new AbortController();
+        fetch(`https://api.github.com/users/${query}`, { signal: safe ? controller.signal : undefined })
+            .then(res => res.json())
+            .then(data => setResult(data.login))
+            .catch(err => { if (err.name !== 'AbortError')
+            console.log(err.message); });
+        // SAFE mode: cancel the previous request when query changes
+        return safe ? () => controller.abort() : undefined;
+    }, [query, safe]);
+    return (React.createElement("div", null,
+        React.createElement("label", null,
+            React.createElement("input", { type: "checkbox", checked: safe, onChange: e => setSafe(e.target.checked) }),
+            ' ',
+            "Abort previous request (the fix)"),
+        React.createElement("p", null,
+            React.createElement("input", { value: query, placeholder: "type slowly, then quickly: abcdef", onChange: e => setQuery(e.target.value) })),
+        React.createElement("p", null,
+            "You typed: ",
+            React.createElement("b", null, query || '-')),
+        React.createElement("p", null,
+            "Result shown for: ",
+            React.createElement("b", { style: { color: result && result !== query ? 'crimson' : 'inherit' } }, result || '-'),
+            " ",
+            result && result !== query && ' (stale!)')));
+}
+
+mount('race',RaceCondition);})();
+(function(){const {useState,useEffect,useRef}=React;
+
+function ThemeToggle() {
+    // Read once at mount (lazy initializer form)
+    const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
+    // Write whenever theme changes
+    useEffect(() => {
+        localStorage.setItem('theme', theme);
+        document.documentElement.setAttribute('data-theme', theme);
+    }, [theme]);
+    return (React.createElement("button", { onClick: () => setTheme(t => t === 'light' ? 'dark' : 'light') },
+        "Current: ",
+        theme,
+        " \u2014 Click to toggle"));
+}
+
+mount('persist',ThemeToggle);})();
+(function(){const {useState,useEffect,useRef}=React;
+
+function Inbox() {
+    const [count, setCount] = useState(0);
+    useEffect(() => {
+        document.title = `Inbox (${count})`;
+        console.log('document.title is now', document.title);
+    }, [count]);
+    return (React.createElement("div", null,
+        React.createElement("p", null,
+            "Unread messages: ",
+            count),
+        React.createElement("button", { onClick: () => setCount(c => c + 1) }, "New message"),
+        React.createElement("button", { onClick: () => setCount(0) }, "Mark all read")));
+}
+
+mount('title',Inbox);})();
+(function(){const {useState,useEffect,useRef}=React;
+
+// BAD: setState inside the effect + that same state in the dependency array
+function BadLoop() {
+    const [count, setCount] = useState(0);
+    const runs = useRef(0);
+    useEffect(() => {
+        runs.current += 1;
+        // Safety guard so this demo cannot freeze the page
+        if (runs.current > 8) {
+            console.log('safety stop: this loop would never end');
+            return;
+        }
+        console.log('effect run #' + runs.current + ', count =', count);
+        setCount(count + 1); // changes count -> effect runs again
+    }, [count]);
+    return React.createElement("p", null,
+        "BadLoop count = ",
+        count);
+}
+// FIX: functional update with an empty dependency array
+function FixedOnce() {
+    const [count, setCount] = useState(0);
+    useEffect(() => {
+        setCount(c => c + 1);
+        console.log('FixedOnce effect ran');
+    }, []);
+    return React.createElement("p", null,
+        "FixedOnce count = ",
+        count);
+}
+// Demo wrapper
+function Demo() {
+    const [which, setWhich] = useState('none');
+    return (React.createElement("div", null,
+        React.createElement("button", { onClick: () => setWhich('bad') }, "Run BadLoop"),
+        React.createElement("button", { onClick: () => setWhich('fixed') }, "Run FixedOnce"),
+        React.createElement("button", { onClick: () => setWhich('none') }, "Unmount"),
+        which === 'bad' && React.createElement(BadLoop, null),
+        which === 'fixed' && React.createElement(FixedOnce, null)));
+}
+
+mount('loop',Demo);})();
+(function(){const {useState,useEffect,useRef}=React;
+
+// Unnecessary effect: extra state and an extra render
+function WithEffect({ first, last }) {
+    const renders = useRef(0);
+    renders.current += 1; // demo counter only
+    const [fullName, setFullName] = useState('');
+    useEffect(() => { setFullName(first + ' ' + last); }, [first, last]);
+    return React.createElement("p", null,
+        "WithEffect: ",
+        fullName,
+        " (renders: ",
+        renders.current,
+        ")");
+}
+// Better: derive the value while rendering
+function Derived({ first, last }) {
+    const renders = useRef(0);
+    renders.current += 1; // demo counter only
+    const fullName = first + ' ' + last;
+    return React.createElement("p", null,
+        "Derived: ",
+        fullName,
+        " (renders: ",
+        renders.current,
+        ")");
+}
+function Demo() {
+    const [first, setFirst] = useState('Kim');
+    const [last, setLast] = useState('Minho');
+    return (React.createElement("div", null,
+        React.createElement("input", { value: first, onChange: e => setFirst(e.target.value) }),
+        React.createElement("input", { value: last, onChange: e => setLast(e.target.value) }),
+        React.createElement(WithEffect, { first: first, last: last }),
+        React.createElement(Derived, { first: first, last: last })));
+}
+
+mount('derived',Demo);})();
+(function(){const {useState,useEffect,useRef}=React;
+
+// Homework starter: Weather Dashboard (Open-Meteo, no API key)
+// TODO 1: let the user type a CITY name and look up coordinates
+//         (https://geocoding-api.open-meteo.com/v1/search?name=Seoul)
+// TODO 2: map weather_code to a description ("Clear", "Rain", ...)
+// TODO 3: BONUS: use navigator.geolocation for the first coordinates
+function WeatherStarter() {
+    const [lat, setLat] = useState(37.46);
+    const [lon, setLon] = useState(127.01);
+    const [weather, setWeather] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    useEffect(() => {
+        const controller = new AbortController();
+        setLoading(true);
+        setError(null);
+        const url = 'https://api.open-meteo.com/v1/forecast'
+            + `?latitude=${lat}&longitude=${lon}`
+            + '&current=temperature_2m,wind_speed_10m,weather_code';
+        fetch(url, { signal: controller.signal })
+            .then(res => {
+            if (!res.ok)
+                throw new Error('Could not load weather (check coordinates)');
+            return res.json();
+        })
+            .then(data => { setWeather(data.current); setLoading(false); })
+            .catch(err => {
+            if (err.name === 'AbortError')
+                return;
+            setError(err.message);
+            setLoading(false);
+        });
+        return () => controller.abort();
+    }, [lat, lon]);
+    return (React.createElement("div", null,
+        React.createElement("label", null,
+            "lat ",
+            React.createElement("input", { type: "number", value: lat, onChange: e => setLat(e.target.value) })),
+        React.createElement("label", null,
+            " lon ",
+            React.createElement("input", { type: "number", value: lon, onChange: e => setLon(e.target.value) })),
+        loading && React.createElement("p", null, "Loading..."),
+        error && React.createElement("p", { style: { color: 'crimson' } }, error),
+        weather && !loading && !error && (React.createElement("p", null,
+            weather.temperature_2m,
+            " \u00B0C \u00B7 wind ",
+            weather.wind_speed_10m,
+            " km/h \u00B7 code ",
+            weather.weather_code))));
+}
+
+mount('weather',WeatherStarter);})();
+
+</script></body></html>
