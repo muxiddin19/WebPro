@@ -124,7 +124,7 @@ tr:hover td{background:var(--surf2)}
   <section id="syntax">
     <h2>2. useEffect Syntax &amp; Dependency Array</h2>
     <div class="concept">
-      <div class="code-block"><code>import { useState, useEffect } from 'react';
+      <div class="code-block"><pre><code>import { useState, useEffect } from 'react';
 
 useEffect(
   () =&gt; {
@@ -138,7 +138,7 @@ useEffect(
   },
   [dep1, dep2]  // ← dependency array
 );
-</code></div>
+</code></pre></div>
 
       <h3>Dependency array controls WHEN the effect runs</h3>
       <table>
@@ -148,7 +148,7 @@ useEffect(
         <tr><td><code>useEffect(fn, [a, b])</code></td><td>After first render, and when <code>a</code> or <code>b</code> changes</td></tr>
       </table>
 
-      <div class="code-block"><code>// 1. Run once on mount — empty array
+      <div class="code-block"><pre><code>// 1. Run once on mount — empty array
 useEffect(() =&gt; {
   document.title = 'Web Programming Course';
 }, []);
@@ -162,7 +162,7 @@ useEffect(() =&gt; {
 useEffect(() =&gt; {
   console.log('Rendered at:', new Date());
 });
-</code></div>
+</code></pre></div>
 
       <div class="callout warn">
         <div class="icon">⚠️</div>
@@ -175,7 +175,7 @@ useEffect(() =&gt; {
     <h2>3. Cleanup Functions</h2>
     <div class="concept">
       <p>Some effects create resources that need to be released when the component unmounts or before the effect runs again (e.g., subscriptions, timers, event listeners). Return a cleanup function to handle this.</p>
-      <div class="code-block"><code>// Cleanup pattern — timer
+      <div class="code-block"><pre><code>// Cleanup pattern — timer
 function Countdown({ seconds }) {
   const [timeLeft, setTimeLeft] = useState(seconds);
 
@@ -208,7 +208,7 @@ function WindowSize() {
 
   return &lt;p&gt;Window width: {width}px&lt;/p&gt;;
 }
-</code></div>
+</code></pre></div>
       <div class="callout tip">
         <div class="icon">✅</div>
         <p><strong>Always cleanup:</strong> Forgetting to clear timers or remove event listeners causes memory leaks. When the component unmounts, React calls the cleanup function automatically.</p>
@@ -220,7 +220,7 @@ function WindowSize() {
     <h2>4. Data Fetching Pattern</h2>
     <div class="concept">
       <p>Fetching data from an API is the most common use of <code>useEffect</code>. The pattern: use state for <code>data</code>, <code>isLoading</code>, and <code>error</code>; fetch inside an effect with the right dependencies.</p>
-      <div class="code-block"><code>function CourseList({ instructorId }) {
+      <div class="code-block"><pre><code>function CourseList({ instructorId }) {
   const [courses,   setCourses]   = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error,     setError]     = useState(null);
@@ -253,12 +253,12 @@ function WindowSize() {
     &lt;/ul&gt;
   );
 }
-</code></div>
+</pre></code></div>
       <div class="callout info">
         <div class="icon">💡</div>
         <p><strong>Async inside useEffect:</strong> You cannot make the useEffect callback itself async. Instead, define an async function inside the effect and call it immediately.</p>
       </div>
-      <div class="code-block"><code>useEffect(() =&gt; {
+      <div class="code-block"><pre><code>useEffect(() =&gt; {
   // Define async function inside
   async function loadCourses() {
     try {
@@ -274,7 +274,7 @@ function WindowSize() {
 
   loadCourses(); // call it immediately
 }, []);
-</code></div>
+</code></pre></div>
     </div>
   </section>
 
@@ -282,13 +282,13 @@ function WindowSize() {
     <h2>5. Common Patterns</h2>
     <div class="concept">
       <h3>Sync document title with state</h3>
-      <div class="code-block"><code>useEffect(() =&gt; {
+      <div class="code-block"><pre><code>useEffect(() =&gt; {
   document.title = `${unreadCount} unread messages — WebPro`;
 }, [unreadCount]);
-</code></div>
+</code></pre></div>
 
       <h3>Debounced search (avoid fetching on every keystroke)</h3>
-      <div class="code-block"><code>const [query, setQuery] = useState('');
+      <div class="code-block"><pre><code>const [query, setQuery] = useState('');
 const [results, setResults] = useState([]);
 
 useEffect(() =&gt; {
@@ -302,7 +302,7 @@ useEffect(() =&gt; {
 
   return () =&gt; clearTimeout(timerId); // cancel if query changes quickly
 }, [query]);
-</code></div>
+</code></pre></div>
 
       <h3>Lifecycle analogy</h3>
       <table>
@@ -321,7 +321,7 @@ useEffect(() =&gt; {
       <summary>Exercise 1 — Page title sync</summary>
       <div class="exercise-body">
         <p><strong>Task:</strong> Build a component with a text input. Use <code>useEffect</code> to update <code>document.title</code> to show whatever is typed in the input. Revert the title to "WebPro" when the component unmounts (via cleanup).</p>
-        <div class="code-block"><code>function TitleEditor() {
+        <div class="code-block"><pre><code>function TitleEditor() {
   const [text, setText] = useState('');
 
   useEffect(() =&gt; {
@@ -337,7 +337,7 @@ useEffect(() =&gt; {
     /&gt;
   );
 }
-</code></div>
+</code></pre></div>
       </div>
     </details>
 
@@ -345,7 +345,7 @@ useEffect(() =&gt; {
       <summary>Exercise 2 — Fetch a user from an API</summary>
       <div class="exercise-body">
         <p><strong>Task:</strong> Use <code>https://jsonplaceholder.typicode.com/users/1</code> to fetch a user and display their name and email. Show "Loading…" while fetching and handle errors.</p>
-        <div class="code-block"><code>function UserProfile() {
+        <div class="code-block"><pre><code>function UserProfile() {
   const [user, setUser]         = useState(null);
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState(null);
@@ -376,7 +376,7 @@ useEffect(() =&gt; {
     &lt;/div&gt;
   );
 }
-</code></div>
+</code></pre></div>
       </div>
     </details>
 
@@ -384,7 +384,7 @@ useEffect(() =&gt; {
       <summary>Exercise 3 — Stopwatch with cleanup</summary>
       <div class="exercise-body">
         <p><strong>Task:</strong> Build a stopwatch with Start, Stop, and Reset buttons. Use <code>setInterval</code> inside <code>useEffect</code> and clean it up properly to avoid memory leaks.</p>
-        <div class="code-block"><code>function Stopwatch() {
+        <div class="code-block"><pre><code>function Stopwatch() {
   const [seconds, setSeconds] = useState(0);
   const [running, setRunning] = useState(false);
 
@@ -404,7 +404,7 @@ useEffect(() =&gt; {
     &lt;/div&gt;
   );
 }
-</code></div>
+</code></pre></div>
       </div>
     </details>
   </section>
