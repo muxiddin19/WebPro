@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>React Forms: live demos and source code</title>
+<style>
+:root{--bg:#f6f7f9;--sf:#fff;--fg:#1f2933;--mu:#5f6b7a;--bd:#d9dee5;--ac:#2f5d8a;--codebg:#0b1526;--codefg:#dbe6f5;--btn:#2f5d8a;--btnfg:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14181d;--sf:#1d232b;--fg:#e8edf2;--mu:#9aa6b4;--bd:#2d3641;--ac:#6fa3d6;--btn:#6fa3d6;--btnfg:#10151b}}
+:root[data-theme="dark"]{--bg:#14181d;--sf:#1d232b;--fg:#e8edf2;--mu:#9aa6b4;--bd:#2d3641;--ac:#6fa3d6;--btn:#6fa3d6;--btnfg:#10151b}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + .5rem);scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:70rem;margin:0 auto;padding:1.5rem 1.25rem 14rem}
+h1{margin:0 0 .25rem;font-size:1.6rem}.sub{color:var(--mu);margin:0 0 .75rem}
+.bar{display:flex;flex-wrap:wrap;gap:1rem;align-items:center;margin-bottom:.75rem;color:var(--mu);font-size:.9rem}
+nav{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem}
+nav a{padding:.35rem .8rem;border:1px solid var(--bd);border-radius:999px;background:var(--sf);color:var(--ac);text-decoration:none;font-size:.9rem}
+section{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:1.25rem;margin-bottom:1.25rem}
+section h2{margin:0 0 .25rem;font-size:1.2rem}.d{color:var(--mu);margin:0 0 1rem}
+.grid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(19rem,1fr))}
+h3{margin:0 0 .5rem;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--mu)}.f{text-transform:none;letter-spacing:0;color:var(--ac)}
+.res{border:1px dashed var(--bd);border-radius:10px;padding:1rem;min-height:6rem}
+pre{margin:0;background:var(--codebg);color:var(--codefg);border-radius:10px;padding:1rem;font-size:.76rem;line-height:1.5;overflow-x:auto;max-height:28rem}
+button{padding:.4rem .9rem;margin:.15rem;border:0;border-radius:8px;background:var(--btn);color:var(--btnfg);font:inherit;cursor:pointer}
+input:not([type=checkbox]),textarea{padding:.4rem .6rem;margin:.15rem;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--fg);font:inherit;max-width:100%}
+label{margin-right:.5rem}
+#dock{position:fixed;left:0;right:0;bottom:0;background:#0b1526;color:#dbe6f5;border-top:2px solid #1fb5d1;padding-bottom:env(safe-area-inset-bottom,0px);z-index:20}
+#dock .hd{display:flex;align-items:center;gap:.75rem;padding:.35rem .9rem;font-size:.8rem;color:#9fb4d3}
+#dock .hd b{color:#fff}#dock button{padding:.15rem .6rem;font-size:.75rem;background:#1fb5d1;color:#0b1526}
+#log{margin:0;height:7.5rem;overflow:auto;padding:.25rem .9rem .5rem;font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap}
+#log .net{color:#7dd3fc}#log .err{color:#f28b82}#log .ok{color:#7ddba3}</style></head><body><main>
+<h1>React Forms: live demos and source code</h1>
+<p class="sub">Week 13 · Monday · Web Programming K0126_002. Each demo is the code from the slides, running for real. The login demo talks to a simulated server (this page cannot reach external servers).</p>
+<div class="bar"><label><input type="checkbox" onchange="setStrict(this.checked)"> Strict Mode (development checks)</label><span>Open the Console at the bottom while you try each demo.</span></div>
+<nav><a href="#controlled">Controlled vs uncontrolled</a><a href="#search">The controlled input pattern</a><a href="#prefs">Select, textarea, checkbox and radio</a><a href="#onehandler">One handler for all fields</a><a href="#login">Form submission and status</a><a href="#validation">Client-side validation</a><a href="#refs">useRef</a><a href="#wizard">Code challenge</a><a href="#a11y">Accessibility in forms</a><a href="#mistakes">Common form mistakes</a><a href="#profile">Homework starter</a></nav>
+<section id="controlled"><h2>Controlled vs uncontrolled</h2><p class="d">Type in all three inputs. The second one is stuck: watch the warning in the Console.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-controlled"></div></div><div><h3>Source <span class="f">01-ControlledVsUncontrolled.jsx</span></h3><pre>import { useState, useRef } from 'react';
+
+export default function ControlledVsUncontrolled() {
+  const [text, setText] = useState('');
+  const [read, setRead] = useState('');
+  const inputRef = useRef(null);
+
+  return (
+    &lt;div&gt;
+      &lt;h4&gt;1. Controlled: React state IS the value&lt;/h4&gt;
+      &lt;input value={text} onChange={e =&gt; setText(e.target.value)} placeholder="type here" /&gt;
+      &lt;p&gt;state = "{text}"&lt;/p&gt;
+
+      &lt;h4&gt;2. Controlled but with NO onChange: stuck&lt;/h4&gt;
+      {/* React warns in the console: value without onChange */}
+      &lt;input value="I cannot be edited" /&gt;
+
+      &lt;h4&gt;3. Uncontrolled: the DOM owns the value&lt;/h4&gt;
+      &lt;input ref={inputRef} defaultValue="edit me, then press the button" /&gt;
+      &lt;button onClick={() =&gt; setRead(inputRef.current.value)}&gt;Read value (ref)&lt;/button&gt;
+      &lt;p&gt;read from the DOM: "{read}"&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+</pre></div></div></section>
+<section id="search"><h2>The controlled input pattern</h2><p class="d">Type, watch the live character count, then press Clear.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-search"></div></div><div><h3>Source <span class="f">02-SearchBar.jsx</span></h3><pre>import { useState } from 'react';
+
+export default function SearchBar() {
+  const [query, setQuery] = useState('');
+
+  return (
+    &lt;div&gt;
+      &lt;input
+        type="text"
+        value={query}                              // React controls value
+        onChange={e =&gt; setQuery(e.target.value)}   // update state on change
+        placeholder="Search..."
+      /&gt;
+      &lt;p&gt;Searching for: "{query}"&lt;/p&gt;
+
+      {/* Real-time character count: only possible with a controlled input */}
+      &lt;span&gt;{query.length} / 100 characters&lt;/span&gt;
+
+      {/* Clear programmatically */}
+      &lt;button onClick={() =&gt; setQuery('')}&gt;Clear&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+</pre></div></div></section>
+<section id="prefs"><h2>Select, textarea, checkbox and radio</h2><p class="d">Change each control and watch the state object below it.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-prefs"></div></div><div><h3>Source <span class="f">03-PreferenceForm.jsx</span></h3><pre>import { useState } from 'react';
+
+export default function PreferenceForm() {
+  const [country, setCountry] = useState('KR');
+  const [bio, setBio]         = useState('');
+  const [agree, setAgree]     = useState(false);
+  const [plan, setPlan]       = useState('free');
+
+  return (
+    &lt;form&gt;
+      {/* Select: value on &lt;select&gt;, NOT on &lt;option&gt; */}
+      &lt;select value={country} onChange={e =&gt; setCountry(e.target.value)}&gt;
+        &lt;option value="KR"&gt;South Korea&lt;/option&gt;
+        &lt;option value="UZ"&gt;Uzbekistan&lt;/option&gt;
+        &lt;option value="US"&gt;United States&lt;/option&gt;
+      &lt;/select&gt;
+
+      {/* Textarea: same pattern as &lt;input&gt; */}
+      &lt;p&gt;&lt;textarea value={bio} onChange={e =&gt; setBio(e.target.value)} rows={3} /&gt;&lt;/p&gt;
+
+      {/* Checkbox: use checked, not value */}
+      &lt;label&gt;
+        &lt;input type="checkbox" checked={agree}
+               onChange={e =&gt; setAgree(e.target.checked)} /&gt; I agree
+      &lt;/label&gt;
+
+      {/* Radio: checked is true for the input whose value === state */}
+      &lt;p&gt;
+        &lt;label&gt;&lt;input type="radio" value="free" checked={plan === 'free'}
+                      onChange={e =&gt; setPlan(e.target.value)} /&gt; Free&lt;/label&gt;
+        &lt;label&gt;&lt;input type="radio" value="pro" checked={plan === 'pro'}
+                      onChange={e =&gt; setPlan(e.target.value)} /&gt; Pro&lt;/label&gt;
+      &lt;/p&gt;
+
+      &lt;pre&gt;{JSON.stringify({ country, bio, agree, plan }, null, 2)}&lt;/pre&gt;
+    &lt;/form&gt;
+  );
+}
+</pre></div></div></section>
+<section id="onehandler"><h2>One handler for all fields</h2><p class="d">A single handleChange reads e.target.name. Note the checkbox branch.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-onehandler"></div></div><div><h3>Source <span class="f">04-RegistrationForm.jsx</span></h3><pre>import { useState } from 'react';
+
+export default function RegistrationForm() {
+  const [form, setForm] = useState({
+    name: '', email: '', password: '', role: 'student', subscribe: false
+  });
+
+  // One handler for ALL fields: reads e.target.name
+  const handleChange = (e) =&gt; {
+    const { name, value, type, checked } = e.target;
+    setForm(prev =&gt; ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value   // computed key
+    }));
+  };
+
+  return (
+    &lt;form&gt;
+      &lt;input name="name"     value={form.name}     onChange={handleChange} placeholder="Name" /&gt;
+      &lt;input name="email"    value={form.email}    onChange={handleChange} type="email" placeholder="Email" /&gt;
+      &lt;input name="password" value={form.password} onChange={handleChange} type="password" placeholder="Password" /&gt;
+      &lt;select name="role"    value={form.role}     onChange={handleChange}&gt;
+        &lt;option value="student"&gt;Student&lt;/option&gt;
+        &lt;option value="ta"&gt;Teaching Assistant&lt;/option&gt;
+      &lt;/select&gt;
+      {/* extra: shows the type === 'checkbox' branch */}
+      &lt;label&gt;
+        &lt;input name="subscribe" type="checkbox" checked={form.subscribe} onChange={handleChange} /&gt; Newsletter
+      &lt;/label&gt;
+      &lt;pre&gt;{JSON.stringify(form, null, 2)}&lt;/pre&gt;
+    &lt;/form&gt;
+  );
+}
+</pre></div></div></section>
+<section id="login"><h2>Form submission and status</h2><p class="d">Try a wrong password, then student@gachon.ac.kr / react1234. The button is disabled while loading.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-login"></div></div><div><h3>Source <span class="f">05-LoginForm.jsx</span></h3><pre>import { useState } from 'react';
+
+export default function LoginForm() {
+  const [email, setEmail]       = useState('');
+  const [password, setPassword] = useState('');
+  const [status, setStatus]     = useState('idle'); // idle|loading|success|error
+
+  const handleSubmit = async (e) =&gt; {
+    e.preventDefault();   // stop the browser's default page reload
+    setStatus('loading');
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      if (!res.ok) throw new Error('Invalid credentials');
+      setStatus('success');
+    } catch (err) { setStatus('error'); }
+  };
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      &lt;p&gt;Hint (simulated server): student@gachon.ac.kr / react1234&lt;/p&gt;
+      &lt;input value={email}    onChange={e =&gt; setEmail(e.target.value)}    type="email" placeholder="Email" /&gt;
+      &lt;input value={password} onChange={e =&gt; setPassword(e.target.value)} type="password" placeholder="Password" /&gt;
+      &lt;button disabled={status === 'loading'}&gt;
+        {status === 'loading' ? 'Logging in...' : 'Log In'}
+      &lt;/button&gt;
+      {status === 'error' &amp;&amp; &lt;p&gt;Login failed. Check your credentials.&lt;/p&gt;}
+      {status === 'success' &amp;&amp; &lt;p&gt;Welcome back!&lt;/p&gt;}
+      &lt;p&gt;status = {status}&lt;/p&gt;
+    &lt;/form&gt;
+  );
+}
+</pre></div></div></section>
+<section id="validation"><h2>Client-side validation</h2><p class="d">Submit an empty form, then fix each field.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-validation"></div></div><div><h3>Source <span class="f">06-RegisterValidation.jsx</span></h3><pre>import { useState } from 'react';
+
+export default function RegisterForm() {
+  const [form, setForm]     = useState({ name: '', email: '', password: '' });
+  const [errors, setErrors] = useState({});
+  const [done, setDone]     = useState(false);
+
+  const handleChange = (e) =&gt;
+    setForm(prev =&gt; ({ ...prev, [e.target.name]: e.target.value }));
+
+  const validate = () =&gt; {
+    const errs = {};
+    if (!form.name.trim())
+      errs.name = 'Name is required';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
+      errs.email = 'Enter a valid email address';
+    if (form.password.length &lt; 8)
+      errs.password = 'Password must be at least 8 characters';
+    return errs;    // empty object = all valid
+  };
+
+  const handleSubmit = (e) =&gt; {
+    e.preventDefault();
+    const errs = validate();
+    if (Object.keys(errs).length &gt; 0) { setErrors(errs); return; }
+    setErrors({});          // clear errors on a successful resubmit
+    setDone(true);          // all valid: proceed with submission
+  };
+
+  if (done) return &lt;p&gt;Registered: {form.name} ({form.email})&lt;/p&gt;;
+
+  return (
+    &lt;form onSubmit={handleSubmit} noValidate&gt;
+      &lt;p&gt;&lt;input name="name" value={form.name} onChange={handleChange} placeholder="Name" /&gt;
+         {errors.name &amp;&amp; &lt;span style={{ color: 'crimson' }}&gt; {errors.name}&lt;/span&gt;}&lt;/p&gt;
+      &lt;p&gt;&lt;input name="email" value={form.email} onChange={handleChange} placeholder="Email" /&gt;
+         {errors.email &amp;&amp; &lt;span style={{ color: 'crimson' }}&gt; {errors.email}&lt;/span&gt;}&lt;/p&gt;
+      &lt;p&gt;&lt;input name="password" type="password" value={form.password} onChange={handleChange} placeholder="Password" /&gt;
+         {errors.password &amp;&amp; &lt;span style={{ color: 'crimson' }}&gt; {errors.password}&lt;/span&gt;}&lt;/p&gt;
+      &lt;button&gt;Register&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+</pre></div></div></section>
+<section id="refs"><h2>useRef: focus and file inputs</h2><p class="d">Press Focus Search, then choose a file (it stays on your device).</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-refs"></div></div><div><h3>Source <span class="f">07-FocusAndFile.jsx</span></h3><pre>import { useState, useRef } from 'react';
+
+function SearchFocus() {
+  const inputRef = useRef(null);
+
+  const handleFocus = () =&gt; {
+    inputRef.current.focus();    // focus the DOM element
+    inputRef.current.select();   // also select existing text
+  };
+
+  return (
+    &lt;div&gt;
+      &lt;input ref={inputRef} type="text" defaultValue="select me" /&gt;
+      &lt;button onClick={handleFocus}&gt;Focus Search&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+
+// File inputs MUST use useRef (they cannot be controlled)
+function FileUpload() {
+  const fileRef = useRef(null);
+  const [info, setInfo] = useState('no file chosen');
+
+  const handleUpload = () =&gt; {
+    const file = fileRef.current.files[0];
+    console.log(file.name, file.size, file.type);
+    setInfo(file.name + ' · ' + file.size + ' bytes · ' + (file.type || 'unknown type'));
+  };
+  return (
+    &lt;div&gt;
+      &lt;input type="file" ref={fileRef} onChange={handleUpload} /&gt;
+      &lt;p&gt;{info}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default function Demo() {
+  return (&lt;div&gt;&lt;h4&gt;Focus management&lt;/h4&gt;&lt;SearchFocus /&gt;&lt;h4&gt;File input&lt;/h4&gt;&lt;FileUpload /&gt;&lt;/div&gt;);
+}
+</pre></div></div></section>
+<section id="wizard"><h2>Code challenge: multi-step registration (solution)</h2><p class="d">Next stays disabled until the step is valid. Previous keeps your data. Submit logs the object.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-wizard"></div></div><div><h3>Source <span class="f">08-MultiStepRegistration.jsx</span></h3><pre>import { useState } from 'react';
+
+const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Validation is DERIVED from state: no extra state to keep in sync
+function validateStep(step, f) {
+  const e = {};
+  if (step === 1) {
+    if (f.name.trim().length &lt; 2) e.name = 'At least 2 characters';
+    if (!emailRe.test(f.email))   e.email = 'Enter a valid email address';
+  }
+  if (step === 2) {
+    if (f.username.length &lt; 3 || /\s/.test(f.username)) e.username = 'At least 3 characters, no spaces';
+    if (f.password.length &lt; 8)                           e.password = 'At least 8 characters';
+    if (!f.confirm || f.confirm !== f.password)          e.confirm  = 'Passwords must match';
+  }
+  return e;
+}
+
+function Field({ label, name, type = 'text', value, onChange, onBlur, error }) {
+  const id = 'f-' + name;
+  return (
+    &lt;p&gt;
+      &lt;label htmlFor={id}&gt;{label} &lt;/label&gt;
+      &lt;input id={id} name={name} type={type} value={value}
+             onChange={onChange} onBlur={onBlur}
+             aria-invalid={!!error} aria-describedby={error ? id + '-err' : undefined} /&gt;
+      {error &amp;&amp; &lt;span id={id + '-err'} style={{ color: 'crimson' }}&gt; {error}&lt;/span&gt;}
+    &lt;/p&gt;
+  );
+}
+
+export default function MultiStepRegistration() {
+  const [step, setStep]       = useState(1);
+  const [done, setDone]       = useState(false);
+  const [touched, setTouched] = useState({});
+  const [form, setForm] = useState({
+    name: '', email: '', username: '', password: '', confirm: '',
+    role: 'student', subscribe: false
+  });
+
+  const errors = validateStep(step, form);
+  const valid  = Object.keys(errors).length === 0;
+
+  const handleChange = (e) =&gt; {
+    const { name, value, type, checked } = e.target;
+    setForm(prev =&gt; ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+  };
+  const handleBlur = (e) =&gt; setTouched(t =&gt; ({ ...t, [e.target.name]: true }));
+  const shown = (name) =&gt; (touched[name] ? errors[name] : undefined);
+
+  const next = () =&gt; { if (valid) setStep(s =&gt; s + 1); };
+  const prev = () =&gt; setStep(s =&gt; s - 1);      // form data stays in state
+
+  const handleSubmit = (e) =&gt; {
+    e.preventDefault();
+    const { confirm, ...fullFormObject } = form;
+    console.log(fullFormObject);
+    setDone(true);
+  };
+
+  if (done) return &lt;p&gt;Registration submitted. Check the console for the form object.&lt;/p&gt;;
+
+  const props = (name) =&gt; ({ name, value: form[name], onChange: handleChange, onBlur: handleBlur, error: shown(name) });
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      &lt;p&gt;&lt;b&gt;Step {step} of 3&lt;/b&gt;&lt;/p&gt;
+      &lt;progress value={step} max="3" /&gt;
+
+      {step === 1 &amp;&amp; (&lt;&gt;
+        &lt;Field label="Name"  {...props('name')} /&gt;
+        &lt;Field label="Email" type="email" {...props('email')} /&gt;
+      &lt;/&gt;)}
+
+      {step === 2 &amp;&amp; (&lt;&gt;
+        &lt;Field label="Username" {...props('username')} /&gt;
+        &lt;Field label="Password" type="password" {...props('password')} /&gt;
+        &lt;Field label="Confirm password" type="password" {...props('confirm')} /&gt;
+      &lt;/&gt;)}
+
+      {step === 3 &amp;&amp; (&lt;&gt;
+        &lt;p&gt;
+          {['student', 'ta', 'instructor'].map(r =&gt; (
+            &lt;label key={r}&gt;
+              &lt;input type="radio" name="role" value={r} checked={form.role === r} onChange={handleChange} /&gt; {r}{' '}
+            &lt;/label&gt;
+          ))}
+        &lt;/p&gt;
+        &lt;label&gt;&lt;input type="checkbox" name="subscribe" checked={form.subscribe} onChange={handleChange} /&gt; Subscribe to newsletter&lt;/label&gt;
+        &lt;h4&gt;Review&lt;/h4&gt;
+        &lt;ul&gt;
+          &lt;li&gt;Name: {form.name}&lt;/li&gt;&lt;li&gt;Email: {form.email}&lt;/li&gt;&lt;li&gt;Username: {form.username}&lt;/li&gt;
+          &lt;li&gt;Password: {'*'.repeat(form.password.length)}&lt;/li&gt;&lt;li&gt;Role: {form.role}&lt;/li&gt;
+          &lt;li&gt;Newsletter: {form.subscribe ? 'yes' : 'no'}&lt;/li&gt;
+        &lt;/ul&gt;
+      &lt;/&gt;)}
+
+      &lt;p&gt;
+        {step &gt; 1 &amp;&amp; &lt;button type="button" onClick={prev}&gt;Previous&lt;/button&gt;}
+        {step &lt; 3 &amp;&amp; &lt;button type="button" onClick={next} disabled={!valid}&gt;Next&lt;/button&gt;}
+        {step === 3 &amp;&amp; &lt;button&gt;Submit&lt;/button&gt;}
+      &lt;/p&gt;
+    &lt;/form&gt;
+  );
+}
+</pre></div></div></section>
+<section id="a11y"><h2>Accessibility in forms</h2><p class="d">Click the label, then tab through the form using only the keyboard.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-a11y"></div></div><div><h3>Source <span class="f">09-AccessibleForm.jsx</span></h3><pre>import { useState } from 'react';
+
+export default function AccessibleForm() {
+  const [email, setEmail]     = useState('');
+  const [touched, setTouched] = useState(false);
+  const error = touched &amp;&amp; !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    ? 'Enter a valid email address' : '';
+
+  return (
+    &lt;form noValidate onSubmit={e =&gt; { e.preventDefault(); setTouched(true); }}&gt;
+      {/* label + htmlFor/id: clicking the label focuses the input */}
+      &lt;label htmlFor="email"&gt;Email &lt;span aria-hidden="true"&gt;(required)&lt;/span&gt;&lt;/label&gt;
+      &lt;br /&gt;
+      &lt;input
+        id="email" type="email" value={email}
+        onChange={e =&gt; setEmail(e.target.value)}
+        onBlur={() =&gt; setTouched(true)}
+        aria-required="true"
+        aria-invalid={!!error}                         // marks the invalid field
+        aria-describedby={error ? 'email-error' : undefined}   // links the message
+      /&gt;
+      {error &amp;&amp; &lt;p id="email-error" role="alert" style={{ color: 'crimson' }}&gt;{error}&lt;/p&gt;}
+      &lt;p&gt;&lt;button&gt;Submit&lt;/button&gt;&lt;/p&gt;
+      &lt;p&gt;Test it: click the label, then tab through using only the keyboard.&lt;/p&gt;
+    &lt;/form&gt;
+  );
+}
+</pre></div></div></section>
+<section id="mistakes"><h2>Common form mistakes</h2><p class="d">Four classic bugs next to their fixes.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-mistakes"></div></div><div><h3>Source <span class="f">11-CommonMistakes.jsx</span></h3><pre>import { useState } from 'react';
+
+// 1. Mutating state directly: the input looks "stuck"
+function MutationBug() {
+  const [form, setForm] = useState({ name: '' });
+  const handle = (e) =&gt; { form.name = e.target.value; setForm(form); };   // WRONG
+  return &lt;p&gt;&lt;input value={form.name} onChange={handle} placeholder="type: nothing happens" /&gt;&lt;/p&gt;;
+}
+function MutationFixed() {
+  const [form, setForm] = useState({ name: '' });
+  const handle = (e) =&gt; setForm(prev =&gt; ({ ...prev, name: e.target.value }));   // CORRECT
+  return &lt;p&gt;&lt;input value={form.name} onChange={handle} placeholder="type: it works" /&gt;&lt;/p&gt;;
+}
+
+// 2. No disabled state: double submits
+function SlowForm({ protect }) {
+  const [loading, setLoading] = useState(false);
+  const [count, setCount]     = useState(0);
+  const submit = async (e) =&gt; {
+    e.preventDefault();
+    setCount(c =&gt; c + 1);
+    setLoading(true);
+    await new Promise(r =&gt; setTimeout(r, 1500));   // slow network
+    setLoading(false);
+  };
+  return (
+    &lt;form onSubmit={submit}&gt;
+      &lt;button disabled={protect &amp;&amp; loading}&gt;{loading ? 'Sending...' : 'Send'}&lt;/button&gt;
+      &lt;span&gt; requests sent: {count}&lt;/span&gt;
+    &lt;/form&gt;
+  );
+}
+
+// 3. Labels: htmlFor + id
+function LabelDemo() {
+  return (
+    &lt;div&gt;
+      &lt;p&gt;&lt;label&gt;Name (label NOT linked): &lt;/label&gt;&lt;input id="nolink" /&gt;&lt;/p&gt;
+      &lt;p&gt;&lt;label htmlFor="linked"&gt;Name (label linked): &lt;/label&gt;&lt;input id="linked" /&gt;&lt;/p&gt;
+      &lt;small&gt;Click each label: only the linked one focuses its input.&lt;/small&gt;
+    &lt;/div&gt;
+  );
+}
+
+// 4. Validate on blur, not only on submit
+function BlurValidation() {
+  const [v, setV] = useState('');
+  const [touched, setTouched] = useState(false);
+  const err = touched &amp;&amp; v.trim() === '' ? 'Required' : '';
+  return (
+    &lt;p&gt;&lt;input value={v} onChange={e =&gt; setV(e.target.value)} onBlur={() =&gt; setTouched(true)} placeholder="click in, then click out" /&gt;
+       {err &amp;&amp; &lt;span style={{ color: 'crimson' }}&gt; {err}&lt;/span&gt;}&lt;/p&gt;
+  );
+}
+
+export default function Demo() {
+  return (
+    &lt;div&gt;
+      &lt;h4&gt;1. Mutating state&lt;/h4&gt;&lt;MutationBug /&gt;&lt;MutationFixed /&gt;
+      &lt;h4&gt;2. Double submit (click Send twice quickly)&lt;/h4&gt;&lt;SlowForm protect={false} /&gt;&lt;SlowForm protect={true} /&gt;
+      &lt;h4&gt;3. Label link&lt;/h4&gt;&lt;LabelDemo /&gt;
+      &lt;h4&gt;4. Validate on blur&lt;/h4&gt;&lt;BlurValidation /&gt;
+    &lt;/div&gt;
+  );
+}
+</pre></div></div></section>
+<section id="profile"><h2>Homework starter: student profile editor</h2><p class="d">Work through the TODO comments in the source.</p><div class="grid"><div><h3>Live result</h3><div class="res" id="res-profile"></div></div><div><h3>Source <span class="f">10-ProfileEditorStarter.jsx</span></h3><pre>import { useState, useRef } from 'react';
+
+const MAJORS = ['Computer Engineering', 'Software', 'Artificial Intelligence', 'Design'];
+
+// Homework starter: Student Profile Editor
+// TODO 1: validate on submit: all required, studentId exactly 10 digits, bio &lt; 200 chars
+// TODO 2: on submit, show a "Profile Preview" card with all entered data
+// TODO 3: profile photo preview (URL.createObjectURL on the chosen file)
+// TODO 4 (stretch): skills as tags: Enter to add, x to remove (array in state)
+export default function ProfileEditorStarter() {
+  const [form, setForm] = useState({
+    name: '', studentId: '', major: MAJORS[0], year: '1', bio: ''
+  });
+  const fileRef = useRef(null);
+  const [fileName, setFileName] = useState('');
+
+  const handleChange = (e) =&gt;
+    setForm(prev =&gt; ({ ...prev, [e.target.name]: e.target.value }));
+
+  const handleSubmit = (e) =&gt; {
+    e.preventDefault();
+    console.log(form, fileName);   // replace with validation + preview
+  };
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      &lt;p&gt;&lt;input name="name" value={form.name} onChange={handleChange} placeholder="Name" /&gt;&lt;/p&gt;
+      &lt;p&gt;&lt;input name="studentId" value={form.studentId} onChange={handleChange} placeholder="Student ID (10 digits)" /&gt;&lt;/p&gt;
+      &lt;p&gt;&lt;select name="major" value={form.major} onChange={handleChange}&gt;
+        {MAJORS.map(m =&gt; &lt;option key={m}&gt;{m}&lt;/option&gt;)}
+      &lt;/select&gt;&lt;/p&gt;
+      &lt;p&gt;Year: {['1', '2', '3', '4'].map(y =&gt; (
+        &lt;label key={y}&gt;&lt;input type="radio" name="year" value={y}
+               checked={form.year === y} onChange={handleChange} /&gt; {y} &lt;/label&gt;
+      ))}&lt;/p&gt;
+      &lt;p&gt;&lt;textarea name="bio" value={form.bio} onChange={handleChange} rows={3} placeholder="Bio" /&gt;
+         &lt;br /&gt;{form.bio.length} / 200 characters&lt;/p&gt;
+      &lt;p&gt;&lt;input type="file" ref={fileRef} onChange={() =&gt; setFileName(fileRef.current.files[0]?.name || '')} /&gt;
+         {fileName &amp;&amp; &lt;span&gt; {fileName}&lt;/span&gt;}&lt;/p&gt;
+      &lt;button&gt;Save profile&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+</pre></div></div></section>
+
+</main>
+<div id="dock"><div class="hd"><b>Console</b><span>warnings, console.log output and simulated requests</span><button onclick="document.getElementById('log').textContent=''">Clear</button></div><div id="log"></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.development.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.development.js"></script>
+<script>
+
+const logEl=()=>document.getElementById('log');
+function logLine(msg,cls){const el=logEl();if(!el)return;const d=document.createElement('div');if(cls)d.className=cls;d.textContent=new Date().toLocaleTimeString('en-GB')+'  '+msg;el.appendChild(d);while(el.childNodes.length>200)el.removeChild(el.firstChild);el.scrollTop=el.scrollHeight;}
+['log','warn','error'].forEach(k=>{const o=console[k].bind(console);console[k]=(...a)=>{o(...a);try{logLine(a.map(x=>typeof x==='string'?x:(x instanceof Error?x.message:JSON.stringify(x))).join(' ').slice(0,300),k==='log'?'':'err');}catch(e){}};});
+const delay=(ms,sig)=>new Promise((res,rej)=>{const abort=()=>{clearTimeout(t);rej(new DOMException('The operation was aborted.','AbortError'));};const t=setTimeout(()=>{if(sig)sig.removeEventListener('abort',abort);res();},ms);if(sig){if(sig.aborted)return abort();sig.addEventListener('abort',abort);}});
+function reply(status,body){return {ok:status>=200&&status<300,status,json:async()=>body};}
+window.fetch=async(url,opts={})=>{const u=new URL(url,location.href);logLine('-> '+(opts.method||'GET')+' '+u.pathname,'net');await delay(900,opts.signal);
+  if(u.pathname==='/api/login'){let b={};try{b=JSON.parse(opts.body||'{}');}catch(e){}const ok=b.email==='student@gachon.ac.kr'&&b.password==='react1234';logLine('<- '+(ok?200:401)+(ok?' OK':' Unauthorized'),ok?'ok':'err');return reply(ok?200:401,ok?{token:'demo'}:{message:'Invalid credentials'});}
+  logLine('<- 404','err');return reply(404,{message:'No simulated route'});};
+const demos=[];let strict=false;
+function view(C){return strict?React.createElement(React.StrictMode,null,React.createElement(C)):React.createElement(C);}
+function mount(id,C){const root=ReactDOM.createRoot(document.getElementById('res-'+id));demos.push({root,C});root.render(view(C));}
+function setStrict(v){strict=v;demos.forEach(d=>d.root.render(view(d.C)));logLine('Strict Mode '+(v?'ON: components render twice, effects run twice on mount':'OFF'));}
+
+
+(function(){const {useState,useEffect,useRef}=React;
+
+function ControlledVsUncontrolled() {
+    const [text, setText] = useState('');
+    const [read, setRead] = useState('');
+    const inputRef = useRef(null);
+    return (React.createElement("div", null,
+        React.createElement("h4", null, "1. Controlled: React state IS the value"),
+        React.createElement("input", { value: text, onChange: e => setText(e.target.value), placeholder: "type here" }),
+        React.createElement("p", null,
+            "state = \"",
+            text,
+            "\""),
+        React.createElement("h4", null, "2. Controlled but with NO onChange: stuck"),
+        React.createElement("input", { value: "I cannot be edited" }),
+        React.createElement("h4", null, "3. Uncontrolled: the DOM owns the value"),
+        React.createElement("input", { ref: inputRef, defaultValue: "edit me, then press the button" }),
+        React.createElement("button", { onClick: () => setRead(inputRef.current.value) }, "Read value (ref)"),
+        React.createElement("p", null,
+            "read from the DOM: \"",
+            read,
+            "\"")));
+}
+
+mount('controlled',ControlledVsUncontrolled);})();
+(function(){const {useState,useEffect,useRef}=React;
+
+function SearchBar() {
+    const [query, setQuery] = useState('');
+    return (React.createElement("div", null,
+        React.createElement("input", { type: "text", value: query, onChange: e => setQuery(e.target.value), placeholder: "Search..." }),
+        React.createElement("p", null,
+            "Searching for: \"",
+            query,
+            "\""),
+        React.createElement("span", null,
+            query.length,
+            " / 100 characters"),
+        React.createElement("button", { onClick: () => setQuery('') }, "Clear")));
+}
+
+mount('search',SearchBar);})();
+(function(){const {useState,useEffect,useRef}=React;
+
+function PreferenceForm() {
+    const [country, setCountry] = useState('KR');
+    const [bio, setBio] = useState('');
+    const [agree, setAgree] = useState(false);
+    const [plan, setPlan] = useState('free');
+    return (React.createElement("form", null,
+        React.createElement("select", { value: country, onChange: e => setCountry(e.target.value) },
+            React.createElement("option", { value: "KR" }, "South Korea"),
+            React.createElement("option", { value: "UZ" }, "Uzbekistan"),
+            React.createElement("option", { value: "US" }, "United States")),
+        React.createElement("p", null,
+            React.createElement("textarea", { value: bio, onChange: e => setBio(e.target.value), rows: 3 })),
+        React.createElement("label", null,
+            React.createElement("input", { type: "checkbox", checked: agree, onChange: e => setAgree(e.target.checked) }),
+            " I agree"),
+        React.createElement("p", null,
+            React.createElement("label", null,
+                React.createElement("input", { type: "radio", value: "free", checked: plan === 'free', onChange: e => setPlan(e.target.value) }),
+                " Free"),
+            React.createElement("label", null,
+                React.createElement("input", { type: "radio", value: "pro", checked: plan === 'pro', onChange: e => setPlan(e.target.value) }),
+                " Pro")),
+        React.createElement("pre", null, JSON.stringify({ country, bio, agree, plan }, null, 2))));
+}
+
+mount('prefs',PreferenceForm);})();
+(function(){const {useState,useEffect,useRef}=React;
+
+function RegistrationForm() {
+    const [form, setForm] = useState({
+        name: '', email: '', password: '', role: 'student', subscribe: false
+    });
+    // One handler for ALL fields: reads e.target.name
+    const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setForm(prev => ({
+            ...prev,
+            [name]: type === 'checkbox' ? checked : value // computed key
+        }));
+    };
+    return (React.createElement("form", null,
+        React.createElement("input", { name: "name", value: form.name, onChange: handleChange, placeholder: "Name" }),
+        React.createElement("input", { name: "email", value: form.email, onChange: handleChange, type: "email", placeholder: "Email" }),
+        React.createElement("input", { name: "password", value: form.password, onChange: handleChange, type: "password", placeholder: "Password" }),
+        React.createElement("select", { name: "role", value: form.role, onChange: handleChange },
+            React.createElement("option", { value: "student" }, "Student"),
+            React.createElement("option", { value: "ta" }, "Teaching Assistant")),
+        React.createElement("label", null,
+            React.createElement("input", { name: "subscribe", type: "checkbox", checked: form.subscribe, onChange: handleChange }),
+            " Newsletter"),
+        React.createElement("pre", null, JSON.stringify(form, null, 2))));
+}
+
+mount('onehandler',RegistrationForm);})();
+(function(){const {useState,useEffect,useRef}=React;
+
+function LoginForm() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [status, setStatus] = useState('idle'); // idle|loading|success|error
+    const handleSubmit = async (e) => {
+        e.preventDefault(); // stop the browser's default page reload
+        setStatus('loading');
+        try {
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            if (!res.ok)
+                throw new Error('Invalid credentials');
+            setStatus('success');
+        }
+        catch (err) {
+            setStatus('error');
+        }
+    };
+    return (React.createElement("form", { onSubmit: handleSubmit },
+        React.createElement("p", null, "Hint (simulated server): student@gachon.ac.kr / react1234"),
+        React.createElement("input", { value: email, onChange: e => setEmail(e.target.value), type: "email", placeholder: "Email" }),
+        React.createElement("input", { value: password, onChange: e => setPassword(e.target.value), type: "password", placeholder: "Password" }),
+        React.createElement("button", { disabled: status === 'loading' }, status === 'loading' ? 'Logging in...' : 'Log In'),
+        status === 'error' && React.createElement("p", null, "Login failed. Check your credentials."),
+        status === 'success' && React.createElement("p", null, "Welcome back!"),
+        React.createElement("p", null,
+            "status = ",
+            status)));
+}
+
+mount('login',LoginForm);})();
+(function(){const {useState,useEffect,useRef}=React;
+
+function RegisterForm() {
+    const [form, setForm] = useState({ name: '', email: '', password: '' });
+    const [errors, setErrors] = useState({});
+    const [done, setDone] = useState(false);
+    const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    const validate = () => {
+        const errs = {};
+        if (!form.name.trim())
+            errs.name = 'Name is required';
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
+            errs.email = 'Enter a valid email address';
+        if (form.password.length < 8)
+            errs.password = 'Password must be at least 8 characters';
+        return errs; // empty object = all valid
+    };
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const errs = validate();
+        if (Object.keys(errs).length > 0) {
+            setErrors(errs);
+            return;
+        }
+        setErrors({}); // clear errors on a successful resubmit
+        setDone(true); // all valid: proceed with submission
+    };
+    if (done)
+        return React.createElement("p", null,
+            "Registered: ",
+            form.name,
+            " (",
+            form.email,
+            ")");
+    return (React.createElement("form", { onSubmit: handleSubmit, noValidate: true },
+        React.createElement("p", null,
+            React.createElement("input", { name: "name", value: form.name, onChange: handleChange, placeholder: "Name" }),
+            errors.name && React.createElement("span", { style: { color: 'crimson' } },
+                " ",
+                errors.name)),
+        React.createElement("p", null,
+            React.createElement("input", { name: "email", value: form.email, onChange: handleChange, placeholder: "Email" }),
+            errors.email && React.createElement("span", { style: { color: 'crimson' } },
+                " ",
+                errors.email)),
+        React.createElement("p", null,
+            React.createElement("input", { name: "password", type: "password", value: form.password, onChange: handleChange, placeholder: "Password" }),
+            errors.password && React.createElement("span", { style: { color: 'crimson' } },
+                " ",
+                errors.password)),
+        React.createElement("button", null, "Register")));
+}
+
+mount('validation',RegisterForm);})();
+(function(){const {useState,useEffect,useRef}=React;
+
+function SearchFocus() {
+    const inputRef = useRef(null);
+    const handleFocus = () => {
+        inputRef.current.focus(); // focus the DOM element
+        inputRef.current.select(); // also select existing text
+    };
+    return (React.createElement("div", null,
+        React.createElement("input", { ref: inputRef, type: "text", defaultValue: "select me" }),
+        React.createElement("button", { onClick: handleFocus }, "Focus Search")));
+}
+// File inputs MUST use useRef (they cannot be controlled)
+function FileUpload() {
+    const fileRef = useRef(null);
+    const [info, setInfo] = useState('no file chosen');
+    const handleUpload = () => {
+        const file = fileRef.current.files[0];
+        console.log(file.name, file.size, file.type);
+        setInfo(file.name + ' · ' + file.size + ' bytes · ' + (file.type || 'unknown type'));
+    };
+    return (React.createElement("div", null,
+        React.createElement("input", { type: "file", ref: fileRef, onChange: handleUpload }),
+        React.createElement("p", null, info)));
+}
+function Demo() {
+    return (React.createElement("div", null,
+        React.createElement("h4", null, "Focus management"),
+        React.createElement(SearchFocus, null),
+        React.createElement("h4", null, "File input"),
+        React.createElement(FileUpload, null)));
+}
+
+mount('refs',Demo);})();
+(function(){const {useState,useEffect,useRef}=React;
+
+const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Validation is DERIVED from state: no extra state to keep in sync
+function validateStep(step, f) {
+    const e = {};
+    if (step === 1) {
+        if (f.name.trim().length < 2)
+            e.name = 'At least 2 characters';
+        if (!emailRe.test(f.email))
+            e.email = 'Enter a valid email address';
+    }
+    if (step === 2) {
+        if (f.username.length < 3 || /\s/.test(f.username))
+            e.username = 'At least 3 characters, no spaces';
+        if (f.password.length < 8)
+            e.password = 'At least 8 characters';
+        if (!f.confirm || f.confirm !== f.password)
+            e.confirm = 'Passwords must match';
+    }
+    return e;
+}
+function Field({ label, name, type = 'text', value, onChange, onBlur, error }) {
+    const id = 'f-' + name;
+    return (React.createElement("p", null,
+        React.createElement("label", { htmlFor: id },
+            label,
+            " "),
+        React.createElement("input", { id: id, name: name, type: type, value: value, onChange: onChange, onBlur: onBlur, "aria-invalid": !!error, "aria-describedby": error ? id + '-err' : undefined }),
+        error && React.createElement("span", { id: id + '-err', style: { color: 'crimson' } },
+            " ",
+            error)));
+}
+function MultiStepRegistration() {
+    const [step, setStep] = useState(1);
+    const [done, setDone] = useState(false);
+    const [touched, setTouched] = useState({});
+    const [form, setForm] = useState({
+        name: '', email: '', username: '', password: '', confirm: '',
+        role: 'student', subscribe: false
+    });
+    const errors = validateStep(step, form);
+    const valid = Object.keys(errors).length === 0;
+    const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setForm(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    };
+    const handleBlur = (e) => setTouched(t => ({ ...t, [e.target.name]: true }));
+    const shown = (name) => (touched[name] ? errors[name] : undefined);
+    const next = () => { if (valid)
+        setStep(s => s + 1); };
+    const prev = () => setStep(s => s - 1); // form data stays in state
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const { confirm, ...fullFormObject } = form;
+        console.log(fullFormObject);
+        setDone(true);
+    };
+    if (done)
+        return React.createElement("p", null, "Registration submitted. Check the console for the form object.");
+    const props = (name) => ({ name, value: form[name], onChange: handleChange, onBlur: handleBlur, error: shown(name) });
+    return (React.createElement("form", { onSubmit: handleSubmit },
+        React.createElement("p", null,
+            React.createElement("b", null,
+                "Step ",
+                step,
+                " of 3")),
+        React.createElement("progress", { value: step, max: "3" }),
+        step === 1 && (React.createElement(React.Fragment, null,
+            React.createElement(Field, { label: "Name", ...props('name') }),
+            React.createElement(Field, { label: "Email", type: "email", ...props('email') }))),
+        step === 2 && (React.createElement(React.Fragment, null,
+            React.createElement(Field, { label: "Username", ...props('username') }),
+            React.createElement(Field, { label: "Password", type: "password", ...props('password') }),
+            React.createElement(Field, { label: "Confirm password", type: "password", ...props('confirm') }))),
+        step === 3 && (React.createElement(React.Fragment, null,
+            React.createElement("p", null, ['student', 'ta', 'instructor'].map(r => (React.createElement("label", { key: r },
+                React.createElement("input", { type: "radio", name: "role", value: r, checked: form.role === r, onChange: handleChange }),
+                " ",
+                r,
+                ' ')))),
+            React.createElement("label", null,
+                React.createElement("input", { type: "checkbox", name: "subscribe", checked: form.subscribe, onChange: handleChange }),
+                " Subscribe to newsletter"),
+            React.createElement("h4", null, "Review"),
+            React.createElement("ul", null,
+                React.createElement("li", null,
+                    "Name: ",
+                    form.name),
+                React.createElement("li", null,
+                    "Email: ",
+                    form.email),
+                React.createElement("li", null,
+                    "Username: ",
+                    form.username),
+                React.createElement("li", null,
+                    "Password: ",
+                    '*'.repeat(form.password.length)),
+                React.createElement("li", null,
+                    "Role: ",
+                    form.role),
+                React.createElement("li", null,
+                    "Newsletter: ",
+                    form.subscribe ? 'yes' : 'no')))),
+        React.createElement("p", null,
+            step > 1 && React.createElement("button", { type: "button", onClick: prev }, "Previous"),
+            step < 3 && React.createElement("button", { type: "button", onClick: next, disabled: !valid }, "Next"),
+            step === 3 && React.createElement("button", null, "Submit"))));
+}
+
+mount('wizard',MultiStepRegistration);})();
+(function(){const {useState,useEffect,useRef}=React;
+
+function AccessibleForm() {
+    const [email, setEmail] = useState('');
+    const [touched, setTouched] = useState(false);
+    const error = touched && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+        ? 'Enter a valid email address' : '';
+    return (React.createElement("form", { noValidate: true, onSubmit: e => { e.preventDefault(); setTouched(true); } },
+        React.createElement("label", { htmlFor: "email" },
+            "Email ",
+            React.createElement("span", { "aria-hidden": "true" }, "(required)")),
+        React.createElement("br", null),
+        React.createElement("input", { id: "email", type: "email", value: email, onChange: e => setEmail(e.target.value), onBlur: () => setTouched(true), "aria-required": "true", "aria-invalid": !!error, "aria-describedby": error ? 'email-error' : undefined }),
+        error && React.createElement("p", { id: "email-error", role: "alert", style: { color: 'crimson' } }, error),
+        React.createElement("p", null,
+            React.createElement("button", null, "Submit")),
+        React.createElement("p", null, "Test it: click the label, then tab through using only the keyboard.")));
+}
+
+mount('a11y',AccessibleForm);})();
+(function(){const {useState,useEffect,useRef}=React;
+
+// 1. Mutating state directly: the input looks "stuck"
+function MutationBug() {
+    const [form, setForm] = useState({ name: '' });
+    const handle = (e) => { form.name = e.target.value; setForm(form); }; // WRONG
+    return React.createElement("p", null,
+        React.createElement("input", { value: form.name, onChange: handle, placeholder: "type: nothing happens" }));
+}
+function MutationFixed() {
+    const [form, setForm] = useState({ name: '' });
+    const handle = (e) => setForm(prev => ({ ...prev, name: e.target.value })); // CORRECT
+    return React.createElement("p", null,
+        React.createElement("input", { value: form.name, onChange: handle, placeholder: "type: it works" }));
+}
+// 2. No disabled state: double submits
+function SlowForm({ protect }) {
+    const [loading, setLoading] = useState(false);
+    const [count, setCount] = useState(0);
+    const submit = async (e) => {
+        e.preventDefault();
+        setCount(c => c + 1);
+        setLoading(true);
+        await new Promise(r => setTimeout(r, 1500)); // slow network
+        setLoading(false);
+    };
+    return (React.createElement("form", { onSubmit: submit },
+        React.createElement("button", { disabled: protect && loading }, loading ? 'Sending...' : 'Send'),
+        React.createElement("span", null,
+            " requests sent: ",
+            count)));
+}
+// 3. Labels: htmlFor + id
+function LabelDemo() {
+    return (React.createElement("div", null,
+        React.createElement("p", null,
+            React.createElement("label", null, "Name (label NOT linked): "),
+            React.createElement("input", { id: "nolink" })),
+        React.createElement("p", null,
+            React.createElement("label", { htmlFor: "linked" }, "Name (label linked): "),
+            React.createElement("input", { id: "linked" })),
+        React.createElement("small", null, "Click each label: only the linked one focuses its input.")));
+}
+// 4. Validate on blur, not only on submit
+function BlurValidation() {
+    const [v, setV] = useState('');
+    const [touched, setTouched] = useState(false);
+    const err = touched && v.trim() === '' ? 'Required' : '';
+    return (React.createElement("p", null,
+        React.createElement("input", { value: v, onChange: e => setV(e.target.value), onBlur: () => setTouched(true), placeholder: "click in, then click out" }),
+        err && React.createElement("span", { style: { color: 'crimson' } },
+            " ",
+            err)));
+}
+function Demo() {
+    return (React.createElement("div", null,
+        React.createElement("h4", null, "1. Mutating state"),
+        React.createElement(MutationBug, null),
+        React.createElement(MutationFixed, null),
+        React.createElement("h4", null, "2. Double submit (click Send twice quickly)"),
+        React.createElement(SlowForm, { protect: false }),
+        React.createElement(SlowForm, { protect: true }),
+        React.createElement("h4", null, "3. Label link"),
+        React.createElement(LabelDemo, null),
+        React.createElement("h4", null, "4. Validate on blur"),
+        React.createElement(BlurValidation, null)));
+}
+
+mount('mistakes',Demo);})();
+(function(){const {useState,useEffect,useRef}=React;
+
+const MAJORS = ['Computer Engineering', 'Software', 'Artificial Intelligence', 'Design'];
+// Homework starter: Student Profile Editor
+// TODO 1: validate on submit: all required, studentId exactly 10 digits, bio < 200 chars
+// TODO 2: on submit, show a "Profile Preview" card with all entered data
+// TODO 3: profile photo preview (URL.createObjectURL on the chosen file)
+// TODO 4 (stretch): skills as tags: Enter to add, x to remove (array in state)
+function ProfileEditorStarter() {
+    const [form, setForm] = useState({
+        name: '', studentId: '', major: MAJORS[0], year: '1', bio: ''
+    });
+    const fileRef = useRef(null);
+    const [fileName, setFileName] = useState('');
+    const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        console.log(form, fileName); // replace with validation + preview
+    };
+    return (React.createElement("form", { onSubmit: handleSubmit },
+        React.createElement("p", null,
+            React.createElement("input", { name: "name", value: form.name, onChange: handleChange, placeholder: "Name" })),
+        React.createElement("p", null,
+            React.createElement("input", { name: "studentId", value: form.studentId, onChange: handleChange, placeholder: "Student ID (10 digits)" })),
+        React.createElement("p", null,
+            React.createElement("select", { name: "major", value: form.major, onChange: handleChange }, MAJORS.map(m => React.createElement("option", { key: m }, m)))),
+        React.createElement("p", null,
+            "Year: ",
+            ['1', '2', '3', '4'].map(y => (React.createElement("label", { key: y },
+                React.createElement("input", { type: "radio", name: "year", value: y, checked: form.year === y, onChange: handleChange }),
+                " ",
+                y,
+                " ")))),
+        React.createElement("p", null,
+            React.createElement("textarea", { name: "bio", value: form.bio, onChange: handleChange, rows: 3, placeholder: "Bio" }),
+            React.createElement("br", null),
+            form.bio.length,
+            " / 200 characters"),
+        React.createElement("p", null,
+            React.createElement("input", { type: "file", ref: fileRef, onChange: () => { var _a; return setFileName(((_a = fileRef.current.files[0]) === null || _a === void 0 ? void 0 : _a.name) || ''); } }),
+            fileName && React.createElement("span", null,
+                " ",
+                fileName)),
+        React.createElement("button", null, "Save profile")));
+}
+
+mount('profile',ProfileEditorStarter);})();
+
+</script></body></html>
