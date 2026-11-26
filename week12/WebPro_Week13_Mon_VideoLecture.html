@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React Forms &amp; Controlled Components · Week 13 Mon Video Lecture</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;700&display=swap">
+<style>
+:root{--bg:#0a0f1e;--surf:#111827;--surf2:#1f2937;--brd:#374151;--tx:#f1f5f9;--mu:#94a3b8;--ac:#e879f9;--ac2:#c026d3;--acl:#1a0520}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column}
+header{position:sticky;top:0;z-index:100;background:#060b14;border-bottom:2px solid var(--ac);display:flex;align-items:center;justify-content:space-between;padding:10px 20px}
+.badge{background:var(--ac);color:#0a0f1e;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;padding:4px 12px;border-radius:6px}
+.hdr-label{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em}
+.hdr-title{font-size:14px;font-weight:600;color:var(--tx)}
+#counter{font-family:'Space Grotesk',sans-serif;font-size:14px;color:var(--mu)}
+.progress-wrap{position:fixed;bottom:72px;left:0;right:0;height:3px;background:var(--surf2)}
+#progress-bar{height:3px;background:var(--ac);transition:width .3s}
+nav{position:fixed;bottom:0;left:0;right:0;background:#060b14;border-top:1px solid var(--brd);display:flex;justify-content:center;gap:12px;padding:14px}
+.btn{background:var(--surf2);border:1px solid var(--brd);color:var(--tx);padding:8px 24px;border-radius:8px;cursor:pointer;font-size:14px;font-family:'Inter',sans-serif}
+.btn:hover{background:var(--brd)}
+.btn.primary{background:var(--ac);color:#0a0f1e;border-color:var(--ac);font-weight:600}
+#slides{flex:1;padding-bottom:120px}
+.slide{display:none;min-height:calc(100vh - 160px);padding:3rem 2rem;max-width:860px;margin:0 auto;animation:fadeIn .25s ease}
+.slide.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+h1{font-family:'Space Grotesk',sans-serif;font-size:2.6rem;font-weight:700;color:var(--ac);line-height:1.2;margin-bottom:.6rem}
+h2{font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:700;color:var(--ac);margin-bottom:1.2rem;padding-bottom:.5rem;border-bottom:2px solid var(--acl)}
+h3{font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:600;color:var(--ac2);margin:1.2rem 0 .6rem}
+p{color:var(--mu);line-height:1.75;margin-bottom:1rem}
+ul,ol{padding-left:1.4rem;color:var(--mu);line-height:1.9;margin-bottom:1rem}
+li strong{color:var(--tx)}
+pre{background:var(--surf2);border:1px solid var(--brd);border-radius:10px;padding:1.4rem;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:#e2e8f0;line-height:1.65;margin:1rem 0}
+code{font-family:'JetBrains Mono',monospace;font-size:.82rem;background:var(--surf2);padding:1px 6px;border-radius:4px;color:var(--ac)}
+.subtitle{font-size:1.2rem;color:var(--mu);margin-top:.4rem}
+.instructor{margin-top:1.2rem;font-size:.95rem;color:var(--mu)}
+.agenda-list{list-style:none;padding:0;counter-reset:agenda}
+.agenda-list li{counter-increment:agenda;padding:.7rem 1rem .7rem 3.5rem;position:relative;background:var(--surf);border:1px solid var(--brd);border-radius:8px;margin-bottom:.6rem;color:var(--tx)}
+.agenda-list li::before{content:counter(agenda);position:absolute;left:.9rem;top:.65rem;background:var(--ac);color:#0a0f1e;font-weight:700;font-size:.85rem;width:1.6rem;height:1.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.card{background:var(--surf);border:1px solid var(--brd);border-radius:10px;padding:1.4rem;margin-bottom:1rem}
+.card-title{font-weight:600;color:var(--ac);margin-bottom:.5rem;font-family:'Space Grotesk',sans-serif}
+.tip{background:var(--acl);border-left:3px solid var(--ac);border-radius:0 8px 8px 0;padding:.8rem 1rem;margin:1rem 0;color:var(--tx);font-size:.93rem}
+.practice-box{background:#0d1f0d;border:2px dashed #22c55e;border-radius:10px;padding:1.4rem;margin:1rem 0}
+.practice-box h3{color:#4ade80;margin-top:0}
+.key-point{display:flex;align-items:flex-start;gap:.8rem;padding:.6rem 0;border-bottom:1px solid var(--brd)}
+.key-point:last-child{border-bottom:none}
+.kp-num{background:var(--ac);color:#0a0f1e;font-weight:700;font-size:.8rem;min-width:1.6rem;height:1.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;flex-shrink:0;margin-top:.1rem}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1rem 0}
+@media(max-width:600px){.two-col{grid-template-columns:1fr}h1{font-size:1.8rem}h2{font-size:1.4rem}}
+.comment{color:#6b7280}.kw{color:#f97316}.fn{color:#a78bfa}.str{color:#34d399}.num{color:#fb923c}.tag{color:#f87171}
+</style>
+</head>
+<body>
+<header>
+  <div style="display:flex;align-items:center;gap:12px">
+    <span class="badge">Forms</span>
+    <div>
+      <div class="hdr-label">Web Programming K0126_002 · Week 13 Monday</div>
+      <div class="hdr-title">React Forms &amp; Controlled Components</div>
+    </div>
+  </div>
+  <span id="counter">1 / 15</span>
+</header>
+
+<div id="slides">
+
+<div class="slide active" id="slide-1">
+  <div style="display:flex;flex-direction:column;justify-content:center;min-height:60vh;text-align:center">
+    <div style="font-size:4rem;margin-bottom:1rem">📝</div>
+    <h1>React Forms &amp;<br>Controlled Components</h1>
+    <p class="subtitle">Handling user input the React way</p>
+    <p class="instructor">Web Programming K0126_002 · Week 13 Monday<br>Dr. Mukhiddin Toshpulatov · Gachon University</p>
+    <div class="tip" style="max-width:500px;margin:2rem auto 0">Use <strong>← →</strong> arrow keys or the buttons below to navigate.</div>
+  </div>
+</div>
+
+<div class="slide" id="slide-2">
+  <h2>📋 Today's Agenda</h2>
+  <ol class="agenda-list">
+    <li>Controlled vs Uncontrolled inputs</li>
+    <li>The controlled input pattern (<code>value</code> + <code>onChange</code>)</li>
+    <li>Handling multiple inputs with one handler</li>
+    <li>Form submission and <code>e.preventDefault()</code></li>
+    <li>Client-side form validation</li>
+    <li>Checkbox and radio button state</li>
+    <li>Select dropdowns</li>
+    <li>useRef for uncontrolled inputs</li>
+    <li>Practice challenge</li>
+  </ol>
+</div>
+
+<div class="slide" id="slide-3">
+  <h2>⚖️ Controlled vs Uncontrolled</h2>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Uncontrolled Input</div>
+      <ul>
+        <li>DOM manages the value</li>
+        <li>Read value with <code>ref.current.value</code></li>
+        <li>Simpler — less code</li>
+        <li>Hard to validate in real-time</li>
+        <li>Hard to reset programmatically</li>
+      </ul>
+      <pre style="font-size:.78rem">&lt;<span class="tag">input</span> defaultValue=<span class="str">"initial"</span> /&gt;</pre>
+    </div>
+    <div class="card">
+      <div class="card-title">Controlled Input (React way)</div>
+      <ul>
+        <li>React state manages the value</li>
+        <li>Read value from state</li>
+        <li>More code — more power</li>
+        <li>Real-time validation easy</li>
+        <li>Reset by setting state to ""</li>
+      </ul>
+      <pre style="font-size:.78rem">&lt;<span class="tag">input</span> value={name} onChange={...} /&gt;</pre>
+    </div>
+  </div>
+  <div class="tip">Use <strong>controlled inputs</strong> in React for most cases. Uncontrolled inputs are only needed for file inputs or third-party DOM libraries.</div>
+</div>
+
+<div class="slide" id="slide-4">
+  <h2>🎛️ The Controlled Input Pattern</h2>
+  <p>Three things make an input "controlled": <code>value</code> from state, <code>onChange</code> that updates state, and state initialized to a string.</p>
+  <pre><span class="kw">import</span> { useState } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="kw">function</span> <span class="fn">NameInput</span>() {
+  <span class="kw">const</span> [name, setName] = useState(<span class="str">''</span>); <span class="comment">// must be string, not null/undefined</span>
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      &lt;<span class="tag">label</span> htmlFor=<span class="str">"name"</span>&gt;이름&lt;/<span class="tag">label</span>&gt;
+      &lt;<span class="tag">input</span>
+        id=<span class="str">"name"</span>
+        type=<span class="str">"text"</span>
+        value={name}            <span class="comment">// ← controlled by state</span>
+        onChange={e =&gt; setName(e.target.value)} <span class="comment">// ← updates state</span>
+        placeholder=<span class="str">"이름을 입력하세요"</span>
+      /&gt;
+      &lt;<span class="tag">p</span>&gt;입력: {name || <span class="str">'(없음)'</span>}&lt;/<span class="tag">p</span>&gt;
+      &lt;<span class="tag">button</span> onClick={() =&gt; setName(<span class="str">''</span>)}&gt;지우기&lt;/<span class="tag">button</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}</pre>
+</div>
+
+<div class="slide" id="slide-5">
+  <h2>🎯 Multiple Inputs — One Handler</h2>
+  <p>Use <code>e.target.name</code> to handle multiple inputs with a single <code>onChange</code> handler.</p>
+  <pre><span class="kw">function</span> <span class="fn">RegistrationForm</span>() {
+  <span class="kw">const</span> [form, setForm] = useState({
+    name: <span class="str">''</span>, email: <span class="str">''</span>, studentId: <span class="str">''</span>,
+  });
+
+  <span class="kw">const</span> <span class="fn">handleChange</span> = (e) =&gt; {
+    <span class="kw">const</span> { name, value } = e.target; <span class="comment">// name attribute of the input</span>
+    setForm(prev =&gt; ({ ...prev, [name]: value }));
+  };
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">form</span>&gt;
+      &lt;<span class="tag">input</span> name=<span class="str">"name"</span>      value={form.name}      onChange={handleChange} /&gt;
+      &lt;<span class="tag">input</span> name=<span class="str">"email"</span>     value={form.email}     onChange={handleChange} /&gt;
+      &lt;<span class="tag">input</span> name=<span class="str">"studentId"</span> value={form.studentId} onChange={handleChange} /&gt;
+    &lt;/<span class="tag">form</span>&gt;
+  );
+}</pre>
+  <div class="tip">The <code>name</code> attribute on the HTML <code>&lt;input&gt;</code> must match the key in your state object.</div>
+</div>
+
+<div class="slide" id="slide-6">
+  <h2>🚀 Form Submission</h2>
+  <p>Always call <code>e.preventDefault()</code> in <code>onSubmit</code> to stop the browser from reloading the page.</p>
+  <pre><span class="kw">function</span> <span class="fn">LoginForm</span>() {
+  <span class="kw">const</span> [form, setForm] = useState({ email: <span class="str">''</span>, password: <span class="str">''</span> });
+  <span class="kw">const</span> [status, setStatus] = useState(<span class="str">''</span>);
+
+  <span class="kw">const</span> <span class="fn">handleSubmit</span> = (e) =&gt; {
+    e.preventDefault(); <span class="comment">// ← prevents page reload</span>
+    setStatus(<span class="str">'로그인 중...'</span>);
+    <span class="comment">// POST to API</span>
+    fetch(<span class="str">'/api/login'</span>, {
+      method: <span class="str">'POST'</span>,
+      headers: { <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span> },
+      body: JSON.stringify(form),
+    }).then(res =&gt; {
+      <span class="kw">if</span> (res.ok) setStatus(<span class="str">'✅ 로그인 성공!'</span>);
+      <span class="kw">else</span> setStatus(<span class="str">'❌ 이메일 또는 비밀번호가 틀렸습니다.'</span>);
+    });
+  };
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">form</span> onSubmit={handleSubmit}&gt;
+      &lt;<span class="tag">input</span> name=<span class="str">"email"</span> type=<span class="str">"email"</span> value={form.email}
+             onChange={e =&gt; setForm(p =&gt; ({...p, email: e.target.value}))} /&gt;
+      &lt;<span class="tag">button</span> type=<span class="str">"submit"</span>&gt;로그인&lt;/<span class="tag">button</span>&gt;
+      {status &amp;&amp; &lt;<span class="tag">p</span>&gt;{status}&lt;/<span class="tag">p</span>&gt;}
+    &lt;/<span class="tag">form</span>&gt;
+  );
+}</pre>
+</div>
+
+<div class="slide" id="slide-7">
+  <h2>✅ Client-Side Validation</h2>
+  <pre><span class="kw">function</span> <span class="fn">SignupForm</span>() {
+  <span class="kw">const</span> [form, setForm] = useState({ name: <span class="str">''</span>, email: <span class="str">''</span>, password: <span class="str">''</span> });
+  <span class="kw">const</span> [errors, setErrors] = useState({});
+
+  <span class="kw">const</span> <span class="fn">validate</span> = () =&gt; {
+    <span class="kw">const</span> e = {};
+    <span class="kw">if</span> (!form.name.trim())         e.name = <span class="str">'이름을 입력하세요.'</span>;
+    <span class="kw">if</span> (!form.email.includes(<span class="str">'@'</span>)) e.email = <span class="str">'유효한 이메일을 입력하세요.'</span>;
+    <span class="kw">if</span> (form.password.length &lt; <span class="num">8</span>)  e.password = <span class="str">'비밀번호는 최소 8자입니다.'</span>;
+    <span class="kw">return</span> e;
+  };
+
+  <span class="kw">const</span> <span class="fn">handleSubmit</span> = (e) =&gt; {
+    e.preventDefault();
+    <span class="kw">const</span> errs = validate();
+    <span class="kw">if</span> (Object.keys(errs).length) { setErrors(errs); <span class="kw">return</span>; }
+    <span class="comment">// no errors — proceed with submission</span>
+    setErrors({});
+    console.log(<span class="str">'Submitting:'</span>, form);
+  };
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">form</span> onSubmit={handleSubmit}&gt;
+      &lt;<span class="tag">input</span> name=<span class="str">"name"</span> value={form.name}
+        onChange={e =&gt; setForm(p=&gt;({...p,name:e.target.value}))} /&gt;
+      {errors.name &amp;&amp; &lt;<span class="tag">span</span> className=<span class="str">"error"</span>&gt;{errors.name}&lt;/<span class="tag">span</span>&gt;}
+      &lt;<span class="tag">button</span> type=<span class="str">"submit"</span>&gt;가입&lt;/<span class="tag">button</span>&gt;
+    &lt;/<span class="tag">form</span>&gt;
+  );
+}</pre>
+</div>
+
+<div class="slide" id="slide-8">
+  <h2>☑️ Checkboxes &amp; Radio Buttons</h2>
+  <pre><span class="kw">function</span> <span class="fn">PreferencesForm</span>() {
+  <span class="kw">const</span> [agreed, setAgreed]   = useState(<span class="kw">false</span>);
+  <span class="kw">const</span> [gender, setGender]   = useState(<span class="str">'</span>');
+  <span class="kw">const</span> [skills, setSkills]   = useState([]);
+
+  <span class="kw">const</span> <span class="fn">toggleSkill</span> = (skill) =&gt; {
+    setSkills(prev =&gt;
+      prev.includes(skill)
+        ? prev.filter(s =&gt; s !== skill)
+        : [...prev, skill]
+    );
+  };
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">form</span>&gt;
+      <span class="comment">// Checkbox — controlled by boolean</span>
+      &lt;<span class="tag">input</span> type=<span class="str">"checkbox"</span> checked={agreed}
+             onChange={e =&gt; setAgreed(e.target.checked)} /&gt;
+      &lt;<span class="tag">label</span>&gt;약관에 동의합니다&lt;/<span class="tag">label</span>&gt;
+
+      <span class="comment">// Radio buttons — controlled by string</span>
+      {[<span class="str">'남성'</span>, <span class="str">'여성'</span>, <span class="str">'기타'</span>].map(g =&gt; (
+        &lt;<span class="tag">label</span> key={g}&gt;
+          &lt;<span class="tag">input</span> type=<span class="str">"radio"</span> value={g} checked={gender===g}
+                 onChange={() =&gt; setGender(g)} /&gt; {g}
+        &lt;/<span class="tag">label</span>&gt;
+      ))}
+
+      <span class="comment">// Multi-select checkboxes — controlled by array</span>
+      {[<span class="str">'HTML'</span>,<span class="str">'CSS'</span>,<span class="str">'React'</span>].map(s =&gt; (
+        &lt;<span class="tag">label</span> key={s}&gt;
+          &lt;<span class="tag">input</span> type=<span class="str">"checkbox"</span> checked={skills.includes(s)}
+                 onChange={() =&gt; toggleSkill(s)} /&gt; {s}
+        &lt;/<span class="tag">label</span>&gt;
+      ))}
+    &lt;/<span class="tag">form</span>&gt;
+  );
+}</pre>
+</div>
+
+<div class="slide" id="slide-9">
+  <h2>📋 Select Dropdowns &amp; Textarea</h2>
+  <pre><span class="kw">function</span> <span class="fn">CourseForm</span>() {
+  <span class="kw">const</span> [dept, setDept]       = useState(<span class="str">'computer'</span>);
+  <span class="kw">const</span> [comment, setComment] = useState(<span class="str">''</span>);
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">form</span>&gt;
+      <span class="comment">// Select dropdown — value on &lt;select&gt;, not &lt;option&gt;</span>
+      &lt;<span class="tag">label</span> htmlFor=<span class="str">"dept"</span>&gt;학과&lt;/<span class="tag">label</span>&gt;
+      &lt;<span class="tag">select</span> id=<span class="str">"dept"</span> value={dept} onChange={e =&gt; setDept(e.target.value)}&gt;
+        &lt;<span class="tag">option</span> value=<span class="str">"computer"</span>&gt;컴퓨터공학과&lt;/<span class="tag">option</span>&gt;
+        &lt;<span class="tag">option</span> value=<span class="str">"software"</span>&gt;소프트웨어학과&lt;/<span class="tag">option</span>&gt;
+        &lt;<span class="tag">option</span> value=<span class="str">"ai"</span>&gt;AI학과&lt;/<span class="tag">option</span>&gt;
+      &lt;/<span class="tag">select</span>&gt;
+
+      <span class="comment">// Textarea — also uses value + onChange</span>
+      &lt;<span class="tag">label</span> htmlFor=<span class="str">"comment"</span>&gt;강의 평가&lt;/<span class="tag">label</span>&gt;
+      &lt;<span class="tag">textarea</span>
+        id=<span class="str">"comment"</span>
+        value={comment}
+        onChange={e =&gt; setComment(e.target.value)}
+        rows={<span class="num">5</span>}
+        placeholder=<span class="str">"수업에 대한 의견을 적어주세요..."</span>
+      /&gt;
+      &lt;<span class="tag">p</span>&gt;{comment.length}/500자&lt;/<span class="tag">p</span>&gt;
+    &lt;/<span class="tag">form</span>&gt;
+  );
+}</pre>
+</div>
+
+<div class="slide" id="slide-10">
+  <h2>🔗 useRef for Uncontrolled Inputs</h2>
+  <p>Use <code>useRef</code> when you need to access a DOM element directly — for example, to focus an input or read a file input.</p>
+  <pre><span class="kw">import</span> { useRef, useEffect } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="kw">function</span> <span class="fn">AutoFocusSearch</span>() {
+  <span class="kw">const</span> inputRef = useRef(<span class="kw">null</span>);
+
+  <span class="comment">// Focus the input automatically on mount</span>
+  useEffect(() =&gt; {
+    inputRef.current.focus();
+  }, []);
+
+  <span class="kw">const</span> <span class="fn">handleSubmit</span> = () =&gt; {
+    <span class="comment">// Read value directly from DOM (uncontrolled)</span>
+    console.log(inputRef.current.value);
+  };
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      &lt;<span class="tag">input</span> ref={inputRef} type=<span class="str">"search"</span>
+             defaultValue=<span class="str">""</span> placeholder=<span class="str">"검색..."</span> /&gt;
+      &lt;<span class="tag">button</span> onClick={handleSubmit}&gt;검색&lt;/<span class="tag">button</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}</pre>
+  <div class="tip"><code>useRef</code> does NOT cause re-renders when its value changes — that's the key difference from <code>useState</code>.</div>
+</div>
+
+<div class="slide" id="slide-11">
+  <h2>🏆 Full Registration Form Example</h2>
+  <pre style="font-size:.75rem"><span class="kw">function</span> <span class="fn">StudentRegForm</span>() {
+  <span class="kw">const</span> [form, setForm] = useState({ name:<span class="str">''</span>,studentId:<span class="str">''</span>,dept:<span class="str">'cs'</span>,agreed:<span class="kw">false</span> });
+  <span class="kw">const</span> [errors, setErrors] = useState({});
+  <span class="kw">const</span> [submitted, setSubmitted] = useState(<span class="kw">false</span>);
+
+  <span class="kw">const</span> change = (e) =&gt; {
+    <span class="kw">const</span> { name, value, type, checked } = e.target;
+    setForm(p =&gt; ({ ...p, [name]: type===<span class="str">'checkbox'</span> ? checked : value }));
+  };
+
+  <span class="kw">const</span> submit = (e) =&gt; {
+    e.preventDefault();
+    <span class="kw">const</span> errs = {};
+    <span class="kw">if</span> (!form.name.trim()) errs.name = <span class="str">'이름 필수'</span>;
+    <span class="kw">if</span> (!/^\d{8}$/.test(form.studentId)) errs.studentId = <span class="str">'8자리 학번'</span>;
+    <span class="kw">if</span> (!form.agreed) errs.agreed = <span class="str">'동의 필요'</span>;
+    setErrors(errs);
+    <span class="kw">if</span> (!Object.keys(errs).length) setSubmitted(<span class="kw">true</span>);
+  };
+
+  <span class="kw">if</span> (submitted) <span class="kw">return</span> &lt;<span class="tag">h2</span>&gt;{form.name}님, 등록 완료!&lt;/<span class="tag">h2</span>&gt;;
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">form</span> onSubmit={submit}&gt;
+      &lt;<span class="tag">input</span> name=<span class="str">"name"</span> value={form.name} onChange={change} placeholder=<span class="str">"이름"</span>/&gt;
+      {errors.name &amp;&amp; &lt;<span class="tag">span</span>&gt;{errors.name}&lt;/<span class="tag">span</span>&gt;}
+      &lt;<span class="tag">input</span> name=<span class="str">"studentId"</span> value={form.studentId} onChange={change} placeholder=<span class="str">"학번(8자리)"</span>/&gt;
+      {errors.studentId &amp;&amp; &lt;<span class="tag">span</span>&gt;{errors.studentId}&lt;/<span class="tag">span</span>&gt;}
+      &lt;<span class="tag">select</span> name=<span class="str">"dept"</span> value={form.dept} onChange={change}&gt;
+        &lt;<span class="tag">option</span> value=<span class="str">"cs"</span>&gt;컴퓨터공학&lt;/<span class="tag">option</span>&gt;
+        &lt;<span class="tag">option</span> value=<span class="str">"sw"</span>&gt;소프트웨어&lt;/<span class="tag">option</span>&gt;
+      &lt;/<span class="tag">select</span>&gt;
+      &lt;<span class="tag">input</span> type=<span class="str">"checkbox"</span> name=<span class="str">"agreed"</span> checked={form.agreed} onChange={change}/&gt; 약관동의
+      {errors.agreed &amp;&amp; &lt;<span class="tag">span</span>&gt;{errors.agreed}&lt;/<span class="tag">span</span>&gt;}
+      &lt;<span class="tag">button</span> type=<span class="str">"submit"</span>&gt;등록&lt;/<span class="tag">button</span>&gt;
+    &lt;/<span class="tag">form</span>&gt;
+  );
+}</pre>
+</div>
+
+<div class="slide" id="slide-12">
+  <h2>⚠️ Common Mistakes</h2>
+  <div class="card" style="border-color:#ef4444">
+    <div class="card-title" style="color:#f87171">❌ Uninitialized state (causes "uncontrolled to controlled" warning)</div>
+    <pre style="font-size:.78rem"><span class="kw">const</span> [name, setName] = useState(<span class="kw">null</span>); <span class="comment">// Wrong — use '' not null</span>
+&lt;<span class="tag">input</span> value={name} .../&gt; <span class="comment">// React warns: switching to controlled!</span></pre>
+  </div>
+  <div class="card" style="border-color:#ef4444">
+    <div class="card-title" style="color:#f87171">❌ Missing e.preventDefault() on submit</div>
+    <pre style="font-size:.78rem"><span class="kw">const</span> <span class="fn">handleSubmit</span> = () =&gt; { <span class="comment">// no e parameter!</span>
+  <span class="comment">// Page reloads before you can do anything</span>
+};</pre>
+  </div>
+  <div class="card" style="border-color:#22c55e">
+    <div class="card-title" style="color:#4ade80">✅ Correct initialisation</div>
+    <pre style="font-size:.78rem"><span class="kw">const</span> [name, setName] = useState(<span class="str">''</span>); <span class="comment">// empty string ✓</span>
+<span class="kw">const</span> [count, setCount] = useState(<span class="num">0</span>); <span class="comment">// number ✓</span>
+<span class="kw">const</span> [checked, setChecked] = useState(<span class="kw">false</span>); <span class="comment">// boolean ✓</span></pre>
+  </div>
+</div>
+
+<div class="slide" id="slide-13">
+  <h2>💻 Practice Challenge</h2>
+  <div class="practice-box">
+    <h3>🎯 Build a Course Feedback Form</h3>
+    <p>Build a form with these fields:</p>
+    <ol style="color:#86efac;padding-left:1.4rem;line-height:2">
+      <li><strong>Student Name</strong> (text input) — required</li>
+      <li><strong>Student ID</strong> (number input, 8 digits) — required, validate format</li>
+      <li><strong>Rating</strong> (radio buttons: ⭐⭐⭐⭐⭐ / ⭐⭐⭐⭐ / ⭐⭐⭐) — required</li>
+      <li><strong>Topics Covered Well</strong> (checkboxes: HTML, CSS, JavaScript, Git, React) — optional</li>
+      <li><strong>Comments</strong> (textarea, max 300 chars) with live char count</li>
+      <li>On submit: validate, then show a "Thank you!" message with their name</li>
+    </ol>
+    <p style="color:#86efac;font-size:.9rem">Bonus: Disable the submit button while any required field is empty.</p>
+  </div>
+</div>
+
+<div class="slide" id="slide-14">
+  <h2>🔄 Real-time Validation Pattern</h2>
+  <pre><span class="kw">function</span> <span class="fn">EmailInput</span>() {
+  <span class="kw">const</span> [email, setEmail]   = useState(<span class="str">''</span>);
+  <span class="kw">const</span> [touched, setTouched] = useState(<span class="kw">false</span>);
+
+  <span class="kw">const</span> isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  <span class="kw">const</span> showError = touched &amp;&amp; !isValid;
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      &lt;<span class="tag">input</span>
+        type=<span class="str">"email"</span>
+        value={email}
+        onChange={e =&gt; setEmail(e.target.value)}
+        onBlur={() =&gt; setTouched(<span class="kw">true</span>)}  <span class="comment">// only show error after user leaves</span>
+        style={{ borderColor: showError ? <span class="str">'red'</span> : <span class="str">'inherit'</span> }}
+      /&gt;
+      {showError &amp;&amp; &lt;<span class="tag">p</span> style={{color:<span class="str">'red'</span>}}&gt;유효한 이메일을 입력하세요.&lt;/<span class="tag">p</span>&gt;}
+      {isValid &amp;&amp; &lt;<span class="tag">p</span> style={{color:<span class="str">'green'</span>}}&gt;✓ 유효한 이메일&lt;/<span class="tag">p</span>&gt;}
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}</pre>
+  <div class="tip">Use the <code>onBlur</code> event to show validation only after the user has left the field — not while still typing.</div>
+</div>
+
+<div class="slide" id="slide-15">
+  <h2>✅ Summary — Key Takeaways</h2>
+  <div class="key-point"><span class="kp-num">1</span><div><strong>Controlled inputs</strong>: bind <code>value</code> to state and update state in <code>onChange</code>. Never let state be <code>null/undefined</code>.</div></div>
+  <div class="key-point"><span class="kp-num">2</span><div><strong>One handler for many inputs</strong>: use <code>e.target.name</code> + computed property <code>[name]: value</code>.</div></div>
+  <div class="key-point"><span class="kp-num">3</span><div><strong>Form submission</strong>: always <code>e.preventDefault()</code> first.</div></div>
+  <div class="key-point"><span class="kp-num">4</span><div><strong>Validation</strong>: validate on submit, set an errors object, show per-field messages.</div></div>
+  <div class="key-point"><span class="kp-num">5</span><div><strong>Checkboxes</strong>: use <code>checked</code> + <code>e.target.checked</code>. Multi-select = array in state.</div></div>
+  <div class="key-point"><span class="kp-num">6</span><div><strong>Select &amp; Textarea</strong>: same pattern — <code>value</code> on the element + <code>onChange</code>.</div></div>
+  <div class="key-point"><span class="kp-num">7</span><div><strong>useRef</strong>: for DOM focus, file inputs, or third-party DOM integrations. No re-render on change.</div></div>
+  <div class="tip" style="margin-top:1.4rem"><strong>Next class (Week 13 Fri):</strong> React Router — building multi-page SPAs with client-side navigation!</div>
+</div>
+
+</div>
+<div class="progress-wrap"><div id="progress-bar" style="width:6.67%"></div></div>
+<nav>
+  <button class="btn" id="prev-btn" onclick="navigate(-1)">← Previous</button>
+  <button class="btn primary" id="next-btn" onclick="navigate(1)">Next →</button>
+</nav>
+<script>
+let current=1;const total=15;
+function show(n){if(n<1||n>total)return;document.getElementById('slide-'+current).classList.remove('active');current=n;document.getElementById('slide-'+current).classList.add('active');document.getElementById('counter').textContent=current+' / '+total;document.getElementById('progress-bar').style.width=(current/total*100)+'%';document.getElementById('prev-btn').disabled=current===1;document.getElementById('next-btn').textContent=current===total?'✓ Done':'Next →';window.scrollTo(0,0);}
+function navigate(dir){show(current+dir);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')navigate(1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')navigate(-1);});show(1);
+</script>
+</body>
+</html>

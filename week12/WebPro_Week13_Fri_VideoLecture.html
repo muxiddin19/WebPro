@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React Router · Week 13 Fri Video Lecture</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;700&display=swap">
+<style>
+:root{--bg:#0a0f1e;--surf:#111827;--surf2:#1f2937;--brd:#374151;--tx:#f1f5f9;--mu:#94a3b8;--ac:#fb7185;--ac2:#f43f5e;--acl:#1f0010}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column}
+header{position:sticky;top:0;z-index:100;background:#060b14;border-bottom:2px solid var(--ac);display:flex;align-items:center;justify-content:space-between;padding:10px 20px}
+.badge{background:var(--ac);color:#0a0f1e;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;padding:4px 12px;border-radius:6px}
+.hdr-label{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em}
+.hdr-title{font-size:14px;font-weight:600;color:var(--tx)}
+#counter{font-family:'Space Grotesk',sans-serif;font-size:14px;color:var(--mu)}
+.progress-wrap{position:fixed;bottom:72px;left:0;right:0;height:3px;background:var(--surf2)}
+#progress-bar{height:3px;background:var(--ac);transition:width .3s}
+nav{position:fixed;bottom:0;left:0;right:0;background:#060b14;border-top:1px solid var(--brd);display:flex;justify-content:center;gap:12px;padding:14px}
+.btn{background:var(--surf2);border:1px solid var(--brd);color:var(--tx);padding:8px 24px;border-radius:8px;cursor:pointer;font-size:14px;font-family:'Inter',sans-serif}
+.btn:hover{background:var(--brd)}.btn.primary{background:var(--ac);color:#0a0f1e;border-color:var(--ac);font-weight:600}
+#slides{flex:1;padding-bottom:120px}
+.slide{display:none;min-height:calc(100vh - 160px);padding:3rem 2rem;max-width:860px;margin:0 auto;animation:fadeIn .25s ease}
+.slide.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+h1{font-family:'Space Grotesk',sans-serif;font-size:2.6rem;font-weight:700;color:var(--ac);line-height:1.2;margin-bottom:.6rem}
+h2{font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:700;color:var(--ac);margin-bottom:1.2rem;padding-bottom:.5rem;border-bottom:2px solid var(--acl)}
+h3{font-family:'Space Grotesk',sans-serif;font-size:1.2rem;font-weight:600;color:var(--ac2);margin:1.2rem 0 .6rem}
+p{color:var(--mu);line-height:1.75;margin-bottom:1rem}
+ul,ol{padding-left:1.4rem;color:var(--mu);line-height:1.9;margin-bottom:1rem}
+li strong{color:var(--tx)}
+pre{background:var(--surf2);border:1px solid var(--brd);border-radius:10px;padding:1.4rem;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:.82rem;color:#e2e8f0;line-height:1.65;margin:1rem 0}
+code{font-family:'JetBrains Mono',monospace;font-size:.82rem;background:var(--surf2);padding:1px 6px;border-radius:4px;color:var(--ac)}
+.subtitle{font-size:1.2rem;color:var(--mu);margin-top:.4rem}.instructor{margin-top:1.2rem;font-size:.95rem;color:var(--mu)}
+.agenda-list{list-style:none;padding:0;counter-reset:agenda}
+.agenda-list li{counter-increment:agenda;padding:.7rem 1rem .7rem 3.5rem;position:relative;background:var(--surf);border:1px solid var(--brd);border-radius:8px;margin-bottom:.6rem;color:var(--tx)}
+.agenda-list li::before{content:counter(agenda);position:absolute;left:.9rem;top:.65rem;background:var(--ac);color:#0a0f1e;font-weight:700;font-size:.85rem;width:1.6rem;height:1.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.card{background:var(--surf);border:1px solid var(--brd);border-radius:10px;padding:1.4rem;margin-bottom:1rem}
+.card-title{font-weight:600;color:var(--ac);margin-bottom:.5rem;font-family:'Space Grotesk',sans-serif}
+.tip{background:var(--acl);border-left:3px solid var(--ac);border-radius:0 8px 8px 0;padding:.8rem 1rem;margin:1rem 0;color:var(--tx);font-size:.93rem}
+.practice-box{background:#0d1f0d;border:2px dashed #22c55e;border-radius:10px;padding:1.4rem;margin:1rem 0}
+.practice-box h3{color:#4ade80;margin-top:0}
+.key-point{display:flex;align-items:flex-start;gap:.8rem;padding:.6rem 0;border-bottom:1px solid var(--brd)}
+.key-point:last-child{border-bottom:none}
+.kp-num{background:var(--ac);color:#0a0f1e;font-weight:700;font-size:.8rem;min-width:1.6rem;height:1.6rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;flex-shrink:0;margin-top:.1rem}
+.comment{color:#6b7280}.kw{color:#f97316}.fn{color:#a78bfa}.str{color:#34d399}.num{color:#fb923c}.tag{color:#f87171}
+</style>
+</head>
+<body>
+<header>
+  <div style="display:flex;align-items:center;gap:12px">
+    <span class="badge">Router</span>
+    <div>
+      <div class="hdr-label">Web Programming K0126_002 · Week 13 Friday</div>
+      <div class="hdr-title">React Router &amp; Navigation</div>
+    </div>
+  </div>
+  <span id="counter">1 / 15</span>
+</header>
+<div id="slides">
+
+<div class="slide active" id="slide-1">
+  <div style="display:flex;flex-direction:column;justify-content:center;min-height:60vh;text-align:center">
+    <div style="font-size:4rem;margin-bottom:1rem">🧭</div>
+    <h1>React Router<br>&amp; Navigation</h1>
+    <p class="subtitle">Building multi-page apps without page reloads</p>
+    <p class="instructor">Web Programming K0126_002 · Week 13 Friday<br>Dr. Mukhiddin Toshpulatov · Gachon University</p>
+    <div class="tip" style="max-width:500px;margin:2rem auto 0">Use <strong>← →</strong> arrow keys or the buttons below to navigate.</div>
+  </div>
+</div>
+
+<div class="slide" id="slide-2">
+  <h2>📋 Today's Agenda</h2>
+  <ol class="agenda-list">
+    <li>What is client-side routing and why React Router?</li>
+    <li>Setting up react-router-dom v6</li>
+    <li>BrowserRouter, Routes, and Route</li>
+    <li>Link vs &lt;a&gt; tags</li>
+    <li>useNavigate — programmatic navigation</li>
+    <li>useParams — URL parameters</li>
+    <li>Nested routes and Outlet</li>
+    <li>404 / catch-all routes</li>
+    <li>Practice challenge</li>
+  </ol>
+</div>
+
+<div class="slide" id="slide-3">
+  <h2>🌍 Client-Side Routing</h2>
+  <p>Traditional websites: clicking a link sends a request to the server, the server returns a whole new HTML page. With React, we build <strong>Single Page Applications (SPAs)</strong> — the page never fully reloads.</p>
+  <div class="card">
+    <div class="card-title">Traditional routing</div>
+    <ul>
+      <li>Browser → Server: GET /about</li>
+      <li>Server → Browser: 200 OK + full HTML page</li>
+      <li>Visible: white flash, full page reload</li>
+    </ul>
+  </div>
+  <div class="card">
+    <div class="card-title">Client-side routing (SPA)</div>
+    <ul>
+      <li>JavaScript intercepts the link click</li>
+      <li>Updates the URL bar using History API</li>
+      <li>Swaps React components without network request</li>
+      <li>Instant navigation — no white flash</li>
+    </ul>
+  </div>
+  <div class="tip"><strong>React Router</strong> is the most popular library for client-side routing in React apps.</div>
+</div>
+
+<div class="slide" id="slide-4">
+  <h2>📦 Installation &amp; Setup</h2>
+  <pre><span class="comment"># Install react-router-dom v6</span>
+npm install react-router-dom</pre>
+  <pre><span class="comment">// main.jsx or index.js — wrap your app in BrowserRouter</span>
+<span class="kw">import</span> { BrowserRouter } <span class="kw">from</span> <span class="str">'react-router-dom'</span>;
+<span class="kw">import</span> App <span class="kw">from</span> <span class="str">'./App'</span>;
+
+ReactDOM.createRoot(document.getElementById(<span class="str">'root'</span>)).render(
+  &lt;<span class="tag">BrowserRouter</span>&gt;
+    &lt;<span class="tag">App</span> /&gt;
+  &lt;/<span class="tag">BrowserRouter</span>&gt;
+);</pre>
+  <div class="tip"><code>BrowserRouter</code> must wrap your entire app — usually at the entry point, not inside components.</div>
+</div>
+
+<div class="slide" id="slide-5">
+  <h2>🗺️ Routes and Route</h2>
+  <p>Define which component to show for each URL path using <code>&lt;Routes&gt;</code> and <code>&lt;Route&gt;</code>.</p>
+  <pre><span class="kw">import</span> { Routes, Route } <span class="kw">from</span> <span class="str">'react-router-dom'</span>;
+<span class="kw">import</span> Home <span class="kw">from</span> <span class="str">'./pages/Home'</span>;
+<span class="kw">import</span> About <span class="kw">from</span> <span class="str">'./pages/About'</span>;
+<span class="kw">import</span> Courses <span class="kw">from</span> <span class="str">'./pages/Courses'</span>;
+<span class="kw">import</span> NotFound <span class="kw">from</span> <span class="str">'./pages/NotFound'</span>;
+
+<span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      &lt;<span class="tag">Navbar</span> /&gt;         <span class="comment">// always visible</span>
+      &lt;<span class="tag">Routes</span>&gt;
+        &lt;<span class="tag">Route</span> path=<span class="str">"/"</span>        element={&lt;<span class="tag">Home</span> /&gt;} /&gt;
+        &lt;<span class="tag">Route</span> path=<span class="str">"/about"</span>   element={&lt;<span class="tag">About</span> /&gt;} /&gt;
+        &lt;<span class="tag">Route</span> path=<span class="str">"/courses"</span> element={&lt;<span class="tag">Courses</span> /&gt;} /&gt;
+        &lt;<span class="tag">Route</span> path=<span class="str">"*"</span>        element={&lt;<span class="tag">NotFound</span> /&gt;} /&gt;  <span class="comment">// 404</span>
+      &lt;/<span class="tag">Routes</span>&gt;
+      &lt;<span class="tag">Footer</span> /&gt;         <span class="comment">// always visible</span>
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}</pre>
+</div>
+
+<div class="slide" id="slide-6">
+  <h2>🔗 Link vs &lt;a&gt;</h2>
+  <p>Always use <code>&lt;Link&gt;</code> from React Router instead of <code>&lt;a href&gt;</code> — it prevents full page reloads.</p>
+  <pre><span class="kw">import</span> { Link, NavLink } <span class="kw">from</span> <span class="str">'react-router-dom'</span>;
+
+<span class="kw">function</span> <span class="fn">Navbar</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">nav</span>&gt;
+      <span class="comment">// NavLink adds an "active" class when path matches</span>
+      &lt;<span class="tag">NavLink</span> to=<span class="str">"/"</span>        className={({ isActive }) =&gt; isActive ? <span class="str">'active'</span> : <span class="str">''</span>}&gt;홈&lt;/<span class="tag">NavLink</span>&gt;
+      &lt;<span class="tag">NavLink</span> to=<span class="str">"/courses"</span> className={({ isActive }) =&gt; isActive ? <span class="str">'active'</span> : <span class="str">''</span>}&gt;강좌&lt;/<span class="tag">NavLink</span>&gt;
+      &lt;<span class="tag">NavLink</span> to=<span class="str">"/about"</span>   className={({ isActive }) =&gt; isActive ? <span class="str">'active'</span> : <span class="str">''</span>}&gt;소개&lt;/<span class="tag">NavLink</span>&gt;
+
+      <span class="comment">// Plain Link — no active styling</span>
+      &lt;<span class="tag">Link</span> to=<span class="str">"/login"</span>&gt;로그인&lt;/<span class="tag">Link</span>&gt;
+    &lt;/<span class="tag">nav</span>&gt;
+  );
+}</pre>
+  <div class="tip"><code>NavLink</code> is <code>Link</code> + automatic active class. Use it for navigation menus. Use plain <code>Link</code> for other links.</div>
+</div>
+
+<div class="slide" id="slide-7">
+  <h2>⚡ useNavigate — Programmatic Navigation</h2>
+  <p>Navigate without a click — after form submission, login success, or any event.</p>
+  <pre><span class="kw">import</span> { useNavigate } <span class="kw">from</span> <span class="str">'react-router-dom'</span>;
+
+<span class="kw">function</span> <span class="fn">LoginForm</span>() {
+  <span class="kw">const</span> navigate = useNavigate();
+  <span class="kw">const</span> [creds, setCreds] = useState({ email: <span class="str">''</span>, password: <span class="str">''</span> });
+
+  <span class="kw">const</span> <span class="fn">handleSubmit</span> = <span class="kw">async</span> (e) =&gt; {
+    e.preventDefault();
+    <span class="kw">const</span> ok = <span class="kw">await</span> login(creds.email, creds.password);
+    <span class="kw">if</span> (ok) {
+      navigate(<span class="str">'/dashboard'</span>);         <span class="comment">// go forward</span>
+    } <span class="kw">else</span> {
+      navigate(<span class="str">'/login?error=1'</span>);      <span class="comment">// go to same page with query</span>
+    }
+  };
+
+  <span class="kw">return</span> &lt;<span class="tag">form</span> onSubmit={handleSubmit}&gt;...&lt;/<span class="tag">form</span>&gt;;
+}
+
+<span class="comment">// Go back one page in history</span>
+navigate(-<span class="num">1</span>);
+
+<span class="comment">// Replace current history entry (no back button)</span>
+navigate(<span class="str">'/home'</span>, { replace: <span class="kw">true</span> });</pre>
+</div>
+
+<div class="slide" id="slide-8">
+  <h2>🏷️ useParams — URL Parameters</h2>
+  <p>Extract dynamic values from the URL path.</p>
+  <pre><span class="comment">// Route definition — :courseId is the parameter</span>
+&lt;<span class="tag">Route</span> path=<span class="str">"/courses/:courseId"</span> element={&lt;<span class="tag">CourseDetail</span> /&gt;} /&gt;
+
+<span class="comment">// CourseDetail.jsx</span>
+<span class="kw">import</span> { useParams } <span class="kw">from</span> <span class="str">'react-router-dom'</span>;
+
+<span class="kw">function</span> <span class="fn">CourseDetail</span>() {
+  <span class="kw">const</span> { courseId } = useParams();
+
+  <span class="kw">const</span> [course, setCourse] = useState(<span class="kw">null</span>);
+
+  useEffect(() =&gt; {
+    fetch(<span class="str">`/api/courses/${courseId}`</span>)
+      .then(r =&gt; r.json())
+      .then(setCourse);
+  }, [courseId]);
+
+  <span class="kw">if</span> (!course) <span class="kw">return</span> &lt;<span class="tag">p</span>&gt;로딩 중...&lt;/<span class="tag">p</span>&gt;;
+  <span class="kw">return</span> &lt;<span class="tag">h1</span>&gt;{course.title}&lt;/<span class="tag">h1</span>&gt;;
+}
+
+<span class="comment">// URL: /courses/web-programming-101</span>
+<span class="comment">// courseId = "web-programming-101"</span></pre>
+</div>
+
+<div class="slide" id="slide-9">
+  <h2>🌲 Nested Routes &amp; Outlet</h2>
+  <p>Nest routes to build layouts where only part of the page changes.</p>
+  <pre><span class="comment">// App.jsx — parent route with Layout</span>
+&lt;<span class="tag">Routes</span>&gt;
+  &lt;<span class="tag">Route</span> path=<span class="str">"/courses"</span> element={&lt;<span class="tag">CoursesLayout</span> /&gt;}&gt;
+    &lt;<span class="tag">Route</span> index element={&lt;<span class="tag">CoursesList</span> /&gt;} /&gt;
+    &lt;<span class="tag">Route</span> path=<span class="str">":courseId"</span> element={&lt;<span class="tag">CourseDetail</span> /&gt;} /&gt;
+    &lt;<span class="tag">Route</span> path=<span class="str">":courseId/enroll"</span> element={&lt;<span class="tag">EnrollForm</span> /&gt;} /&gt;
+  &lt;/<span class="tag">Route</span>&gt;
+&lt;/<span class="tag">Routes</span>&gt;
+
+<span class="comment">// CoursesLayout.jsx — Outlet renders the matched child route</span>
+<span class="kw">import</span> { Outlet, NavLink } <span class="kw">from</span> <span class="str">'react-router-dom'</span>;
+
+<span class="kw">function</span> <span class="fn">CoursesLayout</span>() {
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span> className=<span class="str">"courses-layout"</span>&gt;
+      &lt;<span class="tag">aside</span>&gt;
+        &lt;<span class="tag">h3</span>&gt;강좌 목록&lt;/<span class="tag">h3</span>&gt;
+        &lt;<span class="tag">NavLink</span> to=<span class="str">"/courses"</span> end&gt;전체 강좌&lt;/<span class="tag">NavLink</span>&gt;
+      &lt;/<span class="tag">aside</span>&gt;
+      &lt;<span class="tag">main</span>&gt;
+        &lt;<span class="tag">Outlet</span> /&gt;  <span class="comment">// ← child route renders here</span>
+      &lt;/<span class="tag">main</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}</pre>
+</div>
+
+<div class="slide" id="slide-10">
+  <h2>🔍 Query Strings with useSearchParams</h2>
+  <pre><span class="kw">import</span> { useSearchParams } <span class="kw">from</span> <span class="str">'react-router-dom'</span>;
+
+<span class="kw">function</span> <span class="fn">CourseSearch</span>() {
+  <span class="kw">const</span> [searchParams, setSearchParams] = useSearchParams();
+  <span class="kw">const</span> query = searchParams.get(<span class="str">'q'</span>) || <span class="str">''</span>;
+
+  <span class="kw">const</span> <span class="fn">handleSearch</span> = (e) =&gt; {
+    setSearchParams({ q: e.target.value });
+    <span class="comment">// URL becomes: /courses?q=React</span>
+  };
+
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      &lt;<span class="tag">input</span>
+        value={query}
+        onChange={handleSearch}
+        placeholder=<span class="str">"강좌 검색..."</span>
+      /&gt;
+      {query &amp;&amp; &lt;<span class="tag">p</span>&gt;"{query}" 검색 결과:&lt;/<span class="tag">p</span>&gt;}
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}</pre>
+  <div class="tip">URL: <code>/courses?q=React</code> — the search is shareable and bookmarkable!</div>
+</div>
+
+<div class="slide" id="slide-11">
+  <h2>🗂️ Complete App Example</h2>
+  <pre style="font-size:.75rem"><span class="comment">// main.jsx</span>
+&lt;<span class="tag">BrowserRouter</span>&gt;&lt;<span class="tag">App</span>/&gt;&lt;/<span class="tag">BrowserRouter</span>&gt;
+
+<span class="comment">// App.jsx</span>
+<span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">return</span> (
+    &lt;&gt;
+      &lt;<span class="tag">Navbar</span>/&gt;
+      &lt;<span class="tag">Routes</span>&gt;
+        &lt;<span class="tag">Route</span> path=<span class="str">"/"</span>            element={&lt;<span class="tag">Home</span>/&gt;}/&gt;
+        &lt;<span class="tag">Route</span> path=<span class="str">"/courses"</span>    element={&lt;<span class="tag">CoursesLayout</span>/&gt;}&gt;
+          &lt;<span class="tag">Route</span> index             element={&lt;<span class="tag">CoursesList</span>/&gt;}/&gt;
+          &lt;<span class="tag">Route</span> path=<span class="str">":id"</span>       element={&lt;<span class="tag">CourseDetail</span>/&gt;}/&gt;
+        &lt;/<span class="tag">Route</span>&gt;
+        &lt;<span class="tag">Route</span> path=<span class="str">"/profile"</span>   element={&lt;<span class="tag">Profile</span>/&gt;}/&gt;
+        &lt;<span class="tag">Route</span> path=<span class="str">"*"</span>          element={&lt;<span class="tag">NotFound</span>/&gt;}/&gt;
+      &lt;/<span class="tag">Routes</span>&gt;
+    &lt;/&gt;
+  );
+}
+
+<span class="comment">// CourseDetail.jsx</span>
+<span class="kw">function</span> <span class="fn">CourseDetail</span>() {
+  <span class="kw">const</span> { id } = useParams();
+  <span class="kw">const</span> navigate = useNavigate();
+  <span class="kw">const</span> [course, setCourse] = useState(<span class="kw">null</span>);
+
+  useEffect(() =&gt; {
+    fetch(<span class="str">`/api/courses/${id}`</span>).then(r=&gt;r.json()).then(setCourse);
+  }, [id]);
+
+  <span class="kw">if</span> (!course) <span class="kw">return</span> &lt;<span class="tag">p</span>&gt;로딩...&lt;/<span class="tag">p</span>&gt;;
+  <span class="kw">return</span> (
+    &lt;<span class="tag">div</span>&gt;
+      &lt;<span class="tag">button</span> onClick={() =&gt; navigate(-<span class="num">1</span>)}&gt;← 뒤로&lt;/<span class="tag">button</span>&gt;
+      &lt;<span class="tag">h1</span>&gt;{course.title}&lt;/<span class="tag">h1</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  );
+}</pre>
+</div>
+
+<div class="slide" id="slide-12">
+  <h2>⚠️ Common Mistakes</h2>
+  <div class="card" style="border-color:#ef4444">
+    <div class="card-title" style="color:#f87171">❌ Using &lt;a href&gt; instead of &lt;Link&gt;</div>
+    <pre style="font-size:.78rem">&lt;<span class="tag">a</span> href=<span class="str">"/about"</span>&gt;소개&lt;/<span class="tag">a</span>&gt;  <span class="comment">// Full page reload!</span>
+&lt;<span class="tag">Link</span> to=<span class="str">"/about"</span>&gt;소개&lt;/<span class="tag">Link</span>&gt;  <span class="comment">// SPA navigation ✓</span></pre>
+  </div>
+  <div class="card" style="border-color:#ef4444">
+    <div class="card-title" style="color:#f87171">❌ Routes outside BrowserRouter</div>
+    <pre style="font-size:.78rem"><span class="comment">// WRONG — no BrowserRouter wrapping</span>
+&lt;<span class="tag">App</span>/&gt;  <span class="comment">// Error: useNavigate() may be used only in a Router</span></pre>
+  </div>
+  <div class="card" style="border-color:#ef4444">
+    <div class="card-title" style="color:#f87171">❌ Not using index route</div>
+    <pre style="font-size:.78rem"><span class="comment">// No "index" — /courses doesn't render anything!</span>
+&lt;<span class="tag">Route</span> path=<span class="str">"/courses"</span> element={&lt;<span class="tag">Layout</span>/&gt;}&gt;
+  &lt;<span class="tag">Route</span> path=<span class="str">":id"</span> element={&lt;<span class="tag">Detail</span>/&gt;}/&gt;
+  <span class="comment">// Missing: &lt;Route index element={&lt;List/&gt;}/&gt;</span>
+&lt;/<span class="tag">Route</span>&gt;</pre>
+  </div>
+</div>
+
+<div class="slide" id="slide-13">
+  <h2>💻 Practice Challenge</h2>
+  <div class="practice-box">
+    <h3>🎯 Build a Course Catalog App</h3>
+    <p>Create a React app with these pages:</p>
+    <ol style="color:#86efac;padding-left:1.4rem;line-height:2">
+      <li><code>/</code> — Home page with a welcome message and links to Courses and About</li>
+      <li><code>/courses</code> — List of 5 courses (title + instructor + link to detail)</li>
+      <li><code>/courses/:id</code> — Detail page showing full info for one course</li>
+      <li><code>/about</code> — Simple about page</li>
+      <li><code>*</code> — 404 Not Found page with a link back to home</li>
+    </ol>
+    <p style="color:#86efac;font-size:.9rem">Bonus: Add a Navbar that highlights the active link.</p>
+    <pre style="background:#0a1a0a;border-color:#166534;color:#bbf7d0">const courses = [
+  { id: 1, title: 'Web Programming', instructor: 'Dr. Toshpulatov', credits: 3 },
+  { id: 2, title: 'Database Systems', instructor: 'Dr. Kim', credits: 3 },
+  { id: 3, title: 'Mobile App Dev', instructor: 'Dr. Lee', credits: 2 },
+];</pre>
+  </div>
+</div>
+
+<div class="slide" id="slide-14">
+  <h2>🔒 Protected Routes Pattern</h2>
+  <pre><span class="kw">function</span> <span class="fn">ProtectedRoute</span>({ children }) {
+  <span class="kw">const</span> { isLoggedIn } = useAuth(); <span class="comment">// custom hook</span>
+  <span class="kw">const</span> location = useLocation();
+
+  <span class="kw">if</span> (!isLoggedIn) {
+    <span class="comment">// Redirect to login, remember where they were trying to go</span>
+    <span class="kw">return</span> &lt;<span class="tag">Navigate</span> to=<span class="str">"/login"</span>
+                      state={{ from: location }} replace /&gt;;
+  }
+
+  <span class="kw">return</span> children;
+}
+
+<span class="comment">// In routes:</span>
+&lt;<span class="tag">Route</span>
+  path=<span class="str">"/dashboard"</span>
+  element={
+    &lt;<span class="tag">ProtectedRoute</span>&gt;
+      &lt;<span class="tag">Dashboard</span> /&gt;
+    &lt;/<span class="tag">ProtectedRoute</span>&gt;
+  }
+/&gt;</pre>
+  <div class="tip">This pattern is very common in real apps — wrap sensitive routes in a <code>ProtectedRoute</code> component that checks auth status.</div>
+</div>
+
+<div class="slide" id="slide-15">
+  <h2>✅ Summary — Key Takeaways</h2>
+  <div class="key-point"><span class="kp-num">1</span><div><strong>Client-side routing</strong>: React Router intercepts navigation, swaps components, updates URL — no full reload.</div></div>
+  <div class="key-point"><span class="kp-num">2</span><div><code>BrowserRouter</code> at the top, <code>Routes</code> + <code>Route</code> inside <code>App</code> to define the routing table.</div></div>
+  <div class="key-point"><span class="kp-num">3</span><div>Use <code>Link</code>/<code>NavLink</code> instead of <code>&lt;a href&gt;</code> — prevents page reloads.</div></div>
+  <div class="key-point"><span class="kp-num">4</span><div><code>useNavigate()</code> for programmatic navigation (after form submit, login, etc.)</div></div>
+  <div class="key-point"><span class="kp-num">5</span><div><code>useParams()</code> reads dynamic segments from the URL path (<code>/courses/:id</code> → <code>id</code>).</div></div>
+  <div class="key-point"><span class="kp-num">6</span><div><strong>Nested routes</strong>: parent renders <code>&lt;Outlet /&gt;</code>, child routes render inside it.</div></div>
+  <div class="key-point"><span class="kp-num">7</span><div><code>path="*"</code> is the catch-all 404 route — always list it last.</div></div>
+  <div class="tip" style="margin-top:1.4rem"><strong>Next class (Week 14 Mon):</strong> API Integration with React — connecting your app to real data!</div>
+</div>
+
+</div>
+<div class="progress-wrap"><div id="progress-bar" style="width:6.67%"></div></div>
+<nav>
+  <button class="btn" id="prev-btn" onclick="navigate(-1)">← Previous</button>
+  <button class="btn primary" id="next-btn" onclick="navigate(1)">Next →</button>
+</nav>
+<script>
+let current=1;const total=15;
+function show(n){if(n<1||n>total)return;document.getElementById('slide-'+current).classList.remove('active');current=n;document.getElementById('slide-'+current).classList.add('active');document.getElementById('counter').textContent=current+' / '+total;document.getElementById('progress-bar').style.width=(current/total*100)+'%';document.getElementById('prev-btn').disabled=current===1;document.getElementById('next-btn').textContent=current===total?'✓ Done':'Next →';window.scrollTo(0,0);}
+function navigate(dir){show(current+dir);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowDown')navigate(1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')navigate(-1);});show(1);
+</script>
+</body>
+</html>

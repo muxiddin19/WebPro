@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sprint Quiz — React Forms &amp; Controlled Components · Week 13 Mon</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f0fdf4;--surf:#fff;--surf2:#dcfce7;--brd:#bbf7d0;--tx:#052e16;--mu:#166534;--ac:#16a34a;--acl:#dcfce7;--ac2:#15803d;--ok:#16a34a;--okl:#dcfce7;--er:#dc2626;--erl:#fee2e2}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#020f06;--surf:#061a0c;--surf2:#0a2a14;--brd:#144d26;--tx:#dcfce7;--mu:#4ade80;--ac:#4ade80;--acl:#052e16;--ac2:#86efac;--ok:#4ade80;--okl:#052e16;--er:#f87171;--erl:#450a0a}}
+:root[data-theme=dark]{--bg:#020f06;--surf:#061a0c;--surf2:#0a2a14;--brd:#144d26;--tx:#dcfce7;--mu:#4ade80;--ac:#4ade80;--acl:#052e16;--ac2:#86efac;--ok:#4ade80;--okl:#052e16;--er:#f87171;--erl:#450a0a}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;font-size:16px;line-height:1.65}
+.header{background:var(--surf);border-bottom:3px solid var(--ac);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.badge{background:var(--ac);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;padding:4px 12px;border-radius:6px;font-size:15px}
+.hdr-title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px}
+.hdr-sub{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em}
+.theme-btn{background:var(--surf2);border:1px solid var(--brd);color:var(--tx);padding:5px 12px;border-radius:16px;cursor:pointer;font-size:13px}
+.wrap{max-width:760px;margin:0 auto;padding:28px 16px 80px}
+.student-form{background:var(--surf);border:1px solid var(--brd);border-radius:12px;padding:24px;margin-bottom:32px}
+.student-form h2{font-family:'Space Grotesk',sans-serif;font-size:17px;margin-bottom:16px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:500px){.form-row{grid-template-columns:1fr}}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:4px;color:var(--mu)}
+input[type=text],input[type=number]{width:100%;padding:9px 12px;border:1px solid var(--brd);border-radius:8px;background:var(--surf2);color:var(--tx);font-size:15px;font-family:'Inter',sans-serif}
+input:focus{outline:2px solid var(--ac);outline-offset:1px}
+.quiz-title{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;margin-bottom:4px}
+.quiz-meta{font-size:13px;color:var(--mu);margin-bottom:24px}
+.qcard{background:var(--surf);border:1px solid var(--brd);border-radius:12px;padding:20px 24px;margin-bottom:16px}
+.qcard.correct{border-color:var(--ok);background:var(--okl)}
+.qcard.wrong{border-color:var(--er);background:var(--erl)}
+.qnum{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin-bottom:8px;font-family:'Space Grotesk',sans-serif}
+.qtext{font-size:15px;font-weight:600;margin-bottom:14px;line-height:1.5}
+code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--surf2);padding:1px 5px;border-radius:3px;color:var(--ac2)}
+.options{display:flex;flex-direction:column;gap:8px}
+.opt-label{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:1px solid var(--brd);border-radius:8px;cursor:pointer;transition:background .15s}
+.opt-label:hover{background:var(--surf2)}
+.opt-label input[type=radio]{margin-top:3px;accent-color:var(--ac);flex-shrink:0}
+.opt-text{font-size:14px;line-height:1.45}
+.result-badge{display:none;font-size:13px;font-weight:700;padding:4px 10px;border-radius:6px;margin-top:10px}
+.result-badge.show{display:inline-block}
+.result-badge.ok{background:var(--ok);color:#fff}
+.result-badge.er{background:var(--er);color:#fff}
+.explanation{margin-top:10px;font-size:13px;padding:10px 14px;background:var(--surf2);border-radius:8px;display:none}
+.explanation.show{display:block}
+.submit-area{text-align:center;margin-top:28px}
+.submit-btn{background:var(--ac);color:#fff;border:none;padding:14px 48px;border-radius:10px;font-size:17px;font-weight:700;font-family:'Space Grotesk',sans-serif;cursor:pointer}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed}
+.score-panel{display:none;background:var(--surf);border:2px solid var(--ac);border-radius:14px;padding:28px;margin-top:28px;text-align:center}
+.score-panel.show{display:block}
+.score-big{font-size:56px;font-weight:700;font-family:'Space Grotesk',sans-serif;color:var(--ac);line-height:1}
+.score-label{font-size:16px;color:var(--mu);margin-top:6px}
+.score-pct{font-size:28px;font-weight:700;margin-top:4px}
+.sync-msg{margin-top:16px;font-size:13px;color:var(--mu);font-style:italic}
+.sync-msg.ok{color:var(--ok)}.sync-msg.er{color:var(--er)}
+</style>
+</head>
+<body>
+<div class="header">
+  <div style="display:flex;align-items:center;gap:14px">
+    <div class="badge">📝 Forms</div>
+    <div>
+      <div class="hdr-sub">Sprint Quiz · Week 13 Monday · K0126_002</div>
+      <div class="hdr-title">React Forms &amp; Controlled Components</div>
+    </div>
+  </div>
+  <button class="theme-btn" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">🌙</button>
+</div>
+
+<div class="wrap">
+  <div class="student-form">
+    <h2>🎓 Student Information</h2>
+    <div class="form-row">
+      <div>
+        <label for="sid">Gachon Student ID</label>
+        <input type="number" id="sid" placeholder="e.g. 202011234">
+      </div>
+      <div>
+        <label for="sname">Full Name</label>
+        <input type="text" id="sname" placeholder="e.g. Dilnoza Yusupova">
+      </div>
+    </div>
+  </div>
+  <div class="quiz-title">React Forms — Sprint Quiz</div>
+  <div class="quiz-meta">12 questions · Multiple choice · Week 13 Monday</div>
+  <div id="quiz-container"></div>
+  <div class="submit-area">
+    <button class="submit-btn" id="submit-btn" onclick="submitQuiz()">Submit Quiz</button>
+  </div>
+  <div class="score-panel" id="score-panel">
+    <div class="score-big" id="score-num">0 / 12</div>
+    <div class="score-label">Questions Correct</div>
+    <div class="score-pct" id="score-pct">0%</div>
+    <div class="sync-msg" id="sync-msg">Syncing to grade book…</div>
+  </div>
+</div>
+
+<script>
+const GAS_URL  = 'YOUR_GAS_ENDPOINT_URL';
+const WEEK_NUM = 13;
+const SESSION  = 1;
+
+const questions = [
+  {
+    q: 'What makes a form input "controlled" in React?',
+    opts: [
+      'It has a ref attribute',
+      'Its value is tied to React state via the `value` prop and an `onChange` handler',
+      'It uses the HTML `required` attribute',
+      'It is inside a `<form>` element'
+    ],
+    ans: 1,
+    exp: 'A controlled input has `value={stateVar}` and `onChange={handler}`, making React state the single source of truth. The DOM\'s input value always mirrors React state.'
+  },
+  {
+    q: 'Why must you call `e.preventDefault()` in a form\'s `onSubmit` handler?',
+    opts: [
+      'To prevent React from re-rendering',
+      'To stop the browser\'s default behavior of reloading the page on form submission',
+      'To prevent the onChange event from firing',
+      'To stop CSS transitions during submission'
+    ],
+    ans: 1,
+    exp: 'By default, submitting an HTML form causes the browser to send a GET/POST request and reload the page. `e.preventDefault()` stops this, keeping the React app in control.'
+  },
+  {
+    q: 'For a controlled checkbox, which prop holds its state?',
+    opts: ['value', 'defaultChecked', 'checked', 'selected'],
+    ans: 2,
+    exp: 'Checkboxes use `checked={booleanState}` (not `value`). The `onChange` handler reads `e.target.checked` (a boolean) to update state.'
+  },
+  {
+    q: 'What does `e.target.name` give you in an onChange handler?',
+    opts: [
+      'The HTML element type (input, select, etc.)',
+      'The name attribute of the form element that triggered the event',
+      'The CSS class name of the element',
+      'The ID of the form'
+    ],
+    ans: 1,
+    exp: '`e.target.name` returns the `name` attribute of the form control. This lets a single handler route updates to the right field in a state object using computed property syntax: `{ [name]: value }`.'
+  },
+  {
+    q: 'What is the computed property name syntax `{ [name]: value }` used for in form handling?',
+    opts: [
+      'Defining a CSS class name dynamically',
+      'Dynamically setting a property key on an object using a variable',
+      'Creating an array from a string',
+      'Calling a function whose name is stored in a variable'
+    ],
+    ans: 1,
+    exp: 'Square brackets in object literals `{ [key]: value }` evaluate the expression inside as the property name. So `{ [name]: value }` with `name = "email"` creates `{ email: value }` — perfect for multi-field forms.'
+  },
+  {
+    q: 'How do you correctly update only one field in a form state object `{ name: "", email: "" }`?',
+    opts: [
+      'setForm({ name: "Amir" })',
+      'setForm(prev => ({ ...prev, name: "Amir" }))',
+      'form.name = "Amir"; setForm(form)',
+      'setForm.name("Amir")'
+    ],
+    ans: 1,
+    exp: 'Use spread to copy all existing fields, then override only what changed. `setForm({ name: "Amir" })` would delete the `email` field entirely.'
+  },
+  {
+    q: 'In a controlled `<select>`, how do you set the selected option?',
+    opts: [
+      'Set the `selected` attribute on the `<option>` elements',
+      'Set the `value` prop on the `<select>` element',
+      'Set `defaultValue` on each `<option>`',
+      'Use `document.querySelector("select").selectedIndex`'
+    ],
+    ans: 1,
+    exp: 'In React, set `value={stateVar}` on `<select>` itself (not on individual options). This is different from plain HTML where you set `selected` on the option.'
+  },
+  {
+    q: 'In React, how do you set a default value for an UNcontrolled input?',
+    opts: [
+      'value="default"',
+      'defaultValue="default"',
+      'initial="default"',
+      'placeholder="default"'
+    ],
+    ans: 1,
+    exp: '`defaultValue` sets the initial value for an uncontrolled input (the DOM manages it after that). `value` makes it controlled. `placeholder` only shows hint text, not an actual value.'
+  },
+  {
+    q: 'Which of the following correctly handles multiple checkboxes (add/remove from array)?',
+    opts: [
+      'onChange={e => setSkills(e.target.value)}',
+      'onChange={e => { if(e.target.checked) setSkills([...skills, e.target.value]); else setSkills(skills.filter(s => s !== e.target.value)); }}',
+      'onChange={e => setSkills(e.target.checked)}',
+      'onChange={e => skills.push(e.target.value)}'
+    ],
+    ans: 1,
+    exp: 'For multiple checkboxes, add the value when checked (`[...skills, value]`) and remove it when unchecked (`filter`). Never mutate state directly with `push`.'
+  },
+  {
+    q: 'What is the right approach for validating a form before submission?',
+    opts: [
+      'Use `document.querySelector("form").checkValidity()` only',
+      'Build an errors object in a validate function, call setErrors if any exist, return early to skip submission',
+      'Only use HTML5 `required` attributes',
+      'Validate in a useEffect watching the form state'
+    ],
+    ans: 1,
+    exp: 'Build a validation function that returns an errors object. If errors exist, set them in state and return early. This shows field-specific error messages and keeps the user on the form.'
+  },
+  {
+    q: 'What does `<input value={text} onChange={e => setText(e.target.value)} />` do when the user types?',
+    opts: [
+      'Updates the DOM directly, React reads it later',
+      'The input is read-only since value is set',
+      '`e.target.value` captures the new text, setText updates state, React re-renders with the new value',
+      'The onChange handler receives a synthetic event with the old value'
+    ],
+    ans: 2,
+    exp: 'On each keystroke: the browser fires onChange → handler reads `e.target.value` (what the user typed) → setText updates state → React re-renders → the input\'s `value` prop reflects the new state. This is the controlled flow.'
+  },
+  {
+    q: 'What is a `useRef` in forms, and when should you use it?',
+    opts: [
+      'A way to store state that triggers re-renders',
+      'A way to hold a mutable value or reference a DOM element without causing re-renders — use for uncontrolled inputs or to call `.focus()`',
+      'An alternative to useState for form objects',
+      'A hook that tracks the form\'s submit history'
+    ],
+    ans: 1,
+    exp: 'useRef gives a persistent mutable reference that doesn\'t cause re-renders. For forms, use it to programmatically focus an input (`ref.current.focus()`), or to read an uncontrolled input\'s value on submit.'
+  }
+];
+
+function buildQuiz() {
+  const container = document.getElementById('quiz-container');
+  questions.forEach((q, i) => {
+    const opts = q.opts.map((opt, j) => `
+      <label class="opt-label">
+        <input type="radio" name="q${i}" value="${j}">
+        <span class="opt-text">${opt}</span>
+      </label>`).join('');
+    container.innerHTML += `
+      <div class="qcard" id="qcard-${i}">
+        <div class="qnum">Question ${i+1} of ${questions.length}</div>
+        <div class="qtext">${q.q}</div>
+        <div class="options">${opts}</div>
+        <div class="result-badge" id="rbadge-${i}"></div>
+        <div class="explanation" id="exp-${i}">${q.exp}</div>
+      </div>`;
+  });
+}
+
+function submitQuiz() {
+  const sid   = document.getElementById('sid').value.trim();
+  const sname = document.getElementById('sname').value.trim();
+  if (!sid || !sname) { alert('Please enter your Student ID and Name.'); return; }
+  let correct = 0;
+  questions.forEach((q, i) => {
+    const sel  = document.querySelector(`input[name="q${i}"]:checked`);
+    const card = document.getElementById(`qcard-${i}`);
+    const badge= document.getElementById(`rbadge-${i}`);
+    const exp  = document.getElementById(`exp-${i}`);
+    const chosen = sel ? parseInt(sel.value) : -1;
+    if (chosen === q.ans) {
+      correct++;
+      card.classList.add('correct');
+      badge.textContent = '✅ Correct!';
+      badge.classList.add('show','ok');
+    } else {
+      card.classList.add('wrong');
+      badge.textContent = sel ? `❌ Wrong — correct: ${String.fromCharCode(65+q.ans)}` : '— Not answered';
+      badge.classList.add('show','er');
+      exp.classList.add('show');
+    }
+    document.querySelectorAll(`input[name="q${i}"]`).forEach(r => r.disabled = true);
+  });
+  const quizScore = Math.round((correct / questions.length) * 10 * 10) / 10;
+  const pct = Math.round(correct / questions.length * 100);
+  document.getElementById('score-num').textContent = `${correct} / ${questions.length}`;
+  document.getElementById('score-pct').textContent = `${pct}%`;
+  document.getElementById('score-panel').classList.add('show');
+  document.getElementById('submit-btn').disabled = true;
+  const payload = { studentId: sid, studentName: sname, weekNum: WEEK_NUM, session: SESSION, quizScore, pct, submittedAt: new Date().toISOString() };
+  const syncEl = document.getElementById('sync-msg');
+  if (!GAS_URL || GAS_URL === 'YOUR_GAS_ENDPOINT_URL') {
+    syncEl.textContent = '⚠️ Grade sync URL not configured.';
+    syncEl.className = 'sync-msg er';
+    return;
+  }
+  fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) })
+    .then(r => r.json())
+    .then(d => { syncEl.textContent = d.ok ? '✅ Score synced!' : '⚠️ ' + d.error; syncEl.className = 'sync-msg '+(d.ok?'ok':'er'); })
+    .catch(() => { syncEl.textContent = '⚠️ Could not reach server.'; syncEl.className = 'sync-msg er'; });
+}
+
+buildQuiz();
+</script>
+</body>
+</html>

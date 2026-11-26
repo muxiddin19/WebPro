@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sprint Quiz — React Router · Week 13 Fri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f0f4ff;--surf:#fff;--surf2:#e8eefa;--brd:#c8d4f0;--tx:#1a2340;--mu:#5a6a8a;--ac:#06b6d4;--acl:#cffafe;--ac2:#0891b2;--ok:#16a34a;--okl:#dcfce7;--er:#dc2626;--erl:#fee2e2;--warn:#d97706;--warnl:#fef3c7}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#060d16;--surf:#0d1b2a;--surf2:#122236;--brd:#1e3256;--tx:#dbeafe;--mu:#6080b0;--ac:#22d3ee;--acl:#042f2e;--ac2:#67e8f9;--ok:#4ade80;--okl:#052e16;--er:#f87171;--erl:#450a0a}}
+:root[data-theme=dark]{--bg:#060d16;--surf:#0d1b2a;--surf2:#122236;--brd:#1e3256;--tx:#dbeafe;--mu:#6080b0;--ac:#22d3ee;--acl:#042f2e;--ac2:#67e8f9;--ok:#4ade80;--okl:#052e16;--er:#f87171;--erl:#450a0a}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;font-size:16px;line-height:1.6}
+.header{background:var(--surf);border-bottom:2px solid var(--ac);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.badge{background:var(--ac);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;padding:4px 10px;border-radius:6px;font-size:15px}
+.hdr-info{margin-left:14px;flex:1}
+.hdr-info h1{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700}
+.hdr-info p{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.05em}
+.theme-btn{background:var(--surf2);border:1px solid var(--brd);color:var(--tx);padding:5px 12px;border-radius:16px;cursor:pointer;font-size:12px}
+.wrap{max-width:760px;margin:0 auto;padding:28px 16px 60px}
+.info-box{background:var(--surf);border:1px solid var(--brd);border-radius:12px;padding:20px 24px;margin-bottom:24px}
+.info-box h2{font-family:'Space Grotesk',sans-serif;font-size:16px;margin-bottom:12px;color:var(--ac)}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px}
+@media(max-width:500px){.fields{grid-template-columns:1fr}}
+.fields label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:var(--mu)}
+.fields input{padding:9px 12px;border:1px solid var(--brd);border-radius:8px;background:var(--surf2);color:var(--tx);font-size:15px}
+.fields input:focus{outline:2px solid var(--ac);border-color:var(--ac)}
+.q-card{background:var(--surf);border:1px solid var(--brd);border-radius:12px;padding:20px 22px;margin-bottom:16px}
+.q-num{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--mu);margin-bottom:6px}
+.q-text{font-size:15px;font-weight:600;margin-bottom:14px;line-height:1.5}
+.options{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:9px 12px;border-radius:8px;border:1px solid var(--brd);transition:background .15s}
+.opt:hover{background:var(--surf2)}
+.opt input[type=radio]{margin-top:3px;accent-color:var(--ac);flex-shrink:0}
+.opt-label{font-size:14px;line-height:1.5}
+.opt.correct{background:var(--okl);border-color:var(--ok)}
+.opt.wrong{background:var(--erl);border-color:var(--er)}
+.opt.reveal-correct{background:var(--okl);border-color:var(--ok)}
+.explanation{font-size:13px;color:var(--mu);margin-top:10px;padding:10px 14px;background:var(--surf2);border-radius:8px;border-left:3px solid var(--ac);display:none}
+.explanation.show{display:block}
+.submit-row{text-align:center;margin:28px 0 16px}
+.submit-btn{background:var(--ac);color:#fff;border:none;padding:13px 36px;border-radius:10px;font-size:16px;font-weight:700;font-family:'Space Grotesk',sans-serif;cursor:pointer;transition:opacity .15s}
+.submit-btn:hover{opacity:.88}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed}
+.result-box{background:var(--surf);border:2px solid var(--ac);border-radius:14px;padding:28px;text-align:center;display:none;margin-bottom:24px}
+.result-box.show{display:block}
+.score-big{font-family:'Space Grotesk',sans-serif;font-size:52px;font-weight:700;color:var(--ac);line-height:1.1}
+.score-label{font-size:14px;color:var(--mu);margin-top:4px}
+.sync-msg{font-size:13px;margin-top:12px;padding:8px 14px;border-radius:8px}
+.sync-ok{background:var(--okl);color:var(--ok)}
+.sync-err{background:var(--erl);color:var(--er)}
+</style>
+</head>
+<body>
+<div class="header">
+  <span class="badge">⚛ React</span>
+  <div class="hdr-info">
+    <h1>Sprint Quiz — React Router &amp; Navigation</h1>
+    <p>Web Programming K0126_002 · Week 13 · Friday · 12 Questions</p>
+  </div>
+  <button class="theme-btn" onclick="toggleTheme()">🌙</button>
+</div>
+
+<div class="wrap">
+  <div class="info-box">
+    <h2>Student Information</h2>
+    <div class="fields">
+      <label>Gachon Student ID<input type="number" id="studentId" placeholder="e.g. 202312345" min="2000000000" max="2099999999"></label>
+      <label>Full Name<input type="text" id="studentName" placeholder="e.g. Kim Minji"></label>
+    </div>
+    <p style="font-size:12px;color:var(--mu);margin-top:8px">Enter your 10-digit Gachon student ID. Your score will be recorded automatically.</p>
+  </div>
+
+  <div id="quiz-container"></div>
+
+  <div class="submit-row">
+    <button class="submit-btn" id="submitBtn" onclick="submitQuiz()">Submit Quiz</button>
+  </div>
+
+  <div class="result-box" id="resultBox">
+    <div class="score-big" id="scoreBig"></div>
+    <div class="score-label" id="scoreLabel"></div>
+    <div class="sync-msg" id="syncMsg"></div>
+  </div>
+</div>
+
+<script>
+const GAS_URL = 'YOUR_GAS_ENDPOINT_URL'; // replace with deployed GAS web app URL
+const WEEK_NUM = 13;
+const SESSION  = 2;
+
+const QUESTIONS = [
+  {
+    q: "Which component must wrap your entire React application to enable routing with react-router-dom v6?",
+    opts: ["<Router>","<BrowserRouter>","<RouterProvider>","<Switch>"],
+    ans: 1,
+    exp: "<BrowserRouter> is the standard wrapper for web apps using the HTML5 History API. It must wrap your App (usually in main.jsx or index.jsx)."
+  },
+  {
+    q: "In react-router-dom v6, which component replaced <Switch> for grouping routes?",
+    opts: ["<Router>","<RouteGroup>","<Routes>","<RouterSwitch>"],
+    ans: 2,
+    exp: "<Routes> is the v6 replacement for <Switch>. It always picks the best-matching route and no longer requires 'exact'."
+  },
+  {
+    q: "You want to navigate to /dashboard without a full page reload. Which element do you use?",
+    opts: ["<a href='/dashboard'>","<Link to='/dashboard'>","<Redirect to='/dashboard'>","<Route path='/dashboard'>"],
+    ans: 1,
+    exp: "<Link to='/dashboard'> uses React Router's client-side navigation. <a href> causes a full browser reload."
+  },
+  {
+    q: "What is the correct way to define a dynamic route for individual blog posts?",
+    opts: ["<Route path='/blog/{id}'>","<Route path='/blog/:id'>","<Route path='/blog/$id'>","<Route path='/blog/[id]'>"],
+    ans: 1,
+    exp: "URL parameters use the colon syntax: :id. This makes the value available via the useParams() hook."
+  },
+  {
+    q: "Inside the Post component (route: /blog/:postId), how do you read the postId value?",
+    opts: [
+      "const id = useRoute().params.postId",
+      "const { postId } = useParams()",
+      "const postId = this.props.match.params.postId",
+      "const postId = window.location.pathname.split('/')[2]"
+    ],
+    ans: 1,
+    exp: "useParams() returns an object of URL parameters. Destructure to get the named segment defined in your route path."
+  },
+  {
+    q: "What type of value does useParams() return for a URL segment?",
+    opts: ["Always a number","Always a boolean","Always a string","The original type stored in state"],
+    ans: 2,
+    exp: "URL parameters are always strings. If you need a number, convert with Number(id) or parseInt(id)."
+  },
+  {
+    q: "You need to redirect a user to /home after they log out, and prevent them from going Back to the protected page. Which call do you make?",
+    opts: [
+      "navigate('/home')",
+      "navigate('/home', { replace: true })",
+      "navigate('/home', { push: false })",
+      "navigate.replace('/home')"
+    ],
+    ans: 1,
+    exp: "{ replace: true } replaces the current history entry instead of pushing a new one, so the browser Back button skips the replaced page."
+  },
+  {
+    q: "What does the path='*' on a Route mean?",
+    opts: [
+      "Matches all routes including defined ones",
+      "Matches any URL not matched by other routes (catch-all / 404)",
+      "Makes the route case-insensitive",
+      "Matches only root path variations"
+    ],
+    ans: 1,
+    exp: "path='*' is the catch-all route. React Router checks it last and renders its element for any URL that didn't match a more specific route — perfect for 404 pages."
+  },
+  {
+    q: "In a nested route setup, where does the child route's component render?",
+    opts: [
+      "Directly inside the <Routes> component",
+      "At the end of the parent component's JSX automatically",
+      "Inside an <Outlet /> placed in the parent component",
+      "In a portal attached to document.body"
+    ],
+    ans: 2,
+    exp: "<Outlet /> is a placeholder in the parent (layout) component. React Router renders the matched child route's element in place of <Outlet />."
+  },
+  {
+    q: "What is the difference between <Link> and <NavLink>?",
+    opts: [
+      "NavLink navigates programmatically; Link renders an anchor",
+      "NavLink adds an 'active' class/style when its route matches the current URL",
+      "Link works for external URLs; NavLink only for internal routes",
+      "There is no difference — they are aliases"
+    ],
+    ans: 1,
+    exp: "<NavLink> automatically adds an 'active' class (or accepts a className function with isActive) when the current URL matches its to prop. Useful for navigation menus."
+  },
+  {
+    q: "What prop on a child Route makes it render when the parent route path matches exactly (like an index page)?",
+    opts: ["default","exact","index","primary"],
+    ans: 2,
+    exp: "The 'index' prop on a child Route means it renders when the parent's path matches exactly (no additional path segments). It's the default child route."
+  },
+  {
+    q: "Which hook reads and updates URL query string parameters like ?q=react&page=2?",
+    opts: ["useParams()","useQuery()","useSearchParams()","useLocation().query"],
+    ans: 2,
+    exp: "useSearchParams() returns [searchParams, setSearchParams]. Use searchParams.get('q') to read and setSearchParams({ q: 'new' }) to update without a full page reload."
+  }
+];
+
+function renderQuiz() {
+  const container = document.getElementById('quiz-container');
+  QUESTIONS.forEach((q, i) => {
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.id = 'q-' + i;
+    const opts = q.opts.map((o, j) => `
+      <label class="opt" id="opt-${i}-${j}">
+        <input type="radio" name="q${i}" value="${j}">
+        <span class="opt-label">${o}</span>
+      </label>`).join('');
+    card.innerHTML = `
+      <div class="q-num">Question ${i + 1} of ${QUESTIONS.length}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="options">${opts}</div>
+      <div class="explanation" id="exp-${i}">${q.exp}</div>`;
+    container.appendChild(card);
+  });
+}
+
+function submitQuiz() {
+  const sid = document.getElementById('studentId').value.trim();
+  const name = document.getElementById('studentName').value.trim();
+  if (!sid || !name) { alert('Please enter your Student ID and Name.'); return; }
+
+  let correct = 0;
+  QUESTIONS.forEach((q, i) => {
+    const sel = document.querySelector(`input[name="q${i}"]:checked`);
+    const chosen = sel ? parseInt(sel.value) : -1;
+    q.opts.forEach((_, j) => {
+      const el = document.getElementById(`opt-${i}-${j}`);
+      el.style.pointerEvents = 'none';
+      if (j === q.ans) el.classList.add('reveal-correct');
+    });
+    if (chosen === q.ans) {
+      correct++;
+      if (sel) document.getElementById(`opt-${i}-${chosen}`).classList.add('correct');
+    } else {
+      if (sel) document.getElementById(`opt-${i}-${chosen}`).classList.add('wrong');
+      document.getElementById(`exp-${i}`).classList.add('show');
+    }
+  });
+
+  document.getElementById('submitBtn').disabled = true;
+  const pct = Math.round(correct / QUESTIONS.length * 100);
+  const score = Math.round(correct / QUESTIONS.length * 100) / 10;
+
+  document.getElementById('scoreBig').textContent = `${correct}/${QUESTIONS.length}`;
+  document.getElementById('scoreLabel').textContent = `${pct}% · Quiz Score: ${score.toFixed(1)}/10`;
+  document.getElementById('resultBox').classList.add('show');
+  document.getElementById('resultBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  const payload = {
+    studentId: sid, studentName: name,
+    weekNum: WEEK_NUM, session: SESSION,
+    quizScore: score, pct, submittedAt: new Date().toISOString()
+  };
+
+  if (!GAS_URL || GAS_URL === 'YOUR_GAS_ENDPOINT_URL') {
+    setSync(false, 'Score not synced — GAS URL not configured. Show this screen to your instructor.');
+    return;
+  }
+  fetch(GAS_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) })
+    .then(r => r.json())
+    .then(() => setSync(true, 'Score synced to grade book!'))
+    .catch(() => setSync(false, 'Sync failed — note your score and show this to your instructor.'));
+}
+
+function setSync(ok, msg) {
+  const el = document.getElementById('syncMsg');
+  el.textContent = msg;
+  el.className = 'sync-msg ' + (ok ? 'sync-ok' : 'sync-err');
+}
+
+function toggleTheme() {
+  const root = document.documentElement;
+  const btn = document.querySelector('.theme-btn');
+  if (root.getAttribute('data-theme') === 'dark') { root.removeAttribute('data-theme'); btn.textContent = '🌙'; }
+  else { root.setAttribute('data-theme', 'dark'); btn.textContent = '☀️'; }
+}
+
+renderQuiz();
+</script>
+</body>
+</html>

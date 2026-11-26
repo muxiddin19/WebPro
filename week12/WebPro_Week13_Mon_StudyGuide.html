@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React Forms &amp; Controlled Components — Week 13 Monday</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f0fdf4;--surf:#fff;--surf2:#dcfce7;--brd:#bbf7d0;--tx:#052e16;--mu:#166534;--ac:#16a34a;--acl:#dcfce7;--ac2:#15803d;--warn:#d97706;--warnl:#fef3c7;--cor:#dc2626;--corl:#fee2e2;--cb:#041a0c;--ct:#bbf7d0}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#020f06;--surf:#061a0c;--surf2:#0a2a14;--brd:#144d26;--tx:#dcfce7;--mu:#4ade80;--ac:#4ade80;--acl:#052e16;--ac2:#86efac;--warn:#fbbf24;--warnl:#1a1000;--cor:#f87171;--corl:#450a0a;--cb:#020f06;--ct:#bbf7d0}}
+:root[data-theme=dark]{--bg:#020f06;--surf:#061a0c;--surf2:#0a2a14;--brd:#144d26;--tx:#dcfce7;--mu:#4ade80;--ac:#4ade80;--acl:#052e16;--ac2:#86efac;--warn:#fbbf24;--warnl:#1a1000;--cor:#f87171;--corl:#450a0a;--cb:#020f06;--ct:#bbf7d0}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',sans-serif;font-size:16px;line-height:1.75}
+a{color:var(--ac)}
+code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--surf2);padding:2px 6px;border-radius:4px;color:var(--ac2)}
+#site-header{position:sticky;top:0;z-index:100;background:var(--surf);border-bottom:3px solid var(--ac);display:flex;align-items:center;justify-content:space-between;padding:10px 20px;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.hdr-left{display:flex;align-items:center;gap:14px}
+.badge{background:var(--ac);color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px;padding:4px 12px;border-radius:6px}
+.hdr-info .course{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.hdr-info .title{font-size:15px;font-weight:700;color:var(--tx);font-family:'Space Grotesk',sans-serif}
+.theme-btn{background:var(--surf2);border:1px solid var(--brd);color:var(--tx);padding:5px 14px;border-radius:20px;cursor:pointer;font-size:13px}
+.page-wrap{max-width:900px;margin:0 auto;padding:32px 16px 80px}
+.toc{background:var(--surf);border:1px solid var(--brd);border-radius:12px;padding:20px 24px;margin-bottom:36px}
+.toc h2{font-family:'Space Grotesk',sans-serif;font-size:14px;text-transform:uppercase;letter-spacing:.08em;color:var(--mu);margin-bottom:12px}
+.toc ol{padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.toc li a{font-size:14px;color:var(--ac)}
+section{margin-bottom:48px}
+h1{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;line-height:1.25;margin-bottom:8px}
+h2{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:700;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--brd)}
+h3{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;margin:20px 0 8px;color:var(--ac2)}
+p{margin-bottom:12px}
+ul,ol{padding-left:22px;margin-bottom:12px}
+li{margin-bottom:4px}
+.code-block{background:var(--cb);color:var(--ct);border-radius:10px;padding:20px;margin:16px 0;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.6;border:1px solid var(--brd)}
+.code-block code{background:none;padding:0;color:var(--ct);font-size:inherit}
+.concept{background:var(--surf);border:1px solid var(--brd);border-radius:12px;padding:24px;margin-bottom:24px}
+.obj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:12px}
+.obj-card{background:var(--surf);border:1px solid var(--brd);border-radius:8px;padding:14px 16px;display:flex;align-items:flex-start;gap:10px}
+.obj-card .num{background:var(--ac);color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.obj-card p{margin:0;font-size:14px}
+.callout{border-radius:10px;padding:16px 20px;margin:16px 0;display:flex;gap:12px;align-items:flex-start}
+.callout.info{background:var(--acl);border-left:4px solid var(--ac)}
+.callout.warn{background:var(--warnl);border-left:4px solid var(--warn)}
+.callout.tip{background:var(--acl);border-left:4px solid var(--ac)}
+.callout .icon{font-size:18px;flex-shrink:0}
+.callout p{margin:0;font-size:14px}
+.comparison{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+@media(max-width:600px){.comparison{grid-template-columns:1fr}}
+.comp-card{border-radius:8px;padding:14px;background:var(--surf2)}
+.comp-card h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;color:var(--mu)}
+.exercise{background:var(--surf);border:1px solid var(--brd);border-radius:12px;margin-bottom:16px;overflow:hidden}
+.exercise summary{padding:16px 20px;cursor:pointer;font-weight:600;font-family:'Space Grotesk',sans-serif;display:flex;align-items:center;gap:10px;list-style:none;user-select:none}
+.exercise summary::before{content:'▶';font-size:12px;color:var(--ac);transition:transform .2s}
+.exercise[open] summary::before{transform:rotate(90deg)}
+.exercise-body{padding:0 20px 20px;border-top:1px solid var(--brd)}
+.cheatsheet{background:var(--surf);border:2px solid var(--ac);border-radius:14px;padding:28px}
+.cs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:16px}
+.cs-item{background:var(--surf2);border-radius:8px;padding:14px}
+.cs-item h4{font-family:'Space Grotesk',sans-serif;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin-bottom:8px}
+.cs-item pre{margin:0;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+</style>
+</head>
+<body>
+<header id="site-header">
+  <div class="hdr-left">
+    <div class="badge">📝 Forms</div>
+    <div class="hdr-info">
+      <div class="course">Web Programming · K0126_002 · Week 13 Monday</div>
+      <div class="title">React Forms &amp; Controlled Components</div>
+    </div>
+  </div>
+  <button class="theme-btn" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">🌙 Theme</button>
+</header>
+
+<div class="page-wrap">
+  <section id="intro">
+    <h1>React Forms &amp; Controlled Components</h1>
+    <p>HTML forms have their own state inside the DOM. React's approach is to take control of that state — making form inputs <strong>controlled components</strong> whose values are always driven by React state. This gives you a single source of truth for all form data.</p>
+  </section>
+
+  <nav class="toc">
+    <h2>Table of Contents</h2>
+    <ol>
+      <li><a href="#objectives">Learning Objectives</a></li>
+      <li><a href="#controlled-vs-uncontrolled">Controlled vs Uncontrolled</a></li>
+      <li><a href="#text-inputs">Controlled Text Inputs</a></li>
+      <li><a href="#select-textarea">Select &amp; Textarea</a></li>
+      <li><a href="#checkboxes-radios">Checkboxes &amp; Radio Buttons</a></li>
+      <li><a href="#multiple-inputs">Multiple Inputs — One Handler</a></li>
+      <li><a href="#validation">Form Validation</a></li>
+      <li><a href="#exercises">Practice Exercises</a></li>
+      <li><a href="#cheatsheet">Cheat Sheet</a></li>
+    </ol>
+  </nav>
+
+  <section id="objectives">
+    <h2>Learning Objectives</h2>
+    <div class="obj-grid">
+      <div class="obj-card"><div class="num">1</div><p>Explain the difference between controlled and uncontrolled inputs</p></div>
+      <div class="obj-card"><div class="num">2</div><p>Build controlled text inputs, select dropdowns, and textareas</p></div>
+      <div class="obj-card"><div class="num">3</div><p>Handle checkbox and radio button state correctly</p></div>
+      <div class="obj-card"><div class="num">4</div><p>Use a single <code>onChange</code> handler for many inputs via <code>e.target.name</code></p></div>
+      <div class="obj-card"><div class="num">5</div><p>Add client-side validation and show field-level error messages</p></div>
+    </div>
+  </section>
+
+  <section id="controlled-vs-uncontrolled">
+    <h2>1. Controlled vs Uncontrolled</h2>
+    <div class="concept">
+      <div class="comparison">
+        <div class="comp-card">
+          <h4>Uncontrolled</h4>
+          <ul style="font-size:14px;padding-left:16px">
+            <li>DOM manages the value</li>
+            <li>Read via <code>ref.current.value</code></li>
+            <li>Simple, less code</li>
+            <li>Harder to validate in real time</li>
+          </ul>
+        </div>
+        <div class="comp-card">
+          <h4>Controlled (preferred)</h4>
+          <ul style="font-size:14px;padding-left:16px">
+            <li>React state is the source of truth</li>
+            <li><code>value={state}</code> + <code>onChange</code></li>
+            <li>Full control over input behavior</li>
+            <li>Easy to validate, transform, sync</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout info">
+        <div class="icon">💡</div>
+        <p>Use <strong>controlled</strong> components for any form that needs real-time validation, conditional logic, or submitting values to an API. Use <code>useRef</code> (uncontrolled) only for simple cases like setting focus.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="text-inputs">
+    <h2>2. Controlled Text Inputs</h2>
+    <div class="concept">
+      <p>A controlled input binds its <code>value</code> attribute to React state and updates that state via <code>onChange</code>.</p>
+      <div class="code-block"><code>import { useState } from 'react';
+
+function LoginForm() {
+  const [email,    setEmail]    = useState('');
+  const [password, setPassword] = useState('');
+
+  function handleSubmit(e) {
+    e.preventDefault(); // prevent page reload
+    console.log('Logging in with:', email, password);
+    // send to API...
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      &lt;label&gt;
+        Email
+        &lt;input
+          type="email"
+          value={email}                          {/* controlled: tied to state */}
+          onChange={e =&gt; setEmail(e.target.value)} {/* update state on change */}
+          required
+        /&gt;
+      &lt;/label&gt;
+
+      &lt;label&gt;
+        Password
+        &lt;input
+          type="password"
+          value={password}
+          onChange={e =&gt; setPassword(e.target.value)}
+          minLength={8}
+        /&gt;
+      &lt;/label&gt;
+
+      &lt;button type="submit"&gt;Log in&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+</code></div>
+      <div class="callout warn">
+        <div class="icon">⚠️</div>
+        <p><strong>Always call <code>e.preventDefault()</code></strong> in <code>onSubmit</code>. Without it, the browser reloads the page on form submission, losing all React state.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="select-textarea">
+    <h2>3. Select &amp; Textarea</h2>
+    <div class="concept">
+      <p>Both <code>&lt;select&gt;</code> and <code>&lt;textarea&gt;</code> work the same as text inputs — bind <code>value</code> to state and handle <code>onChange</code>.</p>
+      <div class="code-block"><code>const [department, setDepartment] = useState('');
+const [bio, setBio] = useState('');
+
+// Select dropdown
+&lt;select value={department} onChange={e =&gt; setDepartment(e.target.value)}&gt;
+  &lt;option value=""&gt;— Select department —&lt;/option&gt;
+  &lt;option value="cs"&gt;Computer Science&lt;/option&gt;
+  &lt;option value="ee"&gt;Electrical Engineering&lt;/option&gt;
+  &lt;option value="me"&gt;Mechanical Engineering&lt;/option&gt;
+&lt;/select&gt;
+
+{/* Textarea — also uses value, not children */}
+&lt;textarea
+  value={bio}
+  onChange={e =&gt; setBio(e.target.value)}
+  rows={4}
+  placeholder="Tell us about yourself..."
+/&gt;
+</code></div>
+      <div class="callout info">
+        <div class="icon">💡</div>
+        <p>In HTML, <code>&lt;textarea&gt;</code> content goes between its tags. In React, use the <code>value</code> prop instead — consistent with other controlled inputs.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="checkboxes-radios">
+    <h2>4. Checkboxes &amp; Radio Buttons</h2>
+    <div class="concept">
+      <h3>Checkbox — boolean state</h3>
+      <div class="code-block"><code>const [agreedToTerms, setAgreedToTerms] = useState(false);
+
+&lt;label&gt;
+  &lt;input
+    type="checkbox"
+    checked={agreedToTerms}                      {/* use 'checked', not 'value' */}
+    onChange={e =&gt; setAgreedToTerms(e.target.checked)}
+  /&gt;
+  I agree to the Terms and Conditions
+&lt;/label&gt;
+</code></div>
+
+      <h3>Multiple checkboxes — array state</h3>
+      <div class="code-block"><code>const skills = ['HTML', 'CSS', 'JavaScript', 'React'];
+const [selected, setSelected] = useState([]);
+
+function handleSkill(skill, checked) {
+  if (checked) {
+    setSelected(prev =&gt; [...prev, skill]);
+  } else {
+    setSelected(prev =&gt; prev.filter(s =&gt; s !== skill));
+  }
+}
+
+{skills.map(skill =&gt; (
+  &lt;label key={skill}&gt;
+    &lt;input
+      type="checkbox"
+      checked={selected.includes(skill)}
+      onChange={e =&gt; handleSkill(skill, e.target.checked)}
+    /&gt;
+    {skill}
+  &lt;/label&gt;
+))}
+&lt;p&gt;Selected: {selected.join(', ')}&lt;/p&gt;
+</code></div>
+
+      <h3>Radio buttons — string state</h3>
+      <div class="code-block"><code>const [year, setYear] = useState('1');
+
+{['1','2','3','4'].map(y =&gt; (
+  &lt;label key={y}&gt;
+    &lt;input
+      type="radio"
+      name="year"           {/* same name groups them */}
+      value={y}
+      checked={year === y}
+      onChange={e =&gt; setYear(e.target.value)}
+    /&gt;
+    Year {y}
+  &lt;/label&gt;
+))}
+</code></div>
+    </div>
+  </section>
+
+  <section id="multiple-inputs">
+    <h2>5. Multiple Inputs — One Handler</h2>
+    <div class="concept">
+      <p>For forms with many fields, store all values in a single state object and use <code>e.target.name</code> to route updates to the right field.</p>
+      <div class="code-block"><code>function RegistrationForm() {
+  const [form, setForm] = useState({
+    firstName: '',
+    lastName:  '',
+    email:     '',
+    year:      '1',
+  });
+
+  // One handler for ALL inputs — reads e.target.name to know which field
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setForm(prev =&gt; ({ ...prev, [name]: value }));
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    console.log('Submitted:', form);
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      &lt;input name="firstName" value={form.firstName} onChange={handleChange} placeholder="First name" /&gt;
+      &lt;input name="lastName"  value={form.lastName}  onChange={handleChange} placeholder="Last name" /&gt;
+      &lt;input name="email"     value={form.email}     onChange={handleChange} type="email" placeholder="Email" /&gt;
+      &lt;select name="year"     value={form.year}      onChange={handleChange}&gt;
+        {['1','2','3','4'].map(y =&gt; &lt;option key={y} value={y}&gt;Year {y}&lt;/option&gt;)}
+      &lt;/select&gt;
+      &lt;button type="submit"&gt;Register&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+</code></div>
+      <div class="callout tip">
+        <div class="icon">✅</div>
+        <p><strong>Computed property name:</strong> <code>{ [name]: value }</code> uses the variable <code>name</code> as the object key. This is ES6 syntax — it dynamically sets the field identified by <code>e.target.name</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="validation">
+    <h2>6. Form Validation</h2>
+    <div class="concept">
+      <p>Validate on submit and show field-level error messages. Store errors in a state object keyed by field name.</p>
+      <div class="code-block"><code>function SignupForm() {
+  const [form,   setForm]   = useState({ email: '', password: '' });
+  const [errors, setErrors] = useState({});
+
+  function validate() {
+    const e = {};
+    if (!form.email) {
+      e.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(form.email)) {
+      e.email = 'Enter a valid email address';
+    }
+    if (!form.password) {
+      e.password = 'Password is required';
+    } else if (form.password.length &lt; 8) {
+      e.password = 'Password must be at least 8 characters';
+    }
+    return e;
+  }
+
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setForm(prev =&gt; ({ ...prev, [name]: value }));
+    // Clear error for this field as the user types
+    if (errors[name]) setErrors(prev =&gt; ({ ...prev, [name]: '' }));
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    const newErrors = validate();
+    if (Object.keys(newErrors).length &gt; 0) {
+      setErrors(newErrors);
+      return;
+    }
+    // All valid — submit
+    alert('Account created!');
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      &lt;div&gt;
+        &lt;input name="email" value={form.email} onChange={handleChange}
+               type="email" placeholder="Email"
+               style={{ borderColor: errors.email ? 'red' : '' }} /&gt;
+        {errors.email &amp;&amp; &lt;p style={{color:'red',fontSize:13}}&gt;{errors.email}&lt;/p&gt;}
+      &lt;/div&gt;
+      &lt;div&gt;
+        &lt;input name="password" value={form.password} onChange={handleChange}
+               type="password" placeholder="Password"
+               style={{ borderColor: errors.password ? 'red' : '' }} /&gt;
+        {errors.password &amp;&amp; &lt;p style={{color:'red',fontSize:13}}&gt;{errors.password}&lt;/p&gt;}
+      &lt;/div&gt;
+      &lt;button type="submit"&gt;Create account&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+</code></div>
+    </div>
+  </section>
+
+  <section id="exercises">
+    <h2>Practice Exercises</h2>
+
+    <details class="exercise">
+      <summary>Exercise 1 — Live character counter</summary>
+      <div class="exercise-body">
+        <p><strong>Task:</strong> Build a controlled <code>&lt;textarea&gt;</code> with a maximum of 200 characters. Show a live character count (<code>X / 200</code>) below it. Disable the textarea when the limit is reached.</p>
+        <div class="code-block"><code>function BioField() {
+  const [bio, setBio] = useState('');
+  const MAX = 200;
+  const remaining = MAX - bio.length;
+
+  return (
+    &lt;div&gt;
+      &lt;textarea
+        value={bio}
+        onChange={e =&gt; setBio(e.target.value.slice(0, MAX))}
+        rows={4}
+        placeholder="Your bio"
+      /&gt;
+      &lt;p style={{ color: remaining &lt; 20 ? 'red' : 'gray', fontSize: 13 }}&gt;
+        {bio.length} / {MAX}
+      &lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+</code></div>
+      </div>
+    </details>
+
+    <details class="exercise">
+      <summary>Exercise 2 — Contact form with validation</summary>
+      <div class="exercise-body">
+        <p><strong>Task:</strong> Build a contact form with Name, Email, and Message fields. Validate all three on submit. Show errors next to each field. After successful submission, display a "Thank you" message and reset the form.</p>
+        <div class="code-block"><code>function ContactForm() {
+  const [form, setForm] = useState({ name: '', email: '', message: '' });
+  const [errors, setErrors] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setForm(p =&gt; ({ ...p, [name]: value }));
+    setErrors(p =&gt; ({ ...p, [name]: '' }));
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    const errs = {};
+    if (!form.name.trim())    errs.name    = 'Name is required';
+    if (!form.email.trim())   errs.email   = 'Email is required';
+    if (!form.message.trim()) errs.message = 'Message is required';
+    if (Object.keys(errs).length) { setErrors(errs); return; }
+    setSubmitted(true);
+  }
+
+  if (submitted) return &lt;p&gt;Thank you, {form.name}! We'll be in touch.&lt;/p&gt;;
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      {['name','email','message'].map(field =&gt; (
+        &lt;div key={field}&gt;
+          {field === 'message'
+            ? &lt;textarea name={field} value={form[field]} onChange={handleChange} rows={4} /&gt;
+            : &lt;input name={field} value={form[field]} onChange={handleChange} /&gt;
+          }
+          {errors[field] &amp;&amp; &lt;p style={{color:'red',fontSize:13}}&gt;{errors[field]}&lt;/p&gt;}
+        &lt;/div&gt;
+      ))}
+      &lt;button type="submit"&gt;Send&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+</code></div>
+      </div>
+    </details>
+
+    <details class="exercise">
+      <summary>Exercise 3 — Skills checklist with counter</summary>
+      <div class="exercise-body">
+        <p><strong>Task:</strong> Show a list of 6 programming skills as checkboxes. Display a live counter of selected skills. If more than 3 are selected, show a warning: "Please select at most 3 skills."</p>
+        <div class="code-block"><code>const SKILLS = ['HTML','CSS','JavaScript','React','Node.js','Python'];
+
+function SkillPicker() {
+  const [selected, setSelected] = useState([]);
+
+  function toggle(skill, checked) {
+    setSelected(prev =&gt; checked ? [...prev, skill] : prev.filter(s =&gt; s !== skill));
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;p&gt;Selected: {selected.length} / 3&lt;/p&gt;
+      {selected.length &gt; 3 &amp;&amp; &lt;p style={{color:'red'}}&gt;Please select at most 3 skills.&lt;/p&gt;}
+      {SKILLS.map(skill =&gt; (
+        &lt;label key={skill}&gt;
+          &lt;input
+            type="checkbox"
+            checked={selected.includes(skill)}
+            onChange={e =&gt; toggle(skill, e.target.checked)}
+          /&gt;
+          {skill}
+        &lt;/label&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}
+</code></div>
+      </div>
+    </details>
+  </section>
+
+  <section id="cheatsheet">
+    <div class="cheatsheet">
+      <h2>📝 React Forms — Cheat Sheet</h2>
+      <div class="cs-grid">
+        <div class="cs-item">
+          <h4>Controlled input</h4>
+          <pre>&lt;input
+  value={name}
+  onChange={e =&gt; setName(e.target.value)}
+/&gt;</pre>
+        </div>
+        <div class="cs-item">
+          <h4>Prevent reload</h4>
+          <pre>&lt;form onSubmit={e =&gt; {
+  e.preventDefault();
+  // handle submit
+}}&gt;</pre>
+        </div>
+        <div class="cs-item">
+          <h4>Checkbox</h4>
+          <pre>&lt;input
+  type="checkbox"
+  checked={agreed}
+  onChange={e =&gt; setAgreed(e.target.checked)}
+/&gt;</pre>
+        </div>
+        <div class="cs-item">
+          <h4>Multi-field handler</h4>
+          <pre>function handleChange(e) {
+  const { name, value } = e.target;
+  setForm(p =&gt; ({ ...p, [name]: value }));
+}</pre>
+        </div>
+        <div class="cs-item">
+          <h4>Validation pattern</h4>
+          <pre>const errs = {};
+if (!email) errs.email = 'Required';
+if (Object.keys(errs).length) {
+  setErrors(errs); return;
+}</pre>
+        </div>
+        <div class="cs-item">
+          <h4>Select</h4>
+          <pre>&lt;select
+  value={city}
+  onChange={e =&gt; setCity(e.target.value)}
+&gt;
+  &lt;option value="seoul"&gt;Seoul&lt;/option&gt;
+&lt;/select&gt;</pre>
+        </div>
+        <div class="cs-item">
+          <h4>Textarea</h4>
+          <pre>&lt;textarea
+  value={bio}
+  onChange={e =&gt; setBio(e.target.value)}
+  rows={4}
+/&gt;</pre>
+        </div>
+        <div class="cs-item">
+          <h4>Field error display</h4>
+          <pre>{errors.email &amp;&amp;
+  &lt;p style={{color:'red'}}&gt;
+    {errors.email}
+  &lt;/p&gt;
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>
